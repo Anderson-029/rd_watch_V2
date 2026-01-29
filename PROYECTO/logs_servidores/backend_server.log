@@ -416,3 +416,6 @@
 [Thu Jan 29 15:04:18 2026] PHP Warning:  ini_set(): Session ini settings cannot be changed when a session is active in /home/anderson/Documentos/rd_2/PROYECTO/backend/config.php on line 28
 [Thu Jan 29 15:04:18 2026] 127.0.0.1:42988 [200]: GET /api/servicios.php
 [Thu Jan 29 15:04:18 2026] 127.0.0.1:42988 Closing
+[Thu Jan 29 16:08:49 2026] 127.0.0.1:58088 Accepted
+[Thu Jan 29 16:08:49 2026] 127.0.0.1:58088 [404]: GET /api - No such file or directory
+[Thu Jan 29 16:08:49 2026] 127.0.0.1:58088 Closing
