@@ -1,0 +1,274 @@
+[Thu Jan 29 15:02:11 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Thu Jan 29 15:02:29 2026] 127.0.0.1:59406 Accepted
+[Thu Jan 29 15:02:34 2026] 127.0.0.1:59406 Closed without sending a request; it was probably just an unused speculative preconnection
+[Thu Jan 29 15:02:34 2026] 127.0.0.1:59406 Closing
+[Thu Jan 29 15:02:35 2026] 127.0.0.1:33930 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33930 [200]: GET /index.html
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33930 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33942 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33958 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33962 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33964 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33942 [200]: GET /css/style.css
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33962 [200]: GET /js/config.js
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33942 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33958 [200]: GET /js/notifications.js
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33964 [200]: GET /js/script.js
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33962 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33958 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33964 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33966 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33982 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33996 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34008 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34020 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34034 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33966 [404]: GET /images/watchmaker.jpg - No such file or directory
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33966 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33996 [404]: GET /images/gallery-1.jpg - No such file or directory
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33982 [404]: GET /images/gallery-2.jpg - No such file or directory
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33996 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34034 [404]: GET /images/gallery-3.jpg - No such file or directory
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:33982 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34008 [404]: GET /images/client-1.jpg - No such file or directory
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34020 [404]: GET /images/gallery-4.jpg - No such file or directory
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34034 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34008 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34020 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34042 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34056 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34060 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34042 [404]: GET /images/client-2.jpg - No such file or directory
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34042 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34070 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34082 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34060 [404]: GET /images/brand-rolex.png - No such file or directory
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34056 [404]: GET /images/client-3.jpg - No such file or directory
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34060 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34056 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34070 [404]: GET /images/brand-omega.png - No such file or directory
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34070 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34082 [404]: GET /images/brand-tagheuer.png - No such file or directory
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34082 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34090 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34090 [404]: GET /images/brand-patek.png - No such file or directory
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34090 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34104 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34104 [404]: GET /images/brand-cartier.png - No such file or directory
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34104 Closing
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34106 Accepted
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34106 [200]: GET /css/reloj_4.mp4
+[Thu Jan 29 15:02:37 2026] 127.0.0.1:34106 Closing
+[Thu Jan 29 15:02:40 2026] 127.0.0.1:34120 Accepted
+[Thu Jan 29 15:02:40 2026] 127.0.0.1:34120 [404]: GET /css/images/hero-bg.jpg - No such file or directory
+[Thu Jan 29 15:02:40 2026] 127.0.0.1:34120 Closing
+[Thu Jan 29 15:02:40 2026] 127.0.0.1:34122 Accepted
+[Thu Jan 29 15:02:45 2026] 127.0.0.1:34122 Closed without sending a request; it was probably just an unused speculative preconnection
+[Thu Jan 29 15:02:45 2026] 127.0.0.1:34122 Closing
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39224 Accepted
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39224 [200]: GET /user/user.html
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39224 Closing
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39234 Accepted
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39238 Accepted
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39244 Accepted
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39238 [200]: GET /js/config.js
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39234 [200]: GET /js/notifications.js
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39238 Closing
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39234 Closing
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39244 [200]: GET /user/user.css
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39244 Closing
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39246 Accepted
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39246 [200]: GET /user/user.js?v=csp_fix_1
+[Thu Jan 29 15:03:00 2026] 127.0.0.1:39246 Closing
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39260 Accepted
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39260 [200]: GET /comercio.html
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39260 Closing
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39272 Accepted
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39272 [200]: GET /js/config.js
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39278 Accepted
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39272 Closing
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39278 [200]: GET /js/script.js
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39282 Accepted
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39278 Closing
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39282 [200]: GET /css/style.css
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39282 Closing
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39296 Accepted
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39296 [404]: GET /images/hero-bg.jpg - No such file or directory
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39296 Closing
+[Thu Jan 29 15:03:03 2026] 127.0.0.1:39304 Accepted
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:39304 [200]: GET /user/user.html
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:39304 Closing
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:39978 Accepted
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:39978 [200]: GET /user/user.css
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:39980 Accepted
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:39992 Accepted
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:39978 Closing
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:40000 Accepted
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:39980 [200]: GET /js/config.js
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:40000 [200]: GET /js/notifications.js
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:39992 [200]: GET /user/user.js?v=csp_fix_1
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:39980 Closing
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:40000 Closing
+[Thu Jan 29 15:03:05 2026] 127.0.0.1:39992 Closing
+[Thu Jan 29 15:03:11 2026] 127.0.0.1:40010 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40010 [200]: GET /index.html
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40010 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40014 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40014 [200]: GET /css/style.css
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40014 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40026 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40026 [200]: GET /js/config.js
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40026 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40040 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40050 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40040 [200]: GET /js/notifications.js
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40050 [200]: GET /js/script.js
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40040 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40050 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40052 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40056 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40058 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40064 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40070 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40076 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40052 [404]: GET /images/watchmaker.jpg - No such file or directory
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40052 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40056 [404]: GET /images/gallery-1.jpg - No such file or directory
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40058 [404]: GET /images/gallery-2.jpg - No such file or directory
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40056 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40058 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40070 [404]: GET /images/gallery-4.jpg - No such file or directory
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40076 [404]: GET /images/gallery-3.jpg - No such file or directory
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40064 [404]: GET /images/client-1.jpg - No such file or directory
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40070 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40076 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40064 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40082 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40086 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40090 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40082 [404]: GET /images/client-2.jpg - No such file or directory
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40082 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40104 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40108 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40118 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40090 [404]: GET /images/brand-rolex.png - No such file or directory
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40086 [404]: GET /images/client-3.jpg - No such file or directory
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40090 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40086 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40104 [404]: GET /images/brand-omega.png - No such file or directory
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40104 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40108 [404]: GET /images/brand-tagheuer.png - No such file or directory
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40118 [404]: GET /images/brand-patek.png - No such file or directory
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40108 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40118 Closing
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40134 Accepted
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40134 [404]: GET /images/brand-cartier.png - No such file or directory
+[Thu Jan 29 15:03:13 2026] 127.0.0.1:40134 Closing
+[Thu Jan 29 15:03:17 2026] 127.0.0.1:37322 Accepted
+[Thu Jan 29 15:03:17 2026] 127.0.0.1:37322 [404]: GET /css/images/hero-bg.jpg - No such file or directory
+[Thu Jan 29 15:03:17 2026] 127.0.0.1:37322 Closing
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54500 Accepted
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54500 [200]: GET /admin/admin.html
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54500 Closing
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54508 Accepted
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54520 Accepted
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54508 [200]: GET /css/style.css
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54528 Accepted
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54532 Accepted
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54544 Accepted
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54508 Closing
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54560 Accepted
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54520 [200]: GET /js/config.js
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54520 Closing
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54528 [200]: GET /js/notifications.js
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54528 Closing
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54560 [200]: GET /js/script.js
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54560 Closing
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54544 [200]: GET /admin/admin.css
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54544 Closing
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54532 [200]: GET /admin/admin.js
+[Thu Jan 29 15:03:31 2026] 127.0.0.1:54532 Closing
+[Thu Jan 29 15:03:32 2026] 127.0.0.1:54562 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:54562 Closed without sending a request; it was probably just an unused speculative preconnection
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:54562 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51298 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51298 [200]: GET /index.html
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51298 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51310 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51310 [200]: GET /css/style.css
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51310 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51326 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51330 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51336 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51326 [200]: GET /js/config.js
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51326 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51336 [200]: GET /js/script.js
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51336 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51330 [200]: GET /js/notifications.js
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51330 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51350 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51356 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51350 [404]: GET /images/watchmaker.jpg - No such file or directory
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51350 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51360 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51374 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51356 [404]: GET /images/gallery-1.jpg - No such file or directory
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51356 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51388 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51360 [404]: GET /images/gallery-4.jpg - No such file or directory
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51360 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51374 [404]: GET /images/client-1.jpg - No such file or directory
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51374 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51396 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51388 [404]: GET /images/brand-rolex.png - No such file or directory
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51388 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51396 [404]: GET /images/gallery-2.jpg - No such file or directory
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51396 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51412 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51426 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51438 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51446 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51412 [404]: GET /images/brand-omega.png - No such file or directory
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51412 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51448 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51446 [404]: GET /images/brand-cartier.png - No such file or directory
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51446 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51426 [404]: GET /images/brand-tagheuer.png - No such file or directory
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51438 [404]: GET /images/brand-patek.png - No such file or directory
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51426 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51438 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51450 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51448 [404]: GET /images/gallery-3.jpg - No such file or directory
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51448 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51450 [404]: GET /images/client-2.jpg - No such file or directory
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51450 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51462 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51462 [404]: GET /images/client-3.jpg - No such file or directory
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51462 Closing
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51476 Accepted
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51476 [200]: GET /css/reloj_4.mp4
+[Thu Jan 29 15:03:37 2026] 127.0.0.1:51476 Closing
+[Thu Jan 29 15:03:40 2026] 127.0.0.1:51480 Accepted
+[Thu Jan 29 15:03:40 2026] 127.0.0.1:51480 [404]: GET /css/images/hero-bg.jpg - No such file or directory
+[Thu Jan 29 15:03:40 2026] 127.0.0.1:51480 Closing
+[Thu Jan 29 15:03:40 2026] 127.0.0.1:51484 Accepted
+[Thu Jan 29 15:03:46 2026] 127.0.0.1:51484 Closed without sending a request; it was probably just an unused speculative preconnection
+[Thu Jan 29 15:03:46 2026] 127.0.0.1:51484 Closing
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45882 Accepted
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45882 [200]: GET /user/user.html
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45882 Closing
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45884 Accepted
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45900 Accepted
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45884 [200]: GET /user/user.css
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45906 Accepted
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45884 Closing
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45900 [200]: GET /js/notifications.js
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45916 Accepted
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45900 Closing
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45906 [200]: GET /js/config.js
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45906 Closing
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45916 [200]: GET /user/user.js?v=csp_fix_1
+[Thu Jan 29 15:04:18 2026] 127.0.0.1:45916 Closing
+[Thu Jan 29 15:04:21 2026] 127.0.0.1:45932 Accepted
+[Thu Jan 29 15:04:26 2026] 127.0.0.1:45932 Closed without sending a request; it was probably just an unused speculative preconnection
+[Thu Jan 29 15:04:26 2026] 127.0.0.1:45932 Closing

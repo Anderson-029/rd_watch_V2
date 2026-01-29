@@ -1,0 +1,143 @@
+[2026-01-29 03:19:13] [ERROR] [IP: ::1] (401): No hay sesión activa
+[2026-01-29 03:19:41] [ERROR] [IP: ::1] (401): Credenciales invÃ¡lidas
+[2026-01-29 03:21:40] [ERROR] [IP: ::1] (401): No hay sesión activa
+[2026-01-29 03:32:32] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 03:33:45] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 03:34:24] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 03:35:02] [ERROR] [IP: 127.0.0.1] (401): Sesión no iniciada
+[2026-01-29 03:35:17] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 03:35:31] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 04:07:40] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 04:17:19] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 04:17:19] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 04:17:19] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 04:17:51] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 04:18:36] [ERROR] [IP: 127.0.0.1] (400): El formato del correo electrónico no es válido
+[2026-01-29 04:19:41] [ERROR] [IP: 127.0.0.1] (401): Sesión no iniciada
+[2026-01-29 04:20:12] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 04:21:02] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 04:21:21] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 04:21:21] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 04:21:21] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 04:21:21] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 13:02:31] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 13:04:33] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 13:06:57] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 13:07:19] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 13:08:24] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 13:08:39] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 13:10:24] [ERROR] [IP: 127.0.0.1] (401): Sesión no iniciada
+[2026-01-29 13:12:31] [ERROR] [IP: unknown] (500): Error interno del servidor | Internal: SQLSTATE[22001]: String data, right truncated: 7 ERROR:  value too long for type character varying(50) in /home/anderson/Documentos/rd_2/PROYECTO/force_migration.php:17
+[2026-01-29 13:30:49] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 13:43:26] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 13:43:39] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 13:44:50] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 13:45:09] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 13:51:11] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 13:51:26] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 14:23:05] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 14:23:56] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 14:24:33] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 14:35:34] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 15:00:23] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 15:00:44] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 15:01:36] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 15:02:17] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 15:03:11] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:19:56] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:19:56] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:19:56] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:20:40] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:21:29] [ERROR] [IP: 127.0.0.1] (400): El formato del correo electrónico no es válido
+[2026-01-29 16:22:27] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:24:01] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:24:02] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:24:03] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:24:05] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:24:06] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:32:00] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:32:00] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:32:00] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:32:31] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:33:48] [ERROR] [IP: 127.0.0.1] (400): El formato del correo electrónico no es válido
+[2026-01-29 16:34:15] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:36:00] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:36:36] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:36:37] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:36:37] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:36:37] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:36:37] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:43:45] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:43:52] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:43:52] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:43:53] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:44:34] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:45:39] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:48:49] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:48:55] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:48:55] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:48:56] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:49:29] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:49:29] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:49:29] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:49:58] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:50:43] [ERROR] [IP: 127.0.0.1] (400): El formato del correo electrónico no es válido
+[2026-01-29 16:51:09] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:52:38] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:54:12] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:57:34] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 16:57:53] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:57:53] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:57:53] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:57:54] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 16:57:54] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:02:42] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:02:50] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:02:50] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:02:50] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:03:06] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:03:06] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:03:06] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:03:21] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:03:21] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:03:22] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:03:54] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:04:52] [ERROR] [IP: 127.0.0.1] (400): El formato del correo electrónico no es válido
+[2026-01-29 17:05:14] [ERROR] [IP: 127.0.0.1] (400): El formato del correo electrónico no es válido
+[2026-01-29 17:05:48] [ERROR] [IP: 127.0.0.1] (400): El formato del correo electrónico no es válido
+[2026-01-29 17:06:15] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:07:37] [ERROR] [IP: 127.0.0.1] (400): La contraseña debe incluir mayúsculas, minúsculas, números y al menos un carácter especial (ej. !@#$%^&*).
+[2026-01-29 17:08:27] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:08:54] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:09:04] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:09:23] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:09:23] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:09:23] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:09:54] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:14:26] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:15:37] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:15:37] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:15:37] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:15:37] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:15:37] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:19:43] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 17:20:19] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:20:19] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:20:19] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:20:19] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 17:20:19] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 18:07:19] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 18:43:24] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 18:53:50] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 18:55:27] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 19:00:39] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 19:03:07] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 19:05:04] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 19:05:22] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 19:06:07] [ERROR] [IP: 127.0.0.1] (401): Credenciales inválidas
+[2026-01-29 19:06:19] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 19:13:45] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 19:25:39] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 20:02:37] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 20:03:13] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
+[2026-01-29 20:03:37] [ERROR] [IP: 127.0.0.1] (401): No hay sesión activa
