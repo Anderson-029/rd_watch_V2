@@ -61,4 +61,4 @@ Si necesitas resetear las credenciales o reparar el esquema de seguridad sin rei
 *   **Backend (API)**: [http://localhost:8001](http://localhost:8001)
 
 ---
-© 2026 Relojería Durán - Sistema de Gestión Premium.
+

@@ -1,4 +1,4 @@
-# RD Watch - Sistema de Gestión de Relojería de Lujo
+# RD Watch - Sistema de Gestión de Relojería 
 
 ![Project Status](https://img.shields.io/badge/Status-Production--Ready-success?style=for-the-badge)
 ![Tech Stack](https://img.shields.io/badge/Stack-PHP_8.1--PostgreSQL--Vanilla_JS-blue?style=for-the-badge)
