@@ -9,9 +9,8 @@
   const API_BASE = API_CONFIG.baseUrl;
 
   // Verificar si hay sesión activa
-  fetch(`${API_BASE}/me.php`, {
-    method: 'GET',
-    credentials: 'include'
+  secureFetch(`${API_BASE}/me.php`, {
+    method: 'GET'
   })
     .then(res => res.json())
     .then(data => {
@@ -46,9 +45,8 @@ function cerrarSesion() {
 
   const API_BASE = API_CONFIG.baseUrl;
 
-  fetch(`${API_BASE}/logout.php`, {
-    method: 'POST',
-    credentials: 'include'
+  secureFetch(`${API_BASE}/logout.php`, {
+    method: 'POST'
   })
     .then(res => res.json())
     .then(data => {
@@ -164,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function cargarProductos() {
     try {
-      const res = await fetch(`${API_BASE}/productos.php`);
+      const res = await secureFetch(`${API_BASE}/productos.php`);
       const data = await res.json();
       if (data.ok) {
         productos = data.productos.map(p => ({
@@ -226,8 +224,8 @@ document.addEventListener("DOMContentLoaded", () => {
   async function cargarCatalogosProducto() {
     try {
       const [resMarcas, resCat] = await Promise.all([
-        fetch(`${API_BASE}/catalogos.php?tipo=marcas`),
-        fetch(`${API_BASE}/catalogos.php?tipo=categorias`)
+        secureFetch(`${API_BASE}/catalogos.php?tipo=marcas`),
+        secureFetch(`${API_BASE}/catalogos.php?tipo=categorias`)
       ]);
       const [dataMarcas, dataCat] = [await resMarcas.json(), await resCat.json()];
       if (dataMarcas.ok) {
@@ -251,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       try {
-        const res = await fetch(`${API_BASE}/catalogos.php?tipo=subcategorias&id_categoria=${idCat}`);
+        const res = await secureFetch(`${API_BASE}/catalogos.php?tipo=subcategorias&id_categoria=${idCat}`);
         const data = await res.json();
         if (data.ok) {
           pSubcategoria.innerHTML = '<option value="">Seleccione...</option>' +
@@ -302,27 +300,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function eliminarProducto(id) {
+  async function eliminarProducto(id) {
     if (!confirm("¿Eliminar producto?")) return;
-    fetch(`${API_BASE}/productos.php`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id_producto: id })
-    })
-      .then(res => res.json())
-      .then(async (data) => {
-        if (data.ok) {
-          showNotification('Producto eliminado correctamente');
-          await cargarProductos();
-          renderDashboard();
-        } else {
-          showNotification(data.msg || 'Error al eliminar producto');
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        showNotification('Error al eliminar producto');
+    try {
+      const res = await secureFetch(`${API_BASE}/productos.php`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_producto: id })
       });
+      const data = await res.json();
+      if (data.ok) {
+        showNotification('Producto eliminado correctamente');
+        await cargarProductos();
+        renderDashboard();
+      } else {
+        showNotification(data.msg || 'Error al eliminar producto');
+      }
+    } catch (err) {
+      console.error(err);
+      showNotification('Error al eliminar producto');
+    }
   }
 
   if (formProducto) {
@@ -342,7 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const editing = formProducto.dataset.editing;
       try {
         const method = editing ? 'PUT' : 'POST';
-        const res = await fetch(`${API_BASE}/productos.php`, {
+        const res = await secureFetch(`${API_BASE}/productos.php`, {
           method, headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
@@ -374,9 +371,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function cargarPedidos() {
     try {
-      const res = await fetch(`${API_BASE}/pedidos.php`, {
-        method: 'GET',
-        credentials: 'include'
+      const res = await secureFetch(`${API_BASE}/pedidos.php`, {
+        method: 'GET'
       });
       const data = await res.json();
 
@@ -441,9 +437,8 @@ document.addEventListener("DOMContentLoaded", () => {
    * ========================== */
   async function cargarClientes() {
     try {
-      const res = await fetch(`${API_BASE}/clientes.php`, {
-        method: 'GET',
-        credentials: 'include'
+      const res = await secureFetch(`${API_BASE}/clientes.php`, {
+        method: 'GET'
       });
       const data = await res.json();
 
@@ -507,7 +502,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function cargarServicios() {
     try {
-      const res = await fetch(`${API_BASE}/servicios.php`);
+      const res = await secureFetch(`${API_BASE}/servicios.php`);
       const data = await res.json();
       if (data.ok) {
         servicios = data.servicios;
@@ -581,7 +576,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const editing = formServicio.dataset.editing;
       try {
         const method = editing ? 'PUT' : 'POST';
-        const res = await fetch(`${API_BASE}/servicios.php`, {
+        const res = await secureFetch(`${API_BASE}/servicios.php`, {
           method, headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
@@ -605,7 +600,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function eliminarServicio(id) {
     if (!confirm("¿Eliminar servicio?")) return;
     try {
-      const res = await fetch(`${API_BASE}/servicios.php`, {
+      const res = await secureFetch(`${API_BASE}/servicios.php`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id_servicio: id })
@@ -641,7 +636,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function cargarMarcas() {
     try {
       // Usar el endpoint de administración (marcas.php) para obtener TODAS las marcas (incluidas inactivas)
-      const res = await fetch(`${API_BASE}/marcas.php`);
+      const res = await secureFetch(`${API_BASE}/marcas.php`);
       const data = await res.json();
       if (data.ok) {
         // El endpoint devuelve: id_marca, nom_marca, estado_marca
@@ -704,7 +699,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function eliminarMarca(id) {
     if (!confirm('¿Eliminar marca?')) return;
     try {
-      const res = await fetch(`${API_BASE}/marcas.php`, {
+      const res = await secureFetch(`${API_BASE}/marcas.php`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id_marca: id })
@@ -733,7 +728,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const editing = formMarca.dataset.editing;
       try {
         const method = editing ? 'PUT' : 'POST';
-        const res = await fetch(`${API_BASE}/marcas.php`, {
+        const res = await secureFetch(`${API_BASE}/marcas.php`, {
           method, headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
@@ -770,7 +765,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function cargarCategorias() {
     try {
-      const res = await fetch(`${API_BASE}/categorias.php`);
+      const res = await secureFetch(`${API_BASE}/categorias.php`);
       const data = await res.json();
       if (data.ok) {
         categorias = data.categorias.map(c => ({
@@ -795,7 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function cargarConfiguracion() {
     try {
-      const res = await fetch(`${API_BASE}/admin_settings.php`);
+      const res = await secureFetch(`${API_BASE}/admin_settings.php`);
       const data = await res.json();
       if (data.ok) {
         // Tienda
@@ -822,7 +817,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const moneda = document.getElementById('tiendaMoneda').value;
 
       try {
-        const res = await fetch(`${API_BASE}/admin_settings.php?action=update_store`, {
+        const res = await secureFetch(`${API_BASE}/admin_settings.php?action=update_store`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ nombre, moneda })
@@ -849,7 +844,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        const res = await fetch(`${API_BASE}/admin_settings.php?action=update_admin`, {
+        const res = await secureFetch(`${API_BASE}/admin_settings.php?action=update_admin`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -926,7 +921,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function eliminarCategoria(id) {
     if (!confirm('Eliminar categoría y sus subcategorías asociadas?')) return;
     try {
-      const res = await fetch(`${API_BASE}/categorias.php`, {
+      const res = await secureFetch(`${API_BASE}/categorias.php`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id_categoria: id })
@@ -957,7 +952,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const editing = formCategoria.dataset.editing;
       try {
         const method = editing ? 'PUT' : 'POST';
-        const res = await fetch(`${API_BASE}/categorias.php`, {
+        const res = await secureFetch(`${API_BASE}/categorias.php`, {
           method, headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
@@ -996,7 +991,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function cargarSubcategorias(catId = null) {
     try {
-      const res = await fetch(`${API_BASE}/categorias.php?action=subcategoria`);
+      const res = await secureFetch(`${API_BASE}/categorias.php?action=subcategoria`);
       const data = await res.json();
 
       if (data.ok) {
@@ -1095,7 +1090,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!confirm('¿Eliminar subcategoría?')) return;
 
     try {
-      const res = await fetch(`${API_BASE}/categorias.php?action=subcategoria`, {
+      const res = await secureFetch(`${API_BASE}/categorias.php?action=subcategoria`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1161,7 +1156,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         const method = editing ? 'PUT' : 'POST';
-        const res = await fetch(`${API_BASE}/categorias.php?action=subcategoria`, {
+        const res = await secureFetch(`${API_BASE}/categorias.php?action=subcategoria`, {
           method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
