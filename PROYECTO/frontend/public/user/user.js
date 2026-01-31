@@ -105,6 +105,9 @@ function getUser() {
         // Cargar pedidos del usuario
         await cargarPedidos(user.id);
 
+        // Cargar citas del usuario
+        await cargarCitas(user.id);
+
     } catch (err) {
         console.error('Error al verificar usuario:', err);
         showNotification('❌ Sesión inválida');
@@ -193,6 +196,55 @@ async function cargarPedidos(userId) {
         }
     } catch (error) {
         console.error('Error al cargar pedidos:', error);
+    }
+}
+
+// 🔄 CARGAR CITAS DEL USUARIO
+async function cargarCitas(userId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/citas.php`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        const result = await response.json();
+
+        if (result.ok && result.citas) {
+            const citas = result.citas;
+            const tbodyCitas = document.getElementById('tbodyCitas');
+
+            if (!tbodyCitas) return;
+
+            if (citas.length === 0) {
+                tbodyCitas.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding: 40px; color: #888;">
+                            <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 10px; display: block;"></i>
+                            No tienes citas registradas
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbodyCitas.innerHTML = citas.map(cita => {
+                const estado = cita.estado || 'pendiente';
+                const badgeClass = getBadgeClass(estado);
+                return `
+                    <tr>
+                        <td><strong>${cita.nombre_servicio || 'Servicio'}</strong></td>
+                        <td>${cita.fecha_preferida || 'N/A'}</td>
+                        <td><span class="badge ${cita.prioridad === 'alta' ? 'cancelado' : 'enviado'}">${capitalizeFirst(cita.prioridad)}</span></td>
+                        <td><span class="badge ${badgeClass}">${capitalizeFirst(estado)}</span></td>
+                        <td style="font-size: 0.9em; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cita.notas || ''}">
+                            ${cita.notas || '-'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    } catch (error) {
+        console.error('Error al cargar citas:', error);
     }
 }
 
@@ -384,7 +436,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         'btnEditarPerfil': 'perfilForm',
         'btnHistorial': 'pedidoForm',
         'btnDirecciones': 'direccionForm',
-        'btnSolicitarServicio': 'servicioForm'
+        'btnSolicitarServicio': 'servicioForm',
+        'btnCitasHistorial': 'citaForm'
     };
 
     Object.keys(btnMap).forEach(id => {

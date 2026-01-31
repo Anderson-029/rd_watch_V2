@@ -1138,3 +1138,42 @@ if (authModal) {
         }
     });
 }
+// 10. STATS ANIMATION & LOADING
+// =========================================================
+async function loadStats() {
+    try {
+        const res = await fetch(`${API_BASE}/stats.php`);
+        const data = await res.json();
+
+        if (data.ok && data.stats) {
+            animateValue("stat-years", 0, data.stats.years, 2000);
+            animateValue("stat-repaired", 0, data.stats.repaired, 2000);
+            animateValue("stat-satisfaction", 0, data.stats.satisfaction, 2000);
+        }
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
+
+function animateValue(id, start, end, duration) {
+    const obj = document.getElementById(id);
+    if (!obj) return;
+
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        } else {
+            obj.innerHTML = end;
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// Inicialización final
+document.addEventListener('DOMContentLoaded', () => {
+    loadStats();
+});

@@ -33,11 +33,11 @@ fi
 
 # 1. Esquema Principal
 echo "[INFO] Cargando esquema principal..."
-psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f "database/schema/DATABASE_RDWATCH_3_0.sql" --quiet
+psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f "database/schema/database_rdwatch_3_0.sql" --quiet
 
 # 2. Tablas Adicionales y Rate Limits
 echo "[INFO] Cargando tablas de control adicionales..."
-psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f "database/schema/RATE_LIMITS.sql" --quiet
+psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f "database/schema/rate_limits.sql" --quiet
 
 # 3. Funciones (CRUD y otros)
 echo "[INFO] Cargando funciones..."

@@ -36,11 +36,11 @@ if %errorlevel% neq 0 (
 
 :: 1. Esquema Principal
 echo [INFO] Cargando esquema principal...
-psql -P pager=off -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d %DB_NAME% -f "database\schema\DATABASE_RDWATCH_3_0.sql" --quiet
+psql -P pager=off -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d %DB_NAME% -f "database\schema\database_rdwatch_3_0.sql" --quiet
 
 :: 2. Tablas Adicionales
 echo [INFO] Cargando tablas de control adicionales...
-psql -P pager=off -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d %DB_NAME% -f "database\schema\RATE_LIMITS.sql" --quiet
+psql -P pager=off -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d %DB_NAME% -f "database\schema\rate_limits.sql" --quiet
 
 :: 3. Funciones
 echo [INFO] Cargando funciones...

@@ -33,6 +33,7 @@
                     <li><a class="nav-link" data-section="perfilForm">Perfil</a></li>
                     <li><a class="nav-link" data-section="pedidoForm">Pedidos</a></li>
                     <li><a class="nav-link" data-section="direccionForm">Direcciones</a></li>
+                    <li><a class="nav-link" data-section="citaForm">Citas</a></li>
                     <li><a class="nav-link" data-section="servicioForm">Servicios</a></li>
                     <li><a href="../comercio.html" class="nav-link">Comercio</a></li>
                     <li><a class="nav-link" id="logoutLink">Cerrar Sesión</a></li>
@@ -113,9 +114,16 @@
                         </div>
                         <h3>Servicios</h3>
                         <p>Solicita servicios de reparación, mantenimiento o repuestos originales.</p>
-                        <button class="button button-primary" id="btnSolicitarServicio" data-section="servicioForm">
-                            <i class="fas fa-calendar-plus"></i> Solicitar Servicio
-                        </button>
+                        <div class="card-actions" style="display: flex; gap: 10px;">
+                            <button class="button button-primary" id="btnSolicitarServicio" data-section="servicioForm"
+                                style="flex:1">
+                                <i class="fas fa-calendar-plus"></i> Solicitar
+                            </button>
+                            <button class="button button-secondary" id="btnCitasHistorial" data-section="citaForm"
+                                style="flex:1">
+                                <i class="fas fa-history"></i> Historial
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -160,13 +168,41 @@
                             </tr>
                         </thead>
                         <tbody id="tbodyPedidos">
-                            <!-- Los pedidos se cargarán dinámicamente desde la base de datos -->
+                            <!-- Los pedidos se cargarán dinámicamente -->
                         </tbody>
                     </table>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="button button-secondary btn-cancelar">
                         <i class="fas fa-arrow-left"></i> Volver
+                    </button>
+                </div>
+            </section>
+
+            <section id="citaForm" class="form-section">
+                <h2><i class="fas fa-calendar-check"></i> Mis Citas y Servicios</h2>
+                <div class="table-wrapper">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Servicio</th>
+                                <th>Fecha</th>
+                                <th>Prioridad</th>
+                                <th>Estado</th>
+                                <th>Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyCitas">
+                            <!-- Las citas se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="button button-secondary btn-cancelar">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </button>
+                    <button type="button" class="button button-primary" onclick="showSection('servicioForm')">
+                        <i class="fas fa-plus"></i> Nueva Cita
                     </button>
                 </div>
             </section>
@@ -179,7 +215,6 @@
                         <input type="text" id="inputDireccion" value="" placeholder="Ej: Calle 123 #45-67" required>
                     </div>
 
-                    <!-- NUEVO: Select para Departamento -->
                     <div>
                         <label>Departamento</label>
                         <select id="inputDepartamento" required>
@@ -187,7 +222,6 @@
                         </select>
                     </div>
 
-                    <!-- MODIFICADO: Cambiar input text por select -->
                     <div>
                         <label>Ciudad</label>
                         <select id="inputCiudad" required disabled>

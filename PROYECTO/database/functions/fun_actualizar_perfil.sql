@@ -40,7 +40,6 @@ BEGIN
             usr_update = CURRENT_USER,
             fec_update = CURRENT_TIMESTAMP
         WHERE id_direccion = v_existe;
-        RETURN QUERY SELECT 'SUCCESS'::TEXT, 'Dirección actualizada'::TEXT;
     ELSE
         -- Generar nuevo ID manualmente (sin SERIAL)
         SELECT COALESCE(MAX(id_direccion), 0) + 1 INTO v_next_id 
@@ -55,6 +54,16 @@ BEGIN
             v_next_id, p_id_usuario, p_direccion, p_ciudad_id, p_postal, TRUE,
             CURRENT_USER, CURRENT_TIMESTAMP
         );
+    END IF;
+
+    -- SINCRONIZAR CON LA TABLA DE USUARIOS PARA COHERENCIA EN EL DASHBOARD (UI PROFILE)
+    UPDATE tab_Usuarios 
+    SET direccion_principal = p_direccion 
+    WHERE id_usuario = p_id_usuario;
+
+    IF v_existe IS NOT NULL THEN
+        RETURN QUERY SELECT 'SUCCESS'::TEXT, 'Dirección actualizada'::TEXT;
+    ELSE
         RETURN QUERY SELECT 'SUCCESS'::TEXT, 'Dirección guardada'::TEXT;
     END IF;
 END;
