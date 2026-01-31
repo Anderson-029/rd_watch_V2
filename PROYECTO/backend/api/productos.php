@@ -6,12 +6,12 @@
  * Permite listar productos (público) y realizar operaciones CRUD (admin).
  */
 
-// Aplicar cabeceras de seguridad y dependencias
+// Aplicar configuración global primero (manejo de errores, DB, sesión)
+require_once('../config.php');
 require_once('../security_headers.php');
 require_once('../validator.php');
 require_once('../encoder.php');
 require_once('../csrf.php');
-require_once('../config.php');
 
 header('Content-Type: application/json');
 
@@ -77,7 +77,7 @@ try {
                 $stock = intval($data['stock'] ?? 0);
                 $img = Validator::sanitizeString($data['url_imagen'] ?? '', 500);
 
-                $stmt = $pdo->prepare("SELECT fun_insert_productos(:id, :marca, :nombre, :desc, :precio, :cat, :subcat, :stock, :img)");
+                $stmt = $pdo->prepare("SELECT fun_insert_productos(:id::bigint, :marca::bigint, :nombre::varchar, :desc::text, :precio::numeric, :cat::integer, :subcat::integer, :stock::smallint, :img::varchar)");
                 $stmt->execute([
                     ':id' => $id,
                     ':marca' => $marca,

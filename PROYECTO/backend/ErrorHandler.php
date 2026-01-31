@@ -19,8 +19,15 @@ class ErrorHandler
         if ($internalError) {
             $logMsg .= " | Internal: $internalError";
         }
-        Logger::error($logMsg);
 
+        try {
+            Logger::error($logMsg);
+        } catch (Throwable $e) {
+            // Ignorar errores del logger para no romper la respuesta
+        }
+
+        if (ob_get_length())
+            ob_clean();
         http_response_code($httpCode);
         header('Content-Type: application/json');
         echo json_encode([
@@ -38,6 +45,8 @@ class ErrorHandler
      */
     public static function sendSuccess(string $message, array $data = [], int $httpCode = 200): void
     {
+        if (ob_get_length())
+            ob_clean();
         http_response_code($httpCode);
         header('Content-Type: application/json');
         echo json_encode(array_merge([
@@ -62,5 +71,24 @@ class ErrorHandler
         }
 
         self::stopError($msg, $code, $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
+    }
+
+    /**
+     * Manejador de apagado para errores fatales.
+     */
+    public static function handleShutdown(): void
+    {
+        $error = error_get_last();
+        if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+            if (ob_get_length())
+                ob_clean();
+            http_response_code(500);
+            header('Content-Type: application/json');
+            echo json_encode([
+                'ok' => false,
+                'msg' => 'Error fatal del servidor detectado',
+                'detail' => $error['message'] . " in " . $error['file'] . ":" . $error['line']
+            ]);
+        }
     }
 }

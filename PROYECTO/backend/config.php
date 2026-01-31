@@ -1,19 +1,25 @@
 <?php
+ob_start(); // Prevenir cualquier salida accidental que rompa el JSON
+
 /**
  * RD Watch - Sistema de Gestión de Relojería
  * Configuración Global del Backend
- * 
- * Centraliza la conexión a la base de datos, configuraciones de sesión,
- * manejo de errores y carga de variables de entorno.
  */
+
+// 1. Configuración de manejo de errores (DEBE IR AL PRINCIPIO)
+ini_set('display_errors', '0');           // No mostrar errores al usuario final
+ini_set('log_errors', '1');              // Registrar errores en log interno
+ini_set('error_log', __DIR__ . '/logs/php_errors.log');
+error_reporting(E_ALL);                  // Capturar todos los errores en el log
 
 // Incluir utilidades centrales
 require_once __DIR__ . '/Logger.php';
 require_once __DIR__ . '/ErrorHandler.php';
 set_exception_handler(['ErrorHandler', 'handleException']);
+register_shutdown_function(['ErrorHandler', 'handleShutdown']);
 
 // =============================================================================
-// 1. Configuraciones de Seguridad de PHP y Sesión
+// 2. Configuraciones de Seguridad de PHP y Sesión
 // =============================================================================
 
 // Ocultar versión de PHP en cabeceras
@@ -28,16 +34,13 @@ ini_set('session.use_only_cookies', '1'); // Rechazar IDs de sesión en la URL
 ini_set('session.gc_maxlifetime', '3600'); // Expira tras 1 hora de inactividad
 ini_set('session.entropy_length', '32');  // Fortalecer aleatoriedad de IDs
 
-// Límites de recursos y manejo de errores
+// Límites de recursos
 ini_set('upload_max_filesize', '5M');
 ini_set('post_max_size', '6M');
 ini_set('max_execution_time', '30');
-ini_set('display_errors', '0');           // No mostrar errores al usuario final
-ini_set('log_errors', '1');              // Registrar errores en log interno
-ini_set('error_log', __DIR__ . '/logs/php_errors.log');
 
 // =============================================================================
-// 2. Carga de Variables de Entorno y Conexión a Base de Datos
+// 3. Carga de Variables de Entorno y Conexión a Base de Datos
 // =============================================================================
 
 // Cargar variables desde el archivo .env

@@ -78,5 +78,3 @@ EXCEPTION
         RETURN 'ERROR SQL: ' || SQLERRM;
 END;
 $BODY$;
-
-DROP FUNCTION fun_insert_productos(bigint,bigint,character varying,text,numeric,integer,integer,smallint,character varying);
