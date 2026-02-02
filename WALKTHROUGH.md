@@ -2,18 +2,18 @@
 
 Guía detallada sobre las nuevas funcionalidades y correcciones del sistema.
 
-## Operatividad del Entorno
-Hemos automatizado el arranque para evitar errores de conexión y hemos integrado un nuevo sistema de **Validación de Entorno** para Unix que comprueba dependencias (PHP, PostgreSQL, Extensiones) y permisos automáticamente.
+## Despliegue en Producción
+El sistema está optimizado para funcionar en servidores estándar (Ubuntu Server / Apache / Nginx).
 
-````carousel
-```bash
-# Para iniciar todo el ecosistema (Valida, Configura e Inicia):
-./iniciar.sh
-```
-<!-- slide -->
-![Validador de Requisitos](/home/anderson/.gemini/antigravity/brain/520930b3-4903-4792-b573-425b5315de68/mobile_initial_view_1769712935142.png)
-*(El validador asegura que PHP y PostgreSQL estén listos antes de arrancar)*
-````
+### Configuración del Servidor
+1.  **Base de Datos**: Importar los esquemas y datos iniciales en PostgreSQL usando pgAdmin o línea de comandos.
+    *   Base de datos: `db_rdwatch`
+    *   Usuario de aplicación: `agomez`
+2.  **Archivos**: Desplegar el contenido de `PROYECTO` en `/var/www/html`.
+3.  **Configuración**: El sistema utiliza variables de entorno automatizadas. Asegúrese de que el archivo `.env` exista en la carpeta `backend/` con las credenciales correctas.
+
+> [!NOTE]
+> No se requieren scripts de inicio manuales (`.sh` o `.bat`). El servidor web gestionará las peticiones directamente.
 
 ---
 
@@ -76,5 +76,24 @@ Toda la plataforma ha sido auditada bajo los estándares **OWASP Top 10:2021**.
 
 - **Informe de Seguridad**: [INFORME_SEGURIDAD_OWASP.md](file:///home/anderson/Documentos/rd_2/PROYECTO/INFORME_SEGURIDAD_OWASP.md)
 - **Trazabilidad de Logs**: Cada evento crítico se registra en `/backend/logs/`.
+
+---
+
+## Consolidación de Base de Datos y Pre-Producción
+Se realizaron tareas críticas para la integridad y mantenibilidad del sistema.
+
+### 1. Limpieza y Automatización
+- **Script Maestro de Instalación**: Se creó `install_db.sh` como herramienta unificada.
+    - ✅ **Interactiva**: Pregunta antes de borrar datos.
+    - ✅ **Inteligente**: Detecta credenciales automáticamente desde `.env`.
+    - ✅ **Ordenada**: Ejecuta Triggers -> Functions -> Seeds en el orden correcto.
+- **Consolidación SQL**: Se eliminaron 3 archivos redundantes/inseguros, dejando `crud_funciones_completo.sql` como fuente única de verdad.
+
+### 2. Seguridad en Autenticación
+- **Parche de Hashes**: Se detectó que la BD tenía claves en texto plano. Se actualizaron los scripts semilla para usar **Bcrypt** ($2y$10$...), alineándose con la seguridad del backend PHP (`password_verify`).
+
+### 3. Preparación para Despliegue (CORS)
+- **Configuración Dinámica**: El sistema ahora lee la IP del servidor desde `.env` (`CORS_ALLOWED_ORIGINS`) e inyecta esa IP automáticamente en las cabeceras de seguridad (CSP).
+- **Acceso Dual**: Permite acceso seguro tanto por `localhost` como por IP de red (`10.x.x.x`) sin reconfiguraciones manuales.
 
 ---

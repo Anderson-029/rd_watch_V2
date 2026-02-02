@@ -5,10 +5,8 @@ const API_CONFIG = {
     // Detectar automáticamente la base URL. 
     // Si se abre vía file://, forzar localhost:8001 para intentar la comunicación (aunque el navegador podría bloquearlo)
     baseUrl: (window.location.protocol === 'file:')
-        ? 'http://localhost:8001/api'
-        : (window.location.origin.includes('localhost')
-            ? 'http://localhost:8001/api'
-            : window.location.origin + '/backend/api')
+        ? 'http://localhost/backend/api'
+        : window.location.origin + '/backend/api'
 };
 
 // Alerta preventiva si se detecta acceso por archivo local

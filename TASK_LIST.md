@@ -18,8 +18,8 @@ Hitos técnicos implementados para la profesionalización del ecosistema RD Watc
     - Erradicación de `alert()` nativos para un flujo de usuario moderno.
 - [x] **Optimización de Carga Frontend** <!-- id: 5 -->
     - Implementación de `loading="lazy"` en catálogos y galerías.
-- [x] **Automatización de Arranque** <!-- id: 6 -->
-    - Script `iniciar.sh` para despliegue rápido de servicios (8000/8001).
+- [x] **Configuración de Despliegue** <!-- id: 6 -->
+    - Optimización para servidores web estándar (Apache/Nginx) en puerto 80.
 - [x] **Rediseño Premium del Preloader (Senior UX/UI)** <!-- id: 8 -->
     - Refinamiento minimalista y animación de barrido continuo (Sweep).
 

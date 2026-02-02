@@ -80,14 +80,24 @@ class ErrorHandler
     {
         $error = error_get_last();
         if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+            // 1. Registrar el detalle completo en el LOG privado (SOC)
+            $logMessage = "FATAL ERROR: " . $error['message'] . " in " . $error['file'] . ":" . $error['line'];
+            try {
+                Logger::error($logMessage);
+            } catch (Throwable $e) {
+                // Si falla el logger, intentamos escribir en log de sistema php como fallback
+                error_log($logMessage);
+            }
+
+            // 2. Responder al usuario con mensaje genérico (Sin filtrar rutas)
             if (ob_get_length())
                 ob_clean();
+
             http_response_code(500);
             header('Content-Type: application/json');
             echo json_encode([
                 'ok' => false,
-                'msg' => 'Error fatal del servidor detectado',
-                'detail' => $error['message'] . " in " . $error['file'] . ":" . $error['line']
+                'msg' => 'Error interno crítico. El incidente ha sido registrado.'
             ]);
         }
     }

@@ -30,7 +30,11 @@ class Logger
 
         $timestamp = date('Y-m-d H:i:s');
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        $logEntry = "[$timestamp] [$level] [IP: $ip] $message" . PHP_EOL;
+        $uri = $_SERVER['REQUEST_URI'] ?? 'CLI';
+        $agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown Agent';
+
+        // Formato Enriquecido para SOC (Pipe separated para fácil parsing)
+        $logEntry = "[$timestamp] [$level] [IP:$ip] [URI:$uri] [UA:$agent] $message" . PHP_EOL;
 
         @file_put_contents($filePath, $logEntry, FILE_APPEND | LOCK_EX);
     }

@@ -17,21 +17,11 @@ if (!isset($_SESSION['csp_nonce'])) {
     $_SESSION['csp_nonce'] = base64_encode(random_bytes(16));
 }
 $nonce = $_SESSION['csp_nonce'];
-header(
-    "Content-Security-Policy: " .
-    "default-src 'self'; " .
-    "script-src 'self' 'nonce-$nonce' https://cdnjs.cloudflare.com; " .
-    "style-src 'self' 'nonce-$nonce' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " .
-    "img-src 'self' data: https://via.placeholder.com; " .
-    "connect-src 'self' http://localhost:8001 http://127.0.0.1:8001; " .
-    "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " .
-    "object-src 'none'; " .
-    "frame-ancestors 'none'; " .
-    "base-uri 'self'; " .
-    "form-action 'self';"
-);
 require_once __DIR__ . '/load_env.php';
+
+// 1. Definir Orígenes Permitidos (Base + ENV)
 $allowed_origins = ['http://localhost', 'http://localhost:80', 'http://127.0.0.1', 'http://localhost:8000', 'http://localhost:8002'];
+
 if (isset($_ENV['CORS_ALLOWED_ORIGINS'])) {
     $env_origins = explode(',', $_ENV['CORS_ALLOWED_ORIGINS']);
     foreach ($env_origins as $origin_url) {
@@ -41,11 +31,32 @@ if (isset($_ENV['CORS_ALLOWED_ORIGINS'])) {
         }
     }
 }
+
+// 2. Construir cadena para CSP (connect-src)
+$connect_src_string = implode(' ', $allowed_origins);
+
+// 3. Generar CSP Dinámica
+header(
+    "Content-Security-Policy: " .
+    "default-src 'self'; " .
+    "script-src 'self' 'nonce-$nonce' https://cdnjs.cloudflare.com; " .
+    "style-src 'self' 'nonce-$nonce' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " .
+    "img-src 'self' data: https://via.placeholder.com; " .
+    "connect-src 'self' $connect_src_string; " . // <-- INYECCIÓN DINÁMICA DE LA IP
+    "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " .
+    "object-src 'none'; " .
+    "frame-ancestors 'none'; " .
+    "base-uri 'self'; " .
+    "form-action 'self';"
+);
+
+// 4. Configurar CORS Headers
 $request_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 if ($request_origin && in_array($request_origin, $allowed_origins)) {
     header("Access-Control-Allow-Origin: $request_origin");
 } else {
+    // Loguear intento fallido solo si hay origen (evita loguear accesos directos normales)
     if ($request_origin) {
         Logger::security("CORS Bloqueado: Intento desde origen no permitido: $request_origin");
     }

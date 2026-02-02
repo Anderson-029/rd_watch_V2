@@ -43,10 +43,10 @@ CREATE TABLE IF NOT EXISTS tab_Usuarios
     direccion_principal     VARCHAR(255),                 -- Dirección del usuario
     fecha_registro          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     activo                  BOOLEAN DEFAULT TRUE,
-    contra                  VARCHAR(50) NOT NULL,         -- Hash de contraseña
+    contra                  VARCHAR(255) NOT NULL,         -- Hash de contraseña (Bcrypt)
     rol                     VARCHAR(20) DEFAULT 'cliente',-- Rol del usuario
     
-    salt                    VARCHAR(100),
+    salt                    VARCHAR(255),
     intentos_fallidos       SMALLINT DEFAULT 0,
     bloqueado               BOOLEAN DEFAULT FALSE,
     fecha_bloqueo           TIMESTAMP,

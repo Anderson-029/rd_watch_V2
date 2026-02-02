@@ -1,0 +1,10 @@
+[2026-02-02 18:13:51] [ERROR] [IP:127.0.0.1] [URI:/backend/api/me.php] [UA:Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0] (401): No hay sesión activa
+[2026-02-02 18:14:12] [ERROR] [IP:127.0.0.1] [URI:/backend/api/login.php] [UA:Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0] (401): Credenciales inválidas
+[2026-02-02 18:15:08] [ERROR] [IP:127.0.0.1] [URI:/backend/api/login.php] [UA:Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0] (401): Credenciales inválidas
+[2026-02-02 18:15:29] [ERROR] [IP:127.0.0.1] [URI:/backend/api/login.php] [UA:Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0] (401): Credenciales inválidas
+[2026-02-02 18:16:02] [ERROR] [IP:127.0.0.1] [URI:/backend/api/login.php] [UA:Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0] (401): Credenciales inválidas
+[2026-02-02 18:16:07] [ERROR] [IP:127.0.0.1] [URI:/backend/api/login.php] [UA:Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0] (401): Credenciales inválidas
+[2026-02-02 20:02:12] [ERROR] [IP:127.0.0.1] [URI:/backend/api/login.php] [UA:curl/8.5.0] (401): Credenciales inválidas
+[2026-02-02 20:07:32] [ERROR] [IP:127.0.0.1] [URI:/backend/api/me.php] [UA:Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0] (401): No hay sesión activa
+[2026-02-02 20:08:36] [ERROR] [IP:127.0.0.1] [URI:/backend/api/productos.php] [UA:Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0] (500): Error interno del servidor | Internal: Encoder::url(): Argument #1 ($str) must be of type string, null given, called in /home/anderson/Documentos/rd_watch_V2/PROYECTO/backend/api/productos.php on line 43 in /home/anderson/Documentos/rd_watch_V2/PROYECTO/backend/encoder.php:40
+[2026-02-02 20:09:00] [ERROR] [IP:127.0.0.1] [URI:/backend/api/me.php] [UA:Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0] (401): No hay sesión activa

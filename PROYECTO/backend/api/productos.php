@@ -40,7 +40,7 @@ try {
             foreach ($productos as &$prod) {
                 $prod['nom_producto'] = Encoder::html($prod['nom_producto']);
                 $prod['descripcion'] = Encoder::html($prod['descripcion']);
-                $prod['url_imagen'] = Encoder::url($prod['url_imagen']);
+                $prod['url_imagen'] = Encoder::url($prod['url_imagen'] ?? '');
             }
 
             ErrorHandler::sendSuccess("Lista de productos obtenida", ['productos' => $productos]);
