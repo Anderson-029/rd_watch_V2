@@ -1,19 +1,19 @@
 <?php
-// backend/api/me.php
-require_once('../config.php'); // Ya incluye ErrorHandler
-require_once('../security_headers.php');
+// api/me.php
+require_once '../config.php';
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['user_id'])) {
-    ErrorHandler::stopError('No hay sesión activa', 401);
+if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+    echo json_encode([
+        "ok" => true,
+        "user" => [
+            "id" => $_SESSION['user_id'],
+            "nombre" => $_SESSION['user_name'],
+            "rol" => $_SESSION['user_role']
+        ]
+    ]);
+} else {
+    // No es error 401 para no llenar consola de errores, solo ok: false
+    echo json_encode(["ok" => false, "user" => null]);
 }
-
-ErrorHandler::sendSuccess('Sesión activa', [
-    'user' => [
-        'id' => $_SESSION['user_id'],
-        'nombre' => $_SESSION['user_name'] ?? 'Usuario',
-        'correo' => $_SESSION['user_mail'] ?? '',
-        'rol' => $_SESSION['user_rol'] ?? 'cliente'
-    ]
-]);

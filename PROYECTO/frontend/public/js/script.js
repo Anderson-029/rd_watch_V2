@@ -692,9 +692,9 @@ function updateHeaderUser(user) {
         e.preventDefault();
         const user = JSON.parse(sessionStorage.getItem('user'));
         if (user && user.rol === 'admin') {
-            window.location.href = 'admin/admin.html';
+            window.location.href = `${API_CONFIG.appUrl}/admin/admin.html`;
         } else {
-            window.location.href = 'user/user.html';
+            window.location.href = `${API_CONFIG.appUrl}/user/user.html`;
         }
     });
 }

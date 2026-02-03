@@ -1,69 +1,51 @@
 <?php
-// backend/api/signup.php
-
-// Aplicar cabeceras de seguridad
-require_once('../security_headers.php');
-require_once('../rate_limiter.php');
-require_once('../validator.php');
-require_once('../encoder.php');
-require_once('../csrf.php');
+// api/signup.php
+require_once '../config.php';
 
 header('Content-Type: application/json');
-include_once('../config.php');
 
-// Rate limiting: 10 registros por cada 5 minutos por IP (Ajustado para desarrollo)
-$clientIP = $_SERVER['REMOTE_ADDR'];
-if (!check_rate_limit('signup', $clientIP, 10, 300)) {
-    $remaining = get_rate_limit_remaining('signup', $clientIP, 300);
-    rate_limit_fail_response($remaining > 0 ? $remaining : 300);
+// 1. Obtener JSON
+$input = json_decode(file_get_contents('php://input'), true);
+
+$nombre = $input['nombre'] ?? '';
+$email = $input['email'] ?? '';
+$telefono = $input['telefono'] ?? '';
+$pass = $input['password'] ?? '';
+
+// Validaciones básicas
+if (empty($email) || empty($pass) || empty($nombre)) {
+    echo json_encode(["ok" => false, "msg" => "Faltan datos obligatorios"]);
+    exit;
 }
 
-$data = json_decode(file_get_contents("php://input"), true);
-
-// 2. Verificar token CSRF
-require_csrf_token();
-
 try {
-    $nombre = Validator::sanitizeString($data['nombre'] ?? '', 100);
-    $email = Validator::validateEmail($data['email'] ?? '');
-
-    // Limpiar teléfono: quitar todo lo que no sea dígito
-    $telefonoRaw = $data['telefono'] ?? '';
-    $telefonoDigits = preg_replace('/[^0-9]/', '', $telefonoRaw);
-    $telefono = !empty($telefonoDigits) ? (int) $telefonoDigits : null;
-
-    // Validar contraseña
-    $passwordRaw = Validator::validatePassword($data['password'] ?? '');
-    // Hashear contraseña con Bcrypt (PHP nativo)
-    $password = password_hash($passwordRaw, PASSWORD_DEFAULT);
-
-    $direccion = Validator::sanitizeString($data['direccion'] ?? '', 255);
-
-    // Validación de campos obligatorios
-    if (empty($nombre) || empty($email) || empty($password)) {
-        throw new InvalidArgumentException('Faltan campos obligatorios');
+    // 2. Verificar si ya existe el correo
+    $stmt = $pdo->prepare("SELECT id_usuario FROM tab_Usuarios WHERE correo_usuario = ?");
+    $stmt->execute([$email]);
+    if ($stmt->fetch()) {
+        echo json_encode(["ok" => false, "msg" => "El correo ya está registrado"]);
+        exit;
     }
 
-    $stmt = $pdo->prepare("SELECT * FROM fun_registrar_usuario(:n,:e,:t,:p,:d)");
-    $stmt->execute([
-        ':n' => $nombre,
-        ':e' => $email,
-        ':t' => $telefono,
-        ':p' => $password,
-        ':d' => $direccion
-    ]);
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    // 3. Hashear contraseña
+    $hash = password_hash($pass, PASSWORD_BCRYPT);
 
-    if ($row['status'] === 'SUCCESS') {
-        ErrorHandler::sendSuccess(Encoder::html($row['message']), [
-            'id' => $row['id_usuario'] ?? null
-        ]);
-    } else {
-        ErrorHandler::stopError(Encoder::html($row['message']), 400);
-    }
+    // 4. Insertar Usuario
+    // Calculamos el ID manualmente (MAX + 1) para compatibilidad con el esquema actual
+    $sql = "INSERT INTO tab_Usuarios (
+                id_usuario, nom_usuario, correo_usuario, num_telefono_usuario, 
+                contra, salt, rol, activo, bloqueado, fecha_registro, intentos_fallidos
+            ) VALUES (
+                (SELECT COALESCE(MAX(id_usuario), 0) + 1 FROM tab_Usuarios),
+                ?, ?, ?, ?, 'legacy_salt', 'cliente', TRUE, FALSE, NOW(), 0
+            )";
 
-} catch (InvalidArgumentException $e) {
-    ErrorHandler::stopError($e->getMessage(), 400);
-} catch (Throwable $e) {
-    ErrorHandler::handleException($e);
+    $stmtInsert = $pdo->prepare($sql);
+    $stmtInsert->execute([$nombre, $email, $telefono, $hash]);
+
+    echo json_encode(["ok" => true, "msg" => "Usuario registrado correctamente"]);
+
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(["ok" => false, "msg" => "Error de servidor: " . $e->getMessage()]);
 }

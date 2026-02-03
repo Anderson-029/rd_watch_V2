@@ -79,15 +79,40 @@ Toda la plataforma ha sido auditada bajo los estándares **OWASP Top 10:2021**.
 
 ---
 
-## Consolidación de Base de Datos y Pre-Producción
-Se realizaron tareas críticas para la integridad y mantenibilidad del sistema.
+### 2. Autenticación Robusta
+- **Login/Registro**: Flujo completo funcional con contraseña encriptada (Bcrypt).
+- **Redirección Inteligente**: El frontend detecta automáticamente si está en `/PROYECTO/` u otra carpeta.
 
-### 1. Limpieza y Automatización
-- **Script Maestro de Instalación**: Se creó `install_db.sh` como herramienta unificada.
-    - ✅ **Interactiva**: Pregunta antes de borrar datos.
-    - ✅ **Inteligente**: Detecta credenciales automáticamente desde `.env`.
-    - ✅ **Ordenada**: Ejecuta Triggers -> Functions -> Seeds en el orden correcto.
-- **Consolidación SQL**: Se eliminaron 3 archivos redundantes/inseguros, dejando `crud_funciones_completo.sql` como fuente única de verdad.
+---
+
+## Requisitos para el Servidor de Producción (Checklist)
+Para que todo esto funcione en tu servidor final (`10.5.213.111` o similar), asegúrate de tener instalado:
+
+### 1. Sistema Base
+- **Servidor Web**: Apache 2.4+ (o Nginx).
+- **Base de Datos**: PostgreSQL 13+ (idealmente 14 o 15).
+
+### 2. PHP y Extensiones (Vital)
+No basta con instalar PHP, necesitas estas piezas específicas:
+- `php-pgsql` (Para conectar con la BD).
+- `php-pdo` (El motor que usamos en `config.php`).
+- `php-mbstring` (Para manejar tildes y caracteres especiales).
+- `php-json` (Para las respuestas de la API).
+
+### 3. Configuraciones Clave
+- **Apache (`.htaccess`)**: Asegúrate de que `AllowOverride All` esté activado para que funcionen las rutas amigables si las usas en el futuro.
+- **Permisos de Carpeta**: La carpeta `/var/www/html/PROYECTO` debe tener permisos de lectura para el usuario `www-data`.
+  ```bash
+  sudo chown -R www-data:www-data /var/www/html/PROYECTO
+  sudo chmod -R 755 /var/www/html/PROYECTO
+  ```
+
+### 4. Último Paso Antes de Lanzar
+Recuerda editar el archivo `.env` en el servidor con las credenciales reales:
+```ini
+DB_USER=gr_rdwatch
+DB_HOST=localhost
+```
 
 ### 2. Seguridad en Autenticación
 - **Parche de Hashes**: Se detectó que la BD tenía claves en texto plano. Se actualizaron los scripts semilla para usar **Bcrypt** ($2y$10$...), alineándose con la seguridad del backend PHP (`password_verify`).

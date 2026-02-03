@@ -5,15 +5,25 @@
 # ==========================================
 
 # Intentar cargar .env automáticamente
-if [ -f "backend/.env" ]; then
-    echo "Cargando configuración desde backend/.env..."
-    export $(grep -v '^#' backend/.env | xargs)
+ENV_FILE="PROYECTO/backend/.env"
+if [ ! -f "$ENV_FILE" ]; then
+    ENV_FILE="backend/.env"
 fi
 
+if [ -f "$ENV_FILE" ]; then
+    echo "Cargando configuración desde $ENV_FILE..."
+    # Exportar variables ignorando comentarios y líneas vacías
+    export $(grep -v '^#' "$ENV_FILE" | grep -v '^$' | xargs)
+else
+    echo "ADVERTENCIA: No se encontró archivo .env en backend/"
+fi
+
+# Variables con fallback (Prioridad: ENV > Defecto)
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-5432}"
 DB_NAME="${DB_NAME:-db_rdwatch}"
 DB_USER="${DB_USER:-postgres}"
+# DB_PASS se toma directamente del export anterior
 
 # Colores para output
 GREEN='\033[0;32m'
