@@ -1,0 +1,168 @@
+/* Heredamos variables y base desde style.css (tokens: colores, fuentes, botones) */
+
+/* Layout del admin inspirado en tu web pública */
+:root {
+  --sidebar-w: 260px;
+}
+
+/* reset menor para inputs del admin */
+.input, select, textarea {
+  font-family: var(--font-body);
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px 12px;
+  outline: none;
+}
+.input:focus, select:focus, textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(184,134,11,0.1);
+}
+
+/* Sidebar */
+.admin-sidebar {
+  position: fixed;
+  top: 70px; /* coincide con header fijo */
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--secondary-color);
+  border-right: 1px solid var(--secondary-light);
+  padding: 20px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.admin-sidebar .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--primary-light);
+  font-weight: 700;
+}
+.admin-nav { display: flex; flex-direction: column; gap: 8px; }
+.admin-link {
+  background: transparent;
+  color: #fff;
+  text-align: left;
+  border: 1px solid transparent;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.admin-link:hover { background: var(--secondary-light); }
+.admin-link.active {
+  background: var(--primary-color);
+  color: var(--secondary-color);
+  border-color: var(--primary-color);
+  font-weight: 700;
+}
+.admin-footer { margin-top: auto; }
+
+/* Main */
+.admin-main {
+  margin-top: 90px; /* por el header fijo */
+  margin-left: calc(var(--sidebar-w) + var(--spacing-md));
+  padding-bottom: 80px;
+}
+
+/* Secciones */
+.admin-section { display: none; }
+.admin-section.is-active { display: block; }
+
+/* Tarjetas y estadísticas */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+.stat-card {
+  background: var(--white);
+  border: 1px solid #eee;
+  padding: var(--spacing-lg);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+.stat-label { color: var(--text-light); text-transform: uppercase; font-size: .9rem; }
+.stat-number { font-family: var(--font-heading); font-size: 2.2rem; color: var(--primary-dark); }
+
+/* Tarjeta con gráfica */
+.card-chart, .card {
+  background: var(--white);
+  border: 1px solid #eee;
+  padding: var(--spacing-lg);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-lg);
+}
+.card-title { font-family: var(--font-heading); margin-bottom: var(--spacing-md); color: var(--secondary-color); }
+
+/* Section header */
+.section-header { text-align: left; margin-bottom: var(--spacing-md); }
+.section-heading { text-transform: uppercase; color: var(--primary-dark); }
+.section-subheading { color: var(--text-light); }
+
+/* Tablas */
+.table-wrapper { background: var(--white); border:1px solid #eee; border-radius:10px; box-shadow: var(--shadow-sm); }
+.table { width: 100%; border-collapse: collapse; }
+.table thead th {
+  background: var(--secondary-color);
+  color: #fff;
+  text-align: left;
+  font-weight: 600;
+  padding: 12px 14px;
+}
+.table td { padding: 12px 14px; border-top: 1px solid #f0f0f0; vertical-align: middle; }
+.table img { width: 54px; height: 54px; object-fit: cover; border-radius: 6px; }
+
+/* Toolbar */
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md); }
+.toolbar-right { display: flex; gap: 10px; align-items: center; }
+
+/* Formularios */
+.form-grid { display: grid; gap: var(--spacing-md); }
+.grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: var(--spacing-md); }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--spacing-md); }
+.form-grid label { display: grid; gap: 6px; color: var(--text-color); font-weight: 600; }
+.form-actions { display: flex; gap: var(--spacing-sm); justify-content: flex-end; }
+
+/* Modal reutilizando estilos del sitio */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.6);
+  opacity: 0; visibility: hidden; transition: var(--transition-fast);
+  z-index: 70;
+}
+.modal { position: fixed; inset: 0; display: none; z-index: 80; justify-content: center; align-items: center; }
+.modal.show ~ .modal-overlay { opacity: 1; visibility: visible; }
+.modal-content {
+  background: var(--white); border-radius: 10px; box-shadow: var(--shadow-xl);
+  width: min(720px, 92vw); padding: var(--spacing-lg); position: relative;
+}
+.modal-title { margin-bottom: var(--spacing-md); color: var(--secondary-color); }
+.close-modal {
+  position: absolute; right: 14px; top: 10px; font-size: 26px; color: var(--text-light);
+  cursor: pointer;
+}
+.close-modal:hover { color: var(--error-color); }
+
+/* Utilidades */
+.badge {
+  display:inline-block; padding: 4px 8px; border-radius: 6px; font-size: .8rem; font-weight: 700;
+  background: var(--bg-light); color: var(--text-light);
+}
+.badge.active { background: var(--primary-light); color: var(--secondary-color); }
+.badge.inactive { background: #eee; color: #888; }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  :root { --sidebar-w: 220px; }
+}
+@media (max-width: 860px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .admin-main { margin-left: var(--spacing-md); }
+  .admin-sidebar { transform: translateX(-100%); transition: var(--transition-fast); }
+  .admin-sidebar.open { transform: translateX(0); }
+}
