@@ -1,10 +1,3 @@
-DROP TABLE IF EXISTS tab_Detalle_Factura;
-DROP TABLE IF EXISTS tab_Facturas;
-DROP TABLE IF EXISTS tab_Pagos;
-DROP TABLE IF EXISTS tab_Detalle_Orden;
-DROP TABLE IF EXISTS tab_Orden_Servicios;
-DROP TABLE IF EXISTS tab_Carrito_Detalle;
-DROP TABLE IF EXISTS tab_Recepciones_Proveedor;
 DROP TABLE IF EXISTS tab_Opiniones;
 DROP TABLE IF EXISTS tab_Envios;
 DROP TABLE IF EXISTS tab_Orden;
@@ -20,7 +13,6 @@ DROP TABLE IF EXISTS tab_Usuario_Metodo_Pago;
 DROP TABLE IF EXISTS tab_Metodos_Pago;
 DROP TABLE IF EXISTS tab_Servicios;
 DROP TABLE IF EXISTS tab_Promociones;
-DROP TABLE IF EXISTS tab_Proveedor;
 DROP TABLE IF EXISTS tab_Marcas;
 DROP TABLE IF EXISTS tab_Subcategorias;
 DROP TABLE IF EXISTS tab_Categorias;
@@ -142,31 +134,6 @@ CREATE TABLE IF NOT EXISTS tab_Marcas
     UNIQUE (nom_marca)
 );
 
--- Tabla: tab_Proveedor
--- Almacena la información de los proveedores de productos.
-CREATE TABLE IF NOT EXISTS tab_Proveedor
-(
-    id_proveedor            BIGINT NOT NULL, -- Identificador único del proveedor
-    nom_proveedor           VARCHAR(100) NOT NULL, -- Nombre del proveedor
-    tipo_documento          BIGINT NOT NULL , -- Tipo de documento del proveedor (ej. NIT, CC, RUC)
-    num_documento           BIGINT NOT NULL, -- Número de documento del proveedor
-    num_telefono            BIGINT NOT NULL, -- Número de contacto del proveedor
-    correo                  VARCHAR(100) NOT NULL, -- Correo electrónico del proveedor
-    direccion               VARCHAR(255), -- Dirección del proveedor (se especificó la longitud)
-    fecha_creacion          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de creación del registro del proveedor
-    estado                  BOOLEAN NOT NULL DEFAULT TRUE, -- Indica si el proveedor está activo o inactivo
-
-       -- Columnas de auditoría
-    usr_insert VARCHAR(100),
-    fec_insert TIMESTAMP,
-    usr_update VARCHAR(100),
-    fec_update TIMESTAMP,
-    usr_delete VARCHAR(100),
-    fec_delete TIMESTAMP,
-    PRIMARY KEY (id_proveedor),
-    UNIQUE (num_documento),
-    UNIQUE (correo)
-);
 
 -- Tabla: tab_Metodos_Pago
 -- Almacena los métodos de pago disponibles en el sistema.
@@ -431,7 +398,7 @@ CREATE TABLE IF NOT EXISTS tab_Carrito_Detalle
 -- Almacena la cabecera de las órdenes de compra.
 CREATE TABLE IF NOT EXISTS tab_Orden
 (
-    id_orden                INT NOT NULL, -- Identificador único de la orden
+    id_orden                BIGINT NOT NULL, -- Identificador único de la orden
     id_usuario              BIGINT NOT NULL, -- Clave foránea a tab_Usuarios
     fecha_orden             TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora en que se realizó la orden
     estado_orden            VARCHAR(50) NOT NULL, -- Estado actual de la orden
@@ -457,8 +424,8 @@ CREATE INDEX idx_orden_usuario ON tab_Orden (id_usuario); -- Índice para aceler
 -- Almacena los productos individuales dentro de cada orden.
 CREATE TABLE IF NOT EXISTS tab_Detalle_Orden
 (
-    id_detalle_orden        INT NOT NULL, -- Identificador único del detalle de la orden
-    id_orden                INT NOT NULL, -- Clave foránea a tab_Orden
+    id_detalle_orden        BIGINT NOT NULL, -- Identificador único del detalle de la orden
+    id_orden                BIGINT NOT NULL, -- Clave foránea a tab_Orden
     id_producto             BIGINT NOT NULL, -- Clave foránea a tab_Productos
     cantidad                INT NOT NULL, -- Cantidad del producto en esta línea de la orden
     precio_unitario         DECIMAL(10, 2) NOT NULL, -- Precio del producto al momento de la compra
@@ -509,7 +476,7 @@ CREATE TABLE IF NOT EXISTS tab_Orden_Servicios
 -- Almacena la información principal de cada factura generada por una orden.
 CREATE TABLE IF NOT EXISTS tab_Facturas (
     id_factura      BIGINT NOT NULL, -- Clave primaria de la factura
-    id_orden        INT NOT NULL,     -- ID de la orden asociada a la factura
+    id_orden        BIGINT NOT NULL,     -- ID de la orden asociada a la factura
     id_usuario      BIGINT NOT NULL,     -- ID del usuario (cliente) asociado a la factura
     fecha_emision   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de emisión de la factura
     total_factura   DECIMAL(10, 2) NOT NULL, -- Total de la factura
@@ -563,7 +530,7 @@ CREATE INDEX idx_detalle_factura_producto ON tab_Detalle_Factura (id_producto);
 CREATE TABLE IF NOT EXISTS tab_Envios
 (
     id_envio                BIGINT NOT NULL, -- Identificador único del envío
-    id_orden                INT NOT NULL, -- Clave foránea a tab_Orden, una orden tiene un único envío
+    id_orden                BIGINT NOT NULL, -- Clave foránea a tab_Orden, una orden tiene un único envío
     id_direccion_envio      BIGINT NOT NULL, -- Clave foránea a tab_Direcciones_Envio
     metodo_envio            VARCHAR(100) NOT NULL, -- Método de envío utilizado
     estado_envio            VARCHAR(50) NOT NULL, -- Estado actual del envío
@@ -613,40 +580,20 @@ CREATE TABLE IF NOT EXISTS tab_Opiniones
     CHECK (calificacion BETWEEN 1 AND 5) -- Calificación del producto (1 a 5 estrellas)
 );
 
--- Tabla: tab_Recepciones_Proveedor
--- Registra las entradas de productos desde los proveedores (movimientos de inventario).
-CREATE TABLE IF NOT EXISTS tab_Recepciones_Proveedor
-(
-    id_recepcion            BIGINT NOT NULL, -- Identificador único de la recepción
-    id_producto             BIGINT NOT NULL, -- Clave foránea a tab_Productos
-    id_proveedor            BIGINT NOT NULL, -- Clave foránea a tab_Proveedor
-    cantidad_recibida       BIGINT NOT NULL, -- Cantidad de productos recibidos
-    fecha_recepcion         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de la recepción
-
-    -- Columnas de auditoría
-    usr_insert VARCHAR(100),
-    fec_insert TIMESTAMP,
-    usr_update VARCHAR(100),
-    fec_update TIMESTAMP,
-    usr_delete VARCHAR(100),
-    fec_delete TIMESTAMP,
-
-    PRIMARY KEY (id_recepcion),
-    FOREIGN KEY (id_producto) REFERENCES tab_Productos(id_producto),
-    FOREIGN KEY (id_proveedor) REFERENCES tab_Proveedor(id_proveedor),
-    CHECK (cantidad_recibida > 0) -- Cantidad de productos recibidos
-);
+-- Tabla: tab_Pagos
 
 -- Tabla: tab_Pagos
 -- Almacena los registros de pagos de las órdenes.
 CREATE TABLE IF NOT EXISTS tab_Pagos
 (
-    id_pago                 INT NOT NULL, -- Identificador único del pago
-    id_orden                INT NOT NULL, -- Clave foránea a tab_Orden, una orden tiene un único pago
+    id_pago                 BIGINT NOT NULL, -- Identificador único del pago
+    id_orden                BIGINT NOT NULL, -- Clave foránea a tab_Orden, una orden tiene un único pago
     monto                   DECIMAL(10, 2) NOT NULL, -- Monto del pago
     id_metodo_pago          SMALLINT NOT NULL, -- Clave foránea a tab_Metodos_Pago
     estado_pago             VARCHAR(50) NOT NULL, -- Estado actual del pago
     fecha_pago              TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora en que se realizó el pago
+    comprobante_archivo     BYTEA, -- Contenido binario del comprobante
+    comprobante_extension   VARCHAR(10), -- Extensión del archivo (jpg, png, pdf, etc.)
 
        -- Columnas de auditoría
     usr_insert VARCHAR(100),
@@ -659,6 +606,7 @@ CREATE TABLE IF NOT EXISTS tab_Pagos
     PRIMARY KEY (id_pago),
     FOREIGN KEY (id_orden) REFERENCES tab_Orden(id_orden),
     FOREIGN KEY (id_metodo_pago) REFERENCES tab_Metodos_Pago(id_metodo_pago),
+    CHECK (monto >= 0), -- Monto del pago
     CHECK (monto >= 0), -- Monto del pago
     CHECK (estado_pago IN ('pendiente', 'completado', 'fallido', 'reembolsado')) -- Estado actual del pago
 );

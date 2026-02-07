@@ -1,0 +1,1839 @@
+2026-02-07 07:28:32 [1;33m=== Iniciando instalación de base de datos RD Watch V2 ===[0m
+2026-02-07 07:28:32 [0;34mCargando configuración desde /home/anderson/Documentos/rd_watch_V2/src/backend/.env...[0m
+2026-02-07 07:28:32 
+[0;34m--- Paso 1: Preparando Base de Datos ---[0m
+2026-02-07 07:28:32 Terminando sesiones activas en 'db_rdwatch'...
+ pg_terminate_backend 
+----------------------
+(0 rows)
+
+2026-02-07 07:28:32 Eliminando base de datos 'db_rdwatch' si existe...
+DROP DATABASE
+2026-02-07 07:28:32 Creando base de datos 'db_rdwatch'...
+CREATE DATABASE
+2026-02-07 07:28:32 
+[0;34m--- Paso 2: Estructura (Schema) ---[0m
+2026-02-07 07:28:32 Ejecutando [1;33mdatabase_rdwatch_3_0.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:1: NOTICE:  table "tab_opiniones" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:2: NOTICE:  table "tab_envios" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:3: NOTICE:  table "tab_orden" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:4: NOTICE:  table "tab_carrito" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:5: NOTICE:  table "tab_productos_promociones" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:6: NOTICE:  table "tab_productos" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:7: NOTICE:  table "tab_direcciones_envio" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:8: NOTICE:  table "tab_ciudades" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:9: NOTICE:  table "tab_departamentos" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:10: NOTICE:  table "tab_reservas" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:11: NOTICE:  table "tab_contacto" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:12: NOTICE:  table "tab_usuario_metodo_pago" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:13: NOTICE:  table "tab_metodos_pago" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:14: NOTICE:  table "tab_servicios" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:15: NOTICE:  table "tab_promociones" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:16: NOTICE:  table "tab_marcas" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:17: NOTICE:  table "tab_subcategorias" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:18: NOTICE:  table "tab_categorias" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:19: NOTICE:  table "tab_usuarios" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:20: NOTICE:  table "tab_empleados" does not exist, skipping
+DROP TABLE
+psql:/home/anderson/Documentos/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:21: NOTICE:  table "tab_eventos" does not exist, skipping
+DROP TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+2026-02-07 07:28:33 Ejecutando [1;33mrate_limits.sql[0m...
+CREATE TABLE
+CREATE INDEX
+COMMENT
+2026-02-07 07:28:33 
+[0;34m--- Paso 3: Funciones y Procedimientos ---[0m
+2026-02-07 07:28:33 Ejecutando [1;33mbusiness_logic.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/business_logic.sql:35: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/business_logic.sql:60: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_carrito.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_carrito.sql:115: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_carrito.sql:115: NOTICE:  type reference tab_productos.id_producto%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_carrito.sql:115: NOTICE:  type reference tab_carrito_detalle.cantidad%TYPE converted to integer
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_categorias.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:30: NOTICE:  type reference tab_subcategorias.id_categoria%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:30: NOTICE:  type reference tab_subcategorias.id_subcategoria%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:30: NOTICE:  type reference tab_subcategorias.nom_subcategoria%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:54: NOTICE:  type reference tab_subcategorias.id_categoria%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:54: NOTICE:  type reference tab_subcategorias.id_subcategoria%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:54: NOTICE:  type reference tab_subcategorias.nom_subcategoria%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:54: NOTICE:  type reference tab_subcategorias.estado%TYPE converted to boolean
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:75: NOTICE:  type reference tab_subcategorias.id_categoria%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:75: NOTICE:  type reference tab_subcategorias.id_subcategoria%TYPE converted to integer
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:110: NOTICE:  type reference tab_categorias.id_categoria%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:110: NOTICE:  type reference tab_categorias.nom_categoria%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:110: NOTICE:  type reference tab_categorias.descripcion_categoria%TYPE converted to text
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:149: NOTICE:  type reference tab_categorias.id_categoria%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:149: NOTICE:  type reference tab_categorias.nom_categoria%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:149: NOTICE:  type reference tab_categorias.descripcion_categoria%TYPE converted to text
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:149: NOTICE:  type reference tab_categorias.estado%TYPE converted to boolean
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_categorias.sql:169: NOTICE:  type reference tab_categorias.id_categoria%TYPE converted to integer
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_contacto.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  type reference tab_contacto.id_contacto%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  type reference tab_contacto.nombre_remitente%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  type reference tab_contacto.correo_remitente%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  type reference tab_contacto.telefono_remitente%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  type reference tab_contacto.asunto%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  type reference tab_contacto.mensaje%TYPE converted to text
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_contacto.sql:40: NOTICE:  type reference tab_contacto.id_contacto%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_contacto.sql:40: NOTICE:  type reference tab_contacto.estado%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_contacto.sql:59: NOTICE:  type reference tab_contacto.id_contacto%TYPE converted to bigint
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_empleados.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.id_empleado%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.nom_empleado%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.apellido_empleado%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.correo%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.telefono%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.puesto%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.fecha_contratacion%TYPE converted to date
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  type reference tab_empleados.id_empleado%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  type reference tab_empleados.nom_empleado%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  type reference tab_empleados.apellido_empleado%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  type reference tab_empleados.correo%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  type reference tab_empleados.telefono%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  type reference tab_empleados.puesto%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:71: NOTICE:  type reference tab_empleados.id_empleado%TYPE converted to bigint
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.id_empleado%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.num_documento%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.nom_empleado%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.apellido_empleado%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.correo%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.telefono%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.puesto%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.fecha_contratacion%TYPE converted to date
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_envios_locaciones.sql[0m...
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  type reference tab_direcciones_envio.id_direccion%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  type reference tab_direcciones_envio.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  type reference tab_direcciones_envio.id_ciudad%TYPE converted to smallint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  type reference tab_direcciones_envio.direccion_completa%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  type reference tab_direcciones_envio.codigo_postal%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  type reference tab_direcciones_envio.es_predeterminada%TYPE converted to boolean
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  type reference tab_direcciones_envio.id_direccion%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  type reference tab_direcciones_envio.id_ciudad%TYPE converted to smallint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  type reference tab_direcciones_envio.direccion_completa%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  type reference tab_direcciones_envio.codigo_postal%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  type reference tab_direcciones_envio.es_predeterminada%TYPE converted to boolean
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:183: NOTICE:  type reference tab_direcciones_envio.id_direccion%TYPE converted to bigint
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_eventos.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  type reference tab_eventos.id_evento%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  type reference tab_eventos.titulo%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  type reference tab_eventos.descripcion%TYPE converted to text
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  type reference tab_eventos.fecha_inicio%TYPE converted to timestamp without time zone
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  type reference tab_eventos.fecha_fin%TYPE converted to timestamp without time zone
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  type reference tab_eventos.id_evento%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  type reference tab_eventos.titulo%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  type reference tab_eventos.descripcion%TYPE converted to text
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  type reference tab_eventos.fecha_inicio%TYPE converted to timestamp without time zone
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  type reference tab_eventos.fecha_fin%TYPE converted to timestamp without time zone
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_eventos.sql:68: NOTICE:  type reference tab_eventos.id_evento%TYPE converted to bigint
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_facturas.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:227: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:227: NOTICE:  type reference tab_metodos_pago.id_metodo_pago%TYPE converted to smallint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:227: NOTICE:  type reference tab_facturas.id_factura%TYPE converted to bigint
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:260: NOTICE:  type reference tab_facturas.id_orden%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:260: NOTICE:  type reference tab_facturas.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:260: NOTICE:  type reference tab_facturas.total_factura%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:260: NOTICE:  type reference tab_facturas.estado_factura%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  type reference tab_detalle_factura.id_factura%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  type reference tab_detalle_factura.id_producto%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  type reference tab_detalle_factura.cantidad%TYPE converted to smallint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  type reference tab_detalle_factura.precio_unitario%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  type reference tab_detalle_factura.subtotal_linea%TYPE converted to numeric
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  type reference tab_facturas.id_factura%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  type reference tab_facturas.id_orden%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  type reference tab_facturas.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  type reference tab_facturas.total_factura%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  type reference tab_facturas.estado_factura%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_facturas.sql:395: NOTICE:  type reference tab_orden.id_orden%TYPE converted to bigint
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_locaciones.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:36: NOTICE:  type reference tab_ciudades.id_ciudad%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:36: NOTICE:  type reference tab_ciudades.id_departamento%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:36: NOTICE:  type reference tab_ciudades.nombre_ciudad%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:36: NOTICE:  type reference tab_ciudades.codigo_postal%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:75: NOTICE:  type reference tab_ciudades.id_ciudad%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:75: NOTICE:  type reference tab_ciudades.id_departamento%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:75: NOTICE:  type reference tab_ciudades.nombre_ciudad%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:75: NOTICE:  type reference tab_ciudades.codigo_postal%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:101: NOTICE:  type reference tab_ciudades.id_ciudad%TYPE converted to integer
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:139: NOTICE:  type reference tab_departamentos.id_departamento%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:139: NOTICE:  type reference tab_departamentos.nombre_departamento%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:139: NOTICE:  type reference tab_departamentos.codigo_iso%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:178: NOTICE:  type reference tab_departamentos.id_departamento%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:178: NOTICE:  type reference tab_departamentos.nombre_departamento%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:178: NOTICE:  type reference tab_departamentos.codigo_iso%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_locaciones.sql:204: NOTICE:  type reference tab_departamentos.id_departamento%TYPE converted to integer
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_marcas.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_marcas.sql:30: NOTICE:  type reference tab_marcas.id_marca%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_marcas.sql:30: NOTICE:  type reference tab_marcas.nom_marca%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_marcas.sql:63: NOTICE:  type reference tab_marcas.id_marca%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_marcas.sql:63: NOTICE:  type reference tab_marcas.nom_marca%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_marcas.sql:63: NOTICE:  type reference tab_marcas.estado_marca%TYPE converted to boolean
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_marcas.sql:83: NOTICE:  type reference tab_marcas.id_marca%TYPE converted to bigint
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_ordenes.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  type reference tab_detalle_orden.id_orden%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  type reference tab_detalle_orden.id_producto%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  type reference tab_detalle_orden.cantidad%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  type reference tab_detalle_orden.precio_unitario%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  type reference tab_detalle_orden.id_promocion_aplicada%TYPE converted to smallint
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:134: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  type reference tab_orden.id_orden%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  type reference tab_orden.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  type reference tab_orden.estado_orden%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  type reference tab_orden.concepto%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  type reference tab_orden.total_orden%TYPE converted to numeric
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  type reference tab_orden.id_orden%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  type reference tab_orden.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  type reference tab_orden.estado_orden%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  type reference tab_orden.total_orden%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  type reference tab_orden.concepto%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:227: NOTICE:  type reference tab_orden.id_orden%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:227: NOTICE:  type reference tab_orden.estado_orden%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:227: NOTICE:  type reference tab_orden.concepto%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:227: NOTICE:  type reference tab_orden.total_orden%TYPE converted to numeric
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_ordenes.sql:249: NOTICE:  type reference tab_orden.id_orden%TYPE converted to bigint
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_pagos.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:76: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:76: NOTICE:  type reference tab_metodos_pago.id_metodo_pago%TYPE converted to smallint
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:143: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:143: NOTICE:  type reference tab_metodos_pago.id_metodo_pago%TYPE converted to smallint
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:183: NOTICE:  type reference tab_pagos.id_orden%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:183: NOTICE:  type reference tab_pagos.monto%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:183: NOTICE:  type reference tab_pagos.id_metodo_pago%TYPE converted to smallint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:183: NOTICE:  type reference tab_pagos.estado_pago%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  type reference tab_pagos.id_pago%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  type reference tab_pagos.id_orden%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  type reference tab_pagos.monto%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  type reference tab_pagos.id_metodo_pago%TYPE converted to smallint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  type reference tab_pagos.estado_pago%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:233: NOTICE:  type reference tab_metodos_pago.id_metodo_pago%TYPE converted to smallint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:233: NOTICE:  type reference tab_metodos_pago.nombre_metodo%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:233: NOTICE:  type reference tab_metodos_pago.descripcion%TYPE converted to text
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:256: NOTICE:  type reference tab_metodos_pago.id_metodo_pago%TYPE converted to smallint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:256: NOTICE:  type reference tab_metodos_pago.nombre_metodo%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:256: NOTICE:  type reference tab_metodos_pago.descripcion%TYPE converted to text
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_pagos.sql:278: NOTICE:  type reference tab_metodos_pago.id_metodo_pago%TYPE converted to smallint
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_productos.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:56: NOTICE:  type reference tab_productos.id_producto%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:56: NOTICE:  type reference tab_productos.stock%TYPE converted to smallint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:56: NOTICE:  type reference tab_productos.stock%TYPE converted to smallint
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:107: NOTICE:  type reference tab_productos.id_producto%TYPE converted to bigint
+CREATE FUNCTION
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.id_producto%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.id_marca%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.nom_producto%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.descripcion%TYPE converted to text
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.precio%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.id_categoria%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.id_subcategoria%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.stock%TYPE converted to smallint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.url_imagen%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.estado%TYPE converted to boolean
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.id_producto%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.id_marca%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.nom_producto%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.descripcion%TYPE converted to text
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.precio%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.id_categoria%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.id_subcategoria%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.stock%TYPE converted to smallint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.url_imagen%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.estado%TYPE converted to boolean
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_productos.sql:304: NOTICE:  type reference tab_productos.id_producto%TYPE converted to bigint
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_promociones.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  type reference tab_promociones.id_promocion%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  type reference tab_promociones.descripcion%TYPE converted to text
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  type reference tab_promociones.descuento%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  type reference tab_promociones.fecha_inicio%TYPE converted to timestamp without time zone
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  type reference tab_promociones.fecha_fin%TYPE converted to timestamp without time zone
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  type reference tab_promociones.id_promocion%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  type reference tab_promociones.descripcion%TYPE converted to text
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  type reference tab_promociones.descuento%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  type reference tab_promociones.fecha_inicio%TYPE converted to timestamp without time zone
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  type reference tab_promociones.fecha_fin%TYPE converted to timestamp without time zone
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:76: NOTICE:  type reference tab_promociones.id_promocion%TYPE converted to integer
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  type reference tab_promociones.id_promocion%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  type reference tab_promociones.descripcion%TYPE converted to text
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  type reference tab_promociones.descuento%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  type reference tab_promociones.fecha_inicio%TYPE converted to timestamp without time zone
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  type reference tab_promociones.fecha_fin%TYPE converted to timestamp without time zone
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_servicios.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:37: NOTICE:  type reference tab_orden_servicios.id_orden%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:37: NOTICE:  type reference tab_orden_servicios.id_servicio%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:37: NOTICE:  type reference tab_orden_servicios.cantidad%TYPE converted to integer
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:37: NOTICE:  type reference tab_orden_servicios.precio_servicio_aplicado%TYPE converted to numeric
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:89: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:89: NOTICE:  type reference tab_servicios.id_servicio%TYPE converted to bigint
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  type reference tab_servicios.id_servicio%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  type reference tab_servicios.nom_servicio%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  type reference tab_servicios.descripcion%TYPE converted to text
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  type reference tab_servicios.precio_servicio%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  type reference tab_servicios.duracion_estimada%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  type reference tab_servicios.id_servicio%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  type reference tab_servicios.nom_servicio%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  type reference tab_servicios.descripcion%TYPE converted to text
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  type reference tab_servicios.precio_servicio%TYPE converted to numeric
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  type reference tab_servicios.duracion_estimada%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_servicios.sql:181: NOTICE:  type reference tab_servicios.id_servicio%TYPE converted to bigint
+CREATE FUNCTION
+2026-02-07 07:28:33 Ejecutando [1;33mcrud_usuarios.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  type reference tab_usuarios.nom_usuario%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  type reference tab_usuarios.num_telefono_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  type reference tab_usuarios.direccion_principal%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:114: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:142: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:169: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:221: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  type reference tab_usuarios.nom_usuario%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  type reference tab_usuarios.num_telefono_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  type reference tab_usuarios.direccion_principal%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:414: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:414: NOTICE:  type reference tab_usuarios.rol%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  type reference tab_usuarios.nom_usuario%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  type reference tab_usuarios.num_telefono_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  type reference tab_usuarios.direccion_principal%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  type reference tab_usuarios.activo%TYPE converted to boolean
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  type reference tab_usuarios.nom_usuario%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  type reference tab_usuarios.num_telefono_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  type reference tab_usuarios.direccion_principal%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  type reference tab_usuarios.nom_usuario%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  type reference tab_usuarios.num_telefono_usuario%TYPE converted to bigint
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  type reference tab_usuarios.direccion_principal%TYPE converted to character varying
+CREATE FUNCTION
+psql:/home/anderson/Documentos/rd_watch_V2/sql/functions/crud_usuarios.sql:537: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+2026-02-07 07:28:33 
+[0;34m--- Paso 4: Triggers ---[0m
+2026-02-07 07:28:33 Ejecutando [1;33maudit_trail.sql[0m...
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+psql:/home/anderson/Documentos/rd_watch_V2/sql/triggers/audit_trail.sql:49: ERROR:  relation "tab_proveedor" does not exist
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+psql:/home/anderson/Documentos/rd_watch_V2/sql/triggers/audit_trail.sql:97: ERROR:  relation "tab_recepciones_proveedor" does not exist
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+2026-02-07 07:28:33 
+[0;34m--- Paso 5: Carga de Datos ---[0m
+2026-02-07 07:28:33 Ejecutando [1;33minserts_departamentos_y_ciudades.sql[0m...
+                fun_insert_departamentos                
+--------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 1
+(1 row)
+
+                fun_insert_departamentos                
+--------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 8
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 15
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 16
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 23
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 31
+(1 row)
+
+                fun_insert_departamentos                
+--------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 2
+(1 row)
+
+                fun_insert_departamentos                
+--------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 6
+(1 row)
+
+                fun_insert_departamentos                
+--------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 7
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 14
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 17
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 22
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 24
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 25
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 27
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 29
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 33
+(1 row)
+
+                fun_insert_departamentos                
+--------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 3
+(1 row)
+
+                fun_insert_departamentos                
+--------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 9
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 20
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 32
+(1 row)
+
+                fun_insert_departamentos                
+--------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 4
+(1 row)
+
+                fun_insert_departamentos                
+--------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 5
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 11
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 13
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 18
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 19
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 26
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 28
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 10
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 12
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 21
+(1 row)
+
+                fun_insert_departamentos                 
+---------------------------------------------------------
+ SUCCESS: Departamento insertado correctamente con ID 30
+(1 row)
+
+               fun_insert_ciudades                
+--------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 1
+(1 row)
+
+               fun_insert_ciudades                
+--------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 2
+(1 row)
+
+               fun_insert_ciudades                
+--------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 3
+(1 row)
+
+               fun_insert_ciudades                
+--------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 4
+(1 row)
+
+               fun_insert_ciudades                
+--------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 5
+(1 row)
+
+               fun_insert_ciudades                
+--------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 6
+(1 row)
+
+               fun_insert_ciudades                
+--------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 7
+(1 row)
+
+               fun_insert_ciudades                
+--------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 8
+(1 row)
+
+               fun_insert_ciudades                
+--------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 9
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 10
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 11
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 12
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 13
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 14
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 15
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 16
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 17
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 18
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 19
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 20
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 21
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 22
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 23
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 24
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 25
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 26
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 27
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 28
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 29
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 30
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 31
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 32
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 33
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 34
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 35
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 36
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 37
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 38
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 39
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 40
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 41
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 42
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 43
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 44
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 45
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 46
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 47
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 48
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 49
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 50
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 51
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 52
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 53
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 54
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 55
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 56
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 57
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 58
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 59
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 60
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 61
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 62
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 63
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 64
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 65
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 66
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 67
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 68
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 69
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 70
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 71
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 72
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 73
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 74
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 75
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 76
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 77
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 78
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 79
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 80
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 81
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 82
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 83
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 84
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 85
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 86
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 87
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 88
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 89
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 90
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 91
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 92
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 93
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 94
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 95
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 96
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 97
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 98
+(1 row)
+
+                fun_insert_ciudades                
+---------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 99
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 100
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 101
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 102
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 103
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 104
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 105
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 106
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 107
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 108
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 109
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 110
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 111
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 112
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 113
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 114
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 115
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 116
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 117
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 118
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 119
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 120
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 121
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 122
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 123
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 124
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 125
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 126
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 127
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 128
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 129
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 130
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 131
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 132
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 133
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 134
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 135
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 136
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 137
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 138
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 139
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 140
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 141
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 142
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 143
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 144
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 145
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 146
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 147
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 148
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 149
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 150
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 151
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 152
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 153
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 154
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 155
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 156
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 157
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 158
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 159
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 160
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 161
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 162
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 163
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 164
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 165
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 166
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 167
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 168
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 169
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 170
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 171
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 172
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 173
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 174
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 175
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 176
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 177
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 178
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 179
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 180
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 181
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 182
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 183
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 184
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 185
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 186
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 187
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 188
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 189
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 190
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 191
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 192
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 193
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 194
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 195
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 196
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 197
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 198
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 199
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 200
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 201
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 202
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 203
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 204
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 205
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 206
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 207
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 208
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 209
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 210
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 211
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 212
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 213
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 214
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 215
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 216
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 217
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 218
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 219
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 220
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 221
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 222
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 223
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 224
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 225
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 226
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 227
+(1 row)
+
+                fun_insert_ciudades                 
+----------------------------------------------------
+ SUCCESS: Ciudad insertada correctamente con ID 228
+(1 row)
+
+2026-02-07 07:28:34 Ejecutando [1;33mconfiguracion_admin_pending.sql[0m...
+                              fun_registrar_usuario                              
+---------------------------------------------------------------------------------
+ (SUCCESS,"Usuario registrado correctamente",1,a7afa9903ba6c6fa7c27080abc39cf0e)
+(1 row)
+
+UPDATE 1
+ id_usuario | nom_usuario |  correo_usuario   |  rol  
+------------+-------------+-------------------+-------
+          1 | Admin       | admin@rdwatch.com | admin
+(1 row)
+
+ id_usuario | nom_usuario |  correo_usuario   | num_telefono_usuario |    direccion_principal    |       fecha_registro       | activo |  contra   |  rol  |               salt               | intentos_fallidos | bloqueado | fecha_bloqueo | ultimo_acceso | token_recuperacion | token_expiracion | usr_insert |         fec_insert         | usr_update |         fec_update         | usr_delete | fec_delete 
+------------+-------------+-------------------+----------------------+---------------------------+----------------------------+--------+-----------+-------+----------------------------------+-------------------+-----------+---------------+---------------+--------------------+------------------+------------+----------------------------+------------+----------------------------+------------+------------
+          1 | Admin       | admin@rdwatch.com |           3115460069 | Calle 34 #18-40 local 107 | 2026-02-07 07:28:34.271029 | t      | Admin123! | admin | 79d7c03ad11543d6c31a58baf406c2fb |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-07 07:28:34.271029 | postgres   | 2026-02-07 07:28:34.275177 |            | 
+(1 row)
+
+2026-02-07 07:28:34 Ejecutando [1;33mcreate_reviews_table.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/scripts/create_reviews_table.sql:23: NOTICE:  relation "tab_opiniones" already exists, skipping
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+psql:/home/anderson/Documentos/rd_watch_V2/sql/scripts/create_reviews_table.sql:28: ERROR:  column "activo" does not exist
+2026-02-07 07:28:34 Ejecutando [1;33minsert_metodos_pago.sql[0m...
+INSERT 0 1
+2026-02-07 07:28:34 Ejecutando [1;33mpopulate_catalog.sql[0m...
+INSERT 0 7
+INSERT 0 4
+INSERT 0 8
+INSERT 0 25
+2026-02-07 07:28:34 Ejecutando [1;33mpopulate_reviews.sql[0m...
+psql:/home/anderson/Documentos/rd_watch_V2/sql/scripts/populate_reviews.sql:12: ERROR:  null value in column "id_opinion" of relation "tab_opiniones" violates not-null constraint
+DETALLE:  Failing row contains (null, 1, null, 5, ¡Excelente servicio! Mi reloj quedó como nuevo. Muy recomendad..., 2026-02-07 07:28:34.419808, postgres, 2026-02-07 07:28:34.419808, postgres, 2026-02-07 07:28:34.419808, null, null).
+INSERT 0 0
+INSERT 0 0
+2026-02-07 07:28:34 Ejecutando [1;33mpopulate_users.sql[0m...
+          fun_registrar_usuario          
+-----------------------------------------
+ (ERROR,"El email ya está registrado",,)
+(1 row)
+
+UPDATE 1
+                              fun_registrar_usuario                              
+---------------------------------------------------------------------------------
+ (SUCCESS,"Usuario registrado correctamente",2,58a1c819b90140d45e7f38603825aaf6)
+(1 row)
+
+2026-02-07 07:28:34 
+[0;32m==========================================[0m
+2026-02-07 07:28:34 [0;32m   INSTALACIÓN COMPLETADA EXITOSAMENTE    [0m
+2026-02-07 07:28:34 [0;32m==========================================[0m
+2026-02-07 07:28:34 Log guardado en: /home/anderson/Documentos/rd_watch_V2/install_db.log

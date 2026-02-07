@@ -2,7 +2,8 @@
  * factura.js - Manejo de la página de factura
  */
 
-const API_BASE = API_CONFIG.baseUrl;
+// Usamos un nombre único para evitar conflictos con script.js (SyntaxError: redeclaration of const API_BASE)
+const API_BASE_FACTURA = API_CONFIG.baseUrl;
 
 // Función para formatear precio
 function formatPrice(amount) {
@@ -38,9 +39,7 @@ async function cargarFactura() {
     const template = document.getElementById('factura-template');
 
     try {
-        // Obtener ID de orden desde URL
         const idOrden = getUrlParameter('orden');
-
         if (!idOrden) {
             container.innerHTML = `
                 <div style="text-align:center; padding:50px;">
@@ -57,16 +56,17 @@ async function cargarFactura() {
 
         // Cargar datos de factura y banco en paralelo
         const [resFactura, resBanco] = await Promise.all([
-            fetch(`${API_BASE}/get_factura.php?id_orden=${idOrden}`, {
+            fetch(`${API_BASE_FACTURA}/get_factura.php?id_orden=${idOrden}`, {
                 credentials: 'include'
             }),
-            fetch(`${API_BASE}/get_config_banco.php`)
+            fetch(`${API_BASE_FACTURA}/get_config_banco.php`)
         ]);
 
         const dataFactura = await resFactura.json();
         const dataBanco = await resBanco.json();
 
         if (!dataFactura.ok) {
+            console.error('Error reportado por API:', dataFactura.msg);
             throw new Error(dataFactura.msg || 'Error al cargar factura');
         }
 
@@ -133,6 +133,7 @@ async function cargarFactura() {
         // Reemplazar contenido
         container.innerHTML = '';
         container.appendChild(facturaContent);
+        console.log('Factura renderizada exitosamente para orden:', idOrden);
 
     } catch (error) {
         console.error('Error cargando factura:', error);
@@ -141,6 +142,9 @@ async function cargarFactura() {
                 <i class="fas fa-times-circle" style="font-size:3rem;color:#dc3545;"></i>
                 <h2>Error al cargar la factura</h2>
                 <p>${error.message}</p>
+                <div style="margin-top:20px; font-size: 0.9rem; color: #666;">
+                    ID Orden intentado: ${getUrlParameter('orden') || 'Ninguno'}
+                </div>
                 <a href="user/user.html" class="btn-factura btn-volver" style="display:inline-flex;margin-top:20px;">
                     <i class="fas fa-arrow-left"></i> Volver a Mi Cuenta
                 </a>
@@ -149,5 +153,13 @@ async function cargarFactura() {
     }
 }
 
-// Cargar factura al cargar la página
-document.addEventListener('DOMContentLoaded', cargarFactura);
+// Inicialización Robusta: Ejecutar si el DOM ya está listo o esperar a que lo esté
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM cargado, iniciando carga de factura...');
+        cargarFactura();
+    });
+} else {
+    console.log('El DOM ya estaba listo, iniciando carga de factura inmediata...');
+    cargarFactura();
+}

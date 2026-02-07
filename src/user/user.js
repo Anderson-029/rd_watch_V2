@@ -370,70 +370,9 @@ function showSection(sectionId) {
 
 // 📅 INICIALIZACIÓN DOM
 document.addEventListener('DOMContentLoaded', async () => {
-    const fechaInput = document.getElementById('fechaPreferida');
-    if (fechaInput) {
-        const today = new Date().toISOString().split('T')[0];
-        fechaInput.min = today;
-        fechaInput.value = today;
-    }
+    // 1. REGISTRO INMEDIATO DE EVENTOS (Crítico para que el botón no "muera" si falla el red)
 
-    // Cargar departamentos para el select de direcciones
-    await cargarDepartamentos();
-
-    // Cargar lista de servicios dinámicamente desde el catálogo
-    await cargarServiciosPanel();
-
-    // Listener para cambio de departamento
-    const inputDepartamento = document.getElementById('inputDepartamento');
-    if (inputDepartamento) {
-        inputDepartamento.addEventListener('change', (e) => {
-            const idDepto = e.target.value;
-            const selectCiudad = document.getElementById('inputCiudad');
-
-            if (idDepto) {
-                cargarCiudadesPorDepto(idDepto);
-            } else {
-                selectCiudad.innerHTML = '<option value="">Primero seleccione departamento</option>';
-                selectCiudad.disabled = true;
-            }
-        });
-    }
-
-    // Auto-completar código postal al seleccionar ciudad
-    const inputCiudad = document.getElementById('inputCiudad');
-    if (inputCiudad) {
-        inputCiudad.addEventListener('change', (e) => {
-            const selectedOption = e.target.options[e.target.selectedIndex];
-            const postal = selectedOption.getAttribute('data-postal');
-            const inputPostal = document.getElementById('inputPostal');
-
-            if (postal && inputPostal) {
-                inputPostal.value = postal;
-            }
-        });
-    }
-
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            const section = link.getAttribute('data-section');
-
-            if (link.id === 'logoutLink') {
-                e.preventDefault();
-                cerrarSesion();
-                return;
-            }
-
-            if (section) {
-                e.preventDefault();
-                showSection(section);
-            }
-            // Si tiene href y no es section ni logout, deja que el navegador siga el enlace
-        });
-    });
-
-    // Event Listeners para Navegación y Formularios (Refactorización CSP)
-
-    // 1. Botones de las tarjetas principales
+    // Botones de las tarjetas principales
     const btnMap = {
         'btnResena': 'resenaForm',
         'btnEditarPerfil': 'perfilForm',
@@ -450,18 +389,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // 2. Botones Volver/Cancelar (Clase común)
+    // Botones Volver/Cancelar (Clase común)
     document.querySelectorAll('.btn-cancelar').forEach(btn => {
         btn.addEventListener('click', () => showSection('inicio'));
     });
 
-    // 3. Botón Cancelar Solicitud Específico
-    const btnCancelSol = document.getElementById('btnCancelarSolicitud');
-    if (btnCancelSol) {
-        btnCancelSol.addEventListener('click', cancelarSolicitud);
-    }
-
-    // 4. Formularios
+    // Formularios
     const forms = [
         { id: 'formPerfil', handler: guardarPerfil },
         { id: 'formDireccion', handler: guardarDireccion },
@@ -471,58 +404,88 @@ document.addEventListener('DOMContentLoaded', async () => {
     forms.forEach(item => {
         const f = document.getElementById(item.id);
         if (f) {
-            f.addEventListener('submit', item.handler);
+            f.addEventListener('submit', (e) => {
+                console.log(`Formulario ${item.id} enviado`);
+                item.handler(e);
+            });
+        } else {
+            console.warn(`Formulario con id ${item.id} no encontrado en el DOM`);
         }
     });
 
-    // 5. Delegación de eventos para Servicios Dinámicos
+    // Navegación header
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const section = link.getAttribute('data-section');
+            if (link.id === 'logoutLink') {
+                e.preventDefault();
+                cerrarSesion();
+                return;
+            }
+            if (section) {
+                e.preventDefault();
+                showSection(section);
+            }
+        });
+    });
+
+    // 2. CONFIGURACIÓN DE INPUTS
+    const fechaInput = document.getElementById('fechaPreferida');
+    if (fechaInput) {
+        const today = new Date().toISOString().split('T')[0];
+        fechaInput.min = today;
+        fechaInput.value = today;
+    }
+
+    // Auto-completar datos geográficos
+    const inputDepartamento = document.getElementById('inputDepartamento');
+    if (inputDepartamento) {
+        inputDepartamento.addEventListener('change', (e) => {
+            const idDepto = e.target.value;
+            if (idDepto) cargarCiudadesPorDepto(idDepto);
+        });
+    }
+
+    const inputCiudad = document.getElementById('inputCiudad');
+    if (inputCiudad) {
+        inputCiudad.addEventListener('change', (e) => {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const postal = selectedOption.getAttribute('data-postal');
+            const inputPostal = document.getElementById('inputPostal');
+            if (postal && inputPostal) inputPostal.value = postal;
+        });
+    }
+
+    // Delegación para Servicios Dinámicos
     const servicesGrid = document.getElementById('user-services-grid');
     if (servicesGrid) {
         servicesGrid.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-solicitar-servicio');
             if (btn) {
-                const nombre = btn.getAttribute('data-nombre');
-                const id = btn.getAttribute('data-id');
-                seleccionarServicio(nombre, id);
+                seleccionarServicio(btn.getAttribute('data-nombre'), btn.getAttribute('data-id'));
             }
         });
     }
 
-    // =========================================================
-    // MOBILE MENU LOGIC (USER PANEL)
-    // =========================================================
+    // Mobile Menu
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const mainNav = document.querySelector('.main-nav');
-    const navLinks = document.querySelectorAll('.nav-link');
-
     if (mobileMenuBtn && mainNav) {
         mobileMenuBtn.addEventListener('click', () => {
             const isActive = mainNav.classList.toggle('active');
             mobileMenuBtn.innerHTML = isActive ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
-            document.body.style.overflow = isActive ? 'hidden' : '';
-        });
-
-        // Close menu when clicking a link
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                mainNav.classList.remove('active');
-                mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
-                document.body.style.overflow = '';
-            });
-        });
-
-        // Close menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (mainNav.classList.contains('active') &&
-                !mainNav.contains(e.target) &&
-                !mobileMenuBtn.contains(e.target)) {
-                mainNav.classList.remove('active');
-                mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
-                document.body.style.overflow = '';
-            }
         });
     }
+
+    // 3. CARGA DE DATOS ASÍNCRONOS (Al final para que no bloqueen los eventos anteriores)
     showSection('inicio');
+
+    try {
+        await cargarDepartamentos();
+        await cargarServiciosPanel();
+    } catch (err) {
+        console.error("Error cargando datos iniciales:", err);
+    }
 });
 
 // 💾 GUARDAR PERFIL (CONECTADO AL BACKEND)
@@ -536,6 +499,7 @@ async function guardarPerfil(e) {
     }
 
     const nombre = document.getElementById('inputNombre').value;
+    const email = document.getElementById('inputEmail').value;
     const telefono = document.getElementById('inputTelefono').value;
 
     try {
@@ -548,6 +512,7 @@ async function guardarPerfil(e) {
                 action: 'update_profile', // Mantener por compatibilidad aunque ahora es POST directo
                 uid: user.id,
                 nombre: nombre,
+                email: email,
                 telefono: telefono
             })
         });
@@ -797,6 +762,11 @@ if (inputCVV) {
 // ⭐ ENVIAR RESEÑA (CONECTADO AL BACKEND)
 async function enviarResena(e) {
     e.preventDefault();
+    console.log('enviarResena() disparado');
+    showNotification('⏳ Procesando reseña...');
+
+    // Log de datos del formulario para depuración
+    console.log('Comentario:', document.getElementById('resenaTexto').value);
 
     const user = getUser();
     if (!user) {
@@ -837,8 +807,8 @@ async function enviarResena(e) {
             showNotification('❌ ' + data.msg, true);
         }
     } catch (error) {
-        console.error(error);
-        showNotification('❌ Error al conectar con el servidor', true);
+        console.error('Error en enviarResena:', error);
+        showNotification('❌ Error al conectar con el servidor: ' + error.message, true);
     }
 }
 

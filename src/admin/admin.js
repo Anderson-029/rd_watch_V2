@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${p.marca}</td>
         <td class="actions">
           <button class="button button-outline" onclick="editarProducto(${p.id})"><i class="fas fa-pen"></i></button>
-          <button class="button button-secondary" onclick="eliminarProducto(${p.id})"><i class="fas fa-trash"></i></button>
+          <button class="button button-danger" onclick="eliminarProducto(${p.id})"><i class="fas fa-trash"></i></button>
         </td>
       </tr>`).join("");
   }
@@ -394,7 +394,8 @@ document.addEventListener("DOMContentLoaded", () => {
           email: p.email_cliente,
           estado: p.estado_orden,
           total: parseFloat(p.total_orden),
-          fecha: p.fecha
+          fecha: p.fecha,
+          tiene_comprobante: p.tiene_comprobante == 1
         }));
 
         drawPedidos();
@@ -437,6 +438,11 @@ document.addEventListener("DOMContentLoaded", () => {
              <span class="badge ${getBadgeClass(p.estado)}">
                 ${p.estado.charAt(0).toUpperCase() + p.estado.slice(1)}
              </span>
+          </td>
+          <td style="text-align:center;">
+             ${p.tiene_comprobante
+          ? `<a href="../backend/api/get_comprobante.php?id_orden=${p.id}" target="_blank" class="button button-small button-outline" title="Ver Comprobante"><i class="fas fa-file-invoice-dollar"></i></a>`
+          : '<span style="color:#ccc;font-size:0.8em;">-</span>'}
           </td>
           <td style="font-weight:bold">$${p.total.toFixed(2)}</td>
         </tr>`)
@@ -535,7 +541,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${s.duracion_estimada} min</td>
         <td class="actions">
           <button class="button button-outline" onclick="editarServicio(${s.id_servicio})"><i class="fas fa-pen"></i></button>
-          <button class="button button-secondary" onclick="eliminarServicio(${s.id_servicio})"><i class="fas fa-trash"></i></button>
+          <button class="button button-danger" onclick="eliminarServicio(${s.id_servicio})"><i class="fas fa-trash"></i></button>
         </td>
       </tr>`).join("");
   }
@@ -672,7 +678,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td><span class="badge ${m.estado_marca ? 'active' : 'inactive'}">${m.estado_marca ? 'Activa' : 'Inactiva'}</span></td>
         <td class="actions">
           <button class="button button-outline" onclick="editarMarca(${m.id_marca})"><i class="fas fa-pen"></i></button>
-          <button class="button button-secondary" onclick="eliminarMarca(${m.id_marca})"><i class="fas fa-trash"></i></button>
+          <button class="button button-danger" onclick="eliminarMarca(${m.id_marca})"><i class="fas fa-trash"></i></button>
         </td>
       </tr>`).join('');
   }
@@ -890,7 +896,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td><span class="badge ${c.estado ? 'active' : 'inactive'}">${c.estado ? 'Activa' : 'Inactiva'}</span></td>
         <td class="actions">
           <button class="button button-outline" onclick="editarCategoria(${c.id_categoria})"><i class="fas fa-pen"></i></button>
-          <button class="button button-secondary" onclick="eliminarCategoria(${c.id_categoria})"><i class="fas fa-trash"></i></button>
+          <button class="button button-danger" onclick="eliminarCategoria(${c.id_categoria})"><i class="fas fa-trash"></i></button>
         </td>
       </tr>`).join('');
   }
@@ -1043,7 +1049,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <button class="button button-outline" onclick="editarSubcategoria(${s.id_categoria}, ${s.id_subcategoria})">
           <i class="fas fa-pen"></i>
         </button>
-        <button class="button button-secondary" onclick="eliminarSubcategoria(${s.id_categoria}, ${s.id_subcategoria})">
+        <button class="button button-danger" onclick="eliminarSubcategoria(${s.id_categoria}, ${s.id_subcategoria})">
           <i class="fas fa-trash"></i>
         </button>
       </td>

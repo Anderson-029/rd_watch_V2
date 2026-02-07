@@ -178,6 +178,9 @@ section {
     cursor: pointer;
     transition: all var(--time-fast) var(--transition-premium);
     border: 1px solid transparent;
+    position: relative;
+    /* Asegura que el loader se posicione dentro del botón */
+    overflow: hidden;
 }
 
 .button-primary {
@@ -2246,6 +2249,7 @@ section {
 }
 
 /* Notification Pop-up */
+/* Notification Pop-up (Base) */
 .notification {
     position: fixed;
     top: 20px;
@@ -2255,11 +2259,15 @@ section {
     padding: 15px 25px;
     border-radius: 5px;
     box-shadow: var(--shadow-md);
-    z-index: 1000;
+    z-index: 2000;
+    /* Asegurar que esté por encima de todo */
     opacity: 0;
     visibility: hidden;
     transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     transform: translateX(100%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .notification.show {
@@ -2269,7 +2277,7 @@ section {
 }
 
 .notification.error {
-    background-color: var(--error-color);
+    background-color: var(--accent-color);
 }
 
 /* --- Política de Cookies AGREGADA --- */
@@ -3336,52 +3344,4 @@ section {
     }
 }
 
-/* Notificaciones Tipo Toast */
-.notification {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    padding: 15px 25px;
-    border-radius: 8px;
-    color: var(--white);
-    font-weight: 500;
-    box-shadow: var(--shadow-lg);
-    z-index: 1000;
-    transform: translateY(100px);
-    opacity: 0;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    backdrop-filter: blur(10px);
-    max-width: 450px;
-    border-bottom: 3px solid rgba(0, 0, 0, 0.1);
-}
-
-.notification.show {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-.notification.success {
-    background-color: rgba(40, 167, 69, 0.9);
-    border-left: 5px solid #1e7e34;
-}
-
-.notification.error {
-    background-color: rgba(220, 53, 69, 0.9);
-    border-left: 5px solid #bd2130;
-}
-
-.notification::before {
-    font-family: "Font Awesome 6 Free";
-    font-weight: 900;
-}
-
-.notification.success::before {
-    content: "\f058";
-}
-
-.notification.error::before {
-    content: "\f06a";
-}
+/* Los estilos de notificación ya están definidos arriba */

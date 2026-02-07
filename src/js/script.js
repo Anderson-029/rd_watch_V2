@@ -258,47 +258,117 @@ async function loadCart() {
     } catch (error) { console.error('Error loadCart:', error); }
 }
 
+/**
+ * Actualizar cantidad de un producto en el carrito
+ */
+window.updateCartQuantity = async function (productId, newQty) {
+    if (newQty < 1) return;
+
+    // Optimismo UI: Actualizar localmente primero para rapidez
+    const item = cart.find(i => i.id === productId);
+    if (item && newQty > item.stock) {
+        showNotification('Stock insuficiente', true);
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_BASE_SHOP}/carrito.php`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id_producto: productId, cantidad: newQty })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+            await loadCart(); // Esperar a que recargue
+        } else {
+            showNotification('❌ ' + data.msg, true);
+        }
+    } catch (error) {
+        console.error('Error updateCartQuantity:', error);
+    }
+};
+
+/**
+ * Eliminar producto del carrito
+ */
+window.removeFromCart = async function (productId) {
+    if (!confirm('¿Eliminar este producto del carrito?')) return;
+
+    try {
+        // Optimismo UI: Ocultar el elemento visualmente de inmediato
+        const res = await fetch(`${API_BASE_SHOP}/carrito.php`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id_producto: productId })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+            showNotification('🗑️ Producto eliminado');
+            await loadCart(); // Forzar recarga de datos
+        } else {
+            showNotification('❌ ' + data.msg, true);
+        }
+    } catch (error) {
+        console.error('Error removeFromCart:', error);
+    }
+};
+
 function updateCartDisplay() {
+    // 1. Identificar elementos UI
     const list = document.getElementById('cart-items-list');
-    const countSpan = document.getElementById('cart-item-count');
     const totalSpan = document.getElementById('cart-total');
     const subtotalSpan = document.getElementById('cart-subtotal');
     const checkoutBtn = document.getElementById('btn-procede-checkout');
 
-    if (!list) return;
+    // Contadores (pueden ser varios: header, floating btn, etc)
+    const countSpans = document.querySelectorAll('.cart-count, #cart-item-count');
 
+    // 2. Cálculos base
     let total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     let qty = cart.reduce((acc, item) => acc + item.quantity, 0);
-    const SHIPPING = 15000;
 
-    if (cart.length === 0) {
-        list.innerHTML = '<p class="empty-cart-message">Carrito vacío</p>';
-        if (checkoutBtn) checkoutBtn.disabled = true;
-    } else {
-        list.innerHTML = cart.map(item => `
-            <div class="cart-item">
-                <img src="${item.img}" class="cart-item-img" onerror="this.src='https://via.placeholder.com/80'">
-                <div class="cart-item-details">
-                    <h4>${item.name}</h4>
-                    <p>${formatPrice(item.price)}</p>
-                    <div class="cart-item-actions">
-                        <div class="quantity-controls">
-                            <button onclick="window.updateCartQuantity(${item.id}, ${item.quantity - 1})">-</button>
-                            <span>${item.quantity}</span>
-                            <button onclick="window.updateCartQuantity(${item.id}, ${item.quantity + 1})">+</button>
+    // 3. Actualizar contadores (Independiente de si hay lista o no)
+    countSpans.forEach(span => {
+        span.textContent = qty;
+        // Efecto visual opcional si cambia
+        span.classList.add('pop-animation');
+        setTimeout(() => span.classList.remove('pop-animation'), 300);
+    });
+
+    // 4. Si estamos en una página con lista de carrito (sidebar o checkout)
+    if (list) {
+        if (cart.length === 0) {
+            list.innerHTML = '<p class="empty-cart-message">Tu carrito está vacío</p>';
+            if (checkoutBtn) checkoutBtn.disabled = true;
+        } else {
+            list.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <img src="${item.img}" class="cart-item-img" onerror="this.src='https://via.placeholder.com/80'">
+                    <div class="cart-item-details">
+                        <h4>${item.name}</h4>
+                        <p>${formatPrice(item.price)}</p>
+                        <div class="cart-item-actions">
+                            <div class="quantity-controls">
+                                <button onclick="window.updateCartQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                                <span>${item.quantity}</span>
+                                <button onclick="window.updateCartQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                            </div>
+                            <button class="remove-item-btn" onclick="window.removeFromCart(${item.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
-                        <button class="remove-item-btn" onclick="window.removeFromCart(${item.id})">
-                            <i class="fas fa-trash"></i>
-                        </button>
                     </div>
-                </div>
-            </div>`).join('');
-        if (checkoutBtn) checkoutBtn.disabled = false;
+                </div>`).join('');
+            if (checkoutBtn) checkoutBtn.disabled = false;
+        }
     }
 
-    if (countSpan) countSpan.textContent = qty;
     if (subtotalSpan) subtotalSpan.textContent = formatPrice(total);
-    if (totalSpan) totalSpan.textContent = formatPrice(total > 0 ? total + SHIPPING : 0);
+    if (totalSpan) totalSpan.textContent = formatPrice(total);
 }
 
 function updateCheckoutSummary() {
@@ -364,6 +434,25 @@ async function loadProducts() {
             }));
 
             populateBrandFilter(productsData);
+
+            // Ajustar el slider de precio dinámicamente con mayor resolución
+            if (productsData.length > 0) {
+                const prices = productsData.map(p => p.price);
+                const maxProdPrice = Math.max(...prices);
+                const minProdPrice = Math.min(...prices);
+
+                const priceRange = document.getElementById('price-range');
+                const priceValue = document.getElementById('price-value');
+
+                if (priceRange) {
+                    priceRange.min = 0; // O minProdPrice si se prefiere
+                    priceRange.max = maxProdPrice;
+                    priceRange.step = 1000; // Resolución de mil pesos
+                    priceRange.value = maxProdPrice; // Empezar con la barra "llena" (viendo todo)
+                    if (priceValue) priceValue.textContent = formatPrice(maxProdPrice);
+                }
+            }
+
             filteredData = [...productsData];
             renderPaginatedProducts();
         } else {
@@ -451,11 +540,14 @@ function applyFilters() {
     if (productsData.length === 0) return;
     const activeCatLink = document.querySelector('#category-filters .active');
     const activeCategory = activeCatLink ? activeCatLink.getAttribute('data-filter') : 'all';
+
     const brand = document.getElementById('brand-filter').value;
     const maxPrice = parseFloat(document.getElementById('price-range').value);
+    const sortOrder = document.getElementById('sort-order').value;
 
     document.getElementById('price-value').textContent = formatPrice(maxPrice);
 
+    // 1. Filtrar
     filteredData = productsData.filter(p => {
         const matchCat = activeCategory === 'all' || p.category === activeCategory;
         const matchBrand = brand === 'all' || p.brand === brand;
@@ -463,9 +555,27 @@ function applyFilters() {
         return matchCat && matchBrand && matchPrice;
     });
 
+    // 2. Ordenar
+    switch (sortOrder) {
+        case 'price-asc':
+            filteredData.sort((a, b) => a.price - b.price);
+            break;
+        case 'price-desc':
+            filteredData.sort((a, b) => b.price - a.price);
+            break;
+        case 'name-asc':
+            filteredData.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        case 'featured':
+        default:
+            filteredData.sort((a, b) => b.id - a.id);
+            break;
+    }
+
     currentPage = 1;
     renderPaginatedProducts();
 }
+
 
 function populateBrandFilter(products) {
     const brandSelect = document.getElementById('brand-filter');
@@ -488,6 +598,14 @@ function openProductModal(id) {
     document.getElementById('modal-price').textContent = formatPrice(product.price);
     document.getElementById('modal-desc').textContent = product.description;
 
+    // Actualizar marca dinámicamente
+    const brandContainer = document.querySelector('#modal-brand span');
+    if (brandContainer) brandContainer.textContent = product.brand;
+
+    // Actualizar stock dinámicamente
+    const stockContainer = document.getElementById('modal-stock');
+    if (stockContainer) stockContainer.textContent = 'Stock: ' + product.stock;
+
     const qtyInput = document.getElementById('modal-qty');
     qtyInput.value = 1; qtyInput.max = product.stock;
 
@@ -509,31 +627,51 @@ function openProductModal(id) {
 // 6. PASARELA DE PAGO (CHECKOUT)
 // =========================================================
 
+// Lógica de UI para métodos de pago
+// Lógica de UI para métodos de pago (Simplificado a Consignación)
+function initCheckoutUI() {
+    // Ya no hay radio buttons ni detalles de tarjeta que ocultar/mostrar
+    // Podríamos agregar validaciones de archivo aquí si fuera necesario
+}
+
 const paymentForm = document.getElementById('payment-form');
 if (paymentForm) {
+    initCheckoutUI();
+
     paymentForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         const address = document.getElementById('shipping-address').value;
         const city = document.getElementById('shipping-city').value;
-        const method = document.querySelector('input[name="payment_method"]:checked')?.value || 'Transferencia Bancaria';
+        const proofFile = document.getElementById('payment-proof').files[0];
+
+        if (!proofFile) {
+            showNotification('❌ Por favor adjunta el comprobante de pago', true);
+            return;
+        }
 
         const submitBtn = this.querySelector('button[type="submit"]');
         const btnText = submitBtn.querySelector('.btn-text');
         const btnLoader = submitBtn.querySelector('.btn-loader');
 
-        btnText.style.display = 'none';
-        btnLoader.style.display = 'inline-block';
+        if (btnText) btnText.style.display = 'none';
+        if (btnLoader) btnLoader.style.display = 'inline-block';
         submitBtn.disabled = true;
 
-        showNotification('🔄 Procesando orden...', false);
+        showNotification('🔄 Procesando orden y archivo...', false);
+
+        // Usar FormData para permitir envío de archivos
+        const formData = new FormData();
+        formData.append('direccion', address);
+        formData.append('ciudad', city);
+        formData.append('metodo', 'Consignación Bancaria');
+        formData.append('payment_proof', proofFile);
 
         try {
             const res = await fetch(`${API_BASE_SHOP}/checkout.php`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ direccion: address, ciudad: city, metodo: method })
+                body: formData // No enviamos headers de Content-Type, el navegador lo pone con el boundary
             });
 
             const data = await res.json();
@@ -543,24 +681,22 @@ if (paymentForm) {
                 cart = [];
                 updateCartDisplay();
 
-                // Extraer ID de orden del mensaje (ej: "SUCCESS: Orden #123 creada exitosamente")
-                const orderId = data.order_id || data.msg.match(/\d+/)?.[0];
+                const orderId = data.order_id;
 
-                // Redireccionar a la página de factura
                 setTimeout(() => {
                     window.location.href = `factura.html?orden=${orderId}`;
                 }, 1000);
             } else {
                 showNotification('❌ ' + data.msg, true);
-                btnText.style.display = 'inline-block';
-                btnLoader.style.display = 'none';
+                if (btnText) btnText.style.display = 'inline-block';
+                if (btnLoader) btnLoader.style.display = 'none';
                 submitBtn.disabled = false;
             }
         } catch (error) {
             console.error(error);
             showNotification('Error de conexión', true);
-            btnText.style.display = 'inline-block';
-            btnLoader.style.display = 'none';
+            if (btnText) btnText.style.display = 'inline-block';
+            if (btnLoader) btnLoader.style.display = 'none';
             submitBtn.disabled = false;
         }
     });
@@ -665,7 +801,15 @@ async function checkSession() {
         const data = await res.json();
 
         if (data.ok && data.user) {
-            updateHeaderUser(data.user);
+            currentUser = data.user;
+            updateHeaderUser(data.user); // Assuming updateHeaderUI is a typo and should be updateHeaderUser
+
+            // Auto-rellenar campos de envío si estamos en checkout
+            const addrInput = document.getElementById('shipping-address');
+            const cityInput = document.getElementById('shipping-city');
+            if (addrInput && !addrInput.value) addrInput.value = data.user.direccion || '';
+            if (cityInput && !cityInput.value) cityInput.value = data.user.ciudad || '';
+
             // Guardar en sessionStorage para acceso rápido
             sessionStorage.setItem('user', JSON.stringify(data.user));
         } else {
@@ -1108,13 +1252,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Helper para notificaciones (si no lo tenías ya)
-    function showNotification(msg, isError = false) {
+    window.showNotification = function (msg, isError = false) {
         const notif = document.getElementById('notification');
         if (!notif) return;
         notif.textContent = msg;
-        notif.className = isError ? 'notification error' : 'notification success';
-        notif.classList.add('show');
-        setTimeout(() => notif.classList.remove('show'), 4000);
+        notif.className = isError ? 'notification error show' : 'notification success show';
+
+        // El CSS maneja la transición
+        setTimeout(() => {
+            notif.classList.remove('show');
+        }, 4000);
     }
 
 });

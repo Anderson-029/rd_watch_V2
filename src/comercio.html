@@ -67,9 +67,7 @@
                     <h3><i class="fas fa-tag"></i> Marcas</h3>
                     <select id="brand-filter" class="form-select">
                         <option value="all">Todas las Marcas</option>
-                        <option value="Rolex">Rolex</option>
-                        <option value="Omega">Omega</option>
-                        <option value="Citizen">Citizen</option>
+                        <!-- Las marcas se cargan dinámicamente desde script.js -->
                         <option option="Otro">Otras Marcas</option>
                     </select>
                 </div>
@@ -158,37 +156,29 @@
                             <input type="text" id="shipping-city" required placeholder="Ej. Bogotá">
                         </div>
 
-                        <h3>2. Método de Pago</h3>
-                        <div class="payment-methods">
-                            <label class="payment-option">
-                                <input type="radio" name="payment_method" value="credit_card" checked>
-                                <i class="fas fa-credit-card"></i> Tarjeta de Crédito/Débito
-                            </label>
-                            <label class="payment-option">
-                                <input type="radio" name="payment_method" value="paypal">
-                                <i class="fab fa-paypal"></i> PayPal
-                            </label>
-                            <label class="payment-option">
-                                <input type="radio" name="payment_method" value="pse">
-                                <i class="fas fa-university"></i> PSE
-                            </label>
+                        <h3>2. Pago por Consignación o Transferencia</h3>
+                        <div class="payment-info-box"
+                            style="background: rgba(44, 62, 80, 0.05); padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid var(--primary-color);">
+                            <p style="margin-bottom: 15px;">Para completar tu pedido, por favor realiza la transferencia
+                                a una de nuestras cuentas:</p>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin-bottom: 10px;"><strong>Bancolombia (Ahorros):</strong> 123-456789-01
+                                </li>
+                                <li style="margin-bottom: 10px;"><strong>Nequi / Daviplata:</strong> 300 123 4567</li>
+                                <li><strong>Titular:</strong> Relojería Durán S.A.S</li>
+                            </ul>
                         </div>
 
-                        <div id="credit-card-details">
-                            <div class="form-group">
-                                <label>Número de Tarjeta</label>
-                                <input type="text" id="card-number" required placeholder="XXXX XXXX XXXX XXXX">
+                        <div class="form-group">
+                            <label for="payment-proof">Adjuntar Comprobante de Pago (JPG, PNG, PDF)</label>
+                            <div class="file-upload-wrapper"
+                                style="position: relative; overflow: hidden; display: inline-block; width: 100%;">
+                                <input type="file" id="payment-proof" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf"
+                                    required
+                                    style="width: 100%; padding: 10px; border: 2px dashed #ddd; border-radius: 5px; cursor: pointer;">
                             </div>
-                            <div class="form-group-inline">
-                                <div class="form-group">
-                                    <label>Vencimiento</label>
-                                    <input type="text" id="card-expiry" required placeholder="MM/AA">
-                                </div>
-                                <div class="form-group">
-                                    <label>CVV</label>
-                                    <input type="text" id="card-cvv" required placeholder="123">
-                                </div>
-                            </div>
+                            <small style="color: #666; margin-top: 5px; display: block;">Tamaño máximo recomendado:
+                                5MB</small>
                         </div>
 
                         <button type="submit" class="button button-primary button-lg"
@@ -353,7 +343,7 @@
                     <span class="badge" id="modal-category">Categoría</span>
                     <h2 id="modal-title">Nombre del Reloj</h2>
                     <h3 id="modal-price" style="color: var(--primary-color); font-size: 1.8rem;">$0</h3>
-                    <p id="modal-brand"><strong>Marca:</strong> <span>Rolex</span></p>
+                    <p id="modal-brand"><strong>Marca:</strong> <span></span></p>
                     <div class="modal-description-box">
                         <h4>Descripción:</h4>
                         <p id="modal-desc">Detalles del producto...</p>

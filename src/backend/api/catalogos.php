@@ -1,4 +1,12 @@
 <?php
+/**
+ * API: ASISTENTE DE CATÁLOGOS (Dropdowns)
+ * ---------------------------------------------------------
+ * Este archivo sirve únicamente para devolver listas rápidas 
+ * de marcas, categorías y subcategorías. Se usa para llenar 
+ * los selectores (dropdowns) en la interfaz de administración.
+ */
+
 header('Content-Type: application/json');
 require_once '../config.php';
 
@@ -8,12 +16,13 @@ if (!isset($pdo)) {
     exit;
 }
 
+// Recibe el 'tipo' de catálogo a consultar
 $tipo = $_GET['tipo'] ?? '';
 
 try {
     switch ($tipo) {
         case 'marcas':
-            // Solo lista simple para dropdowns
+            // Devuelve solo marcas activas para selección
             $stmt = $pdo->prepare("SELECT id_marca, nom_marca FROM tab_Marcas WHERE estado_marca = true ORDER BY nom_marca ASC");
             $stmt->execute();
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -21,6 +30,7 @@ try {
             break;
 
         case 'categorias':
+            // Devuelve solo categorías activas
             $stmt = $pdo->prepare("SELECT id_categoria, nom_categoria FROM tab_Categorias WHERE estado = true ORDER BY nom_categoria ASC");
             $stmt->execute();
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -28,6 +38,7 @@ try {
             break;
 
         case 'subcategorias':
+            // Devuelve subcategorías filtradas por la categoría padre seleccionada
             $idCat = isset($_GET['id_categoria']) ? $_GET['id_categoria'] : null;
             if (!$idCat) {
                 echo json_encode(['ok' => false, 'msg' => 'ID categoría requerido', 'subcategorias' => []]);

@@ -155,6 +155,16 @@
 }
 .badge.active { background: var(--primary-light); color: var(--secondary-color); }
 .badge.inactive { background: #eee; color: #888; }
+.button-danger {
+  background-color: var(--accent-color);
+  color: var(--white);
+  border: 1px solid var(--accent-color);
+}
+.button-danger:hover {
+  background-color: #7a0008;
+  border-color: #7a0008;
+  transform: scale(1.05);
+}
 
 /* Responsive */
 @media (max-width: 1024px) {

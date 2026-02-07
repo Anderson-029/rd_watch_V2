@@ -1,10 +1,14 @@
 <?php
-// api/signup.php
-require_once '../config.php';
+/**
+ * API: REGISTRO DE USUARIOS (SIGNUP)
+ * ---------------------------------------------------------
+ * Permite la creación de nuevas cuentas para clientes.
+ */
 
+require_once '../config.php';
 header('Content-Type: application/json');
 
-// 1. Obtener JSON
+// 1. OBTENCIÓN DE DATOS
 $input = json_decode(file_get_contents('php://input'), true);
 
 $nombre = $input['nombre'] ?? '';
@@ -12,14 +16,15 @@ $email = $input['email'] ?? '';
 $telefono = $input['telefono'] ?? '';
 $pass = $input['password'] ?? '';
 
-// Validaciones básicas
+// Validaciones básicas de campos obligatorios
 if (empty($email) || empty($pass) || empty($nombre)) {
     echo json_encode(["ok" => false, "msg" => "Faltan datos obligatorios"]);
     exit;
 }
 
 try {
-    // 2. Verificar si ya existe el correo
+    // 2. VERIFICACIÓN DE DUPLICADOS
+    // Comprobamos si el correo electrónico ya está registrado en la base de datos
     $stmt = $pdo->prepare("SELECT id_usuario FROM tab_Usuarios WHERE correo_usuario = ?");
     $stmt->execute([$email]);
     if ($stmt->fetch()) {
@@ -27,11 +32,14 @@ try {
         exit;
     }
 
-    // 3. Hashear contraseña
+    // 3. SEGURIDAD DE CONTRASEÑA
+    // Encriptamos la contraseña usando el algoritmo BCRYPT antes de guardarla
     $hash = password_hash($pass, PASSWORD_BCRYPT);
 
-    // 4. Insertar Usuario
-    // Calculamos el ID manualmente (MAX + 1) para compatibilidad con el esquema actual
+    /**
+     * 4. INSERCIÓN DEL NUEVO USUARIO
+     * Calculamos el ID manualmente (MAX + 1) para mayor control sobre el esquema.
+     */
     $sql = "INSERT INTO tab_Usuarios (
                 id_usuario, nom_usuario, correo_usuario, num_telefono_usuario, 
                 contra, salt, rol, activo, bloqueado, fecha_registro, intentos_fallidos
