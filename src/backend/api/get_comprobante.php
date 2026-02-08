@@ -16,7 +16,7 @@ if (!isset($pdo)) {
 
 // 1. Validar sesión de ADMINISTRADOR
 // (Asegúrate de que 'admin' sea el rol correcto en tu sistema)
-if (!isset($_SESSION['user']) || $_SESSION['user']['rol'] !== 'admin') {
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     http_response_code(403);
     die('Acceso denegado');
 }
@@ -81,6 +81,11 @@ try {
         header("Content-Length: " . strlen($contenido));
         // Opcional: Para forzar descarga
         // header('Content-Disposition: attachment; filename="comprobante_orden_' . $id_orden . '.' . $ext . '"');
+
+        // Limpiar cualquier salida previa (espacios en blanco, notices) que corrompan la imagen
+        if (ob_get_length())
+            ob_clean();
+        flush();
 
         echo $contenido;
     } else {
