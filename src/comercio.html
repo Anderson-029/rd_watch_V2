@@ -57,14 +57,22 @@
         <div class="container shop-layout">
 
             <aside class="sidebar">
+                <div class="sidebar-header"
+                    style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                    <h2
+                        style="font-size: 1.5rem; color: var(--primary-color); display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-filter"></i> Filtros
+                    </h2>
+                </div>
+
                 <div class="filter-group">
-                    <h3><i class="fas fa-filter"></i> Categorías</h3>
+                    <h3>Categorías</h3>
                     <ul class="filter-list" id="category-filters">
                     </ul>
                 </div>
 
                 <div class="filter-group">
-                    <h3><i class="fas fa-tag"></i> Marcas</h3>
+                    <h3>Marcas</h3>
                     <select id="brand-filter" class="form-select">
                         <option value="all">Todas las Marcas</option>
                         <!-- Las marcas se cargan dinámicamente desde script.js -->
@@ -73,13 +81,11 @@
                 </div>
 
                 <div class="filter-group">
-                    <h3><i class="fas fa-dollar-sign"></i> Precio Máximo (COP)</h3>
+                    <h3>Precio Máximo (COP)</h3>
                     <input type="range" id="price-range" min="0" max="999999999" value="999999999" step="1000000"
                         class="price-slider">
                     <p>Hasta: <span id="price-value">$999.999.999</span></p>
                 </div>
-
-                <button class="button button-primary" onclick="applyFilters()">Aplicar Filtros</button>
             </aside>
 
             <main class="product-grid-container">

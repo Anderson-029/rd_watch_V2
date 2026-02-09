@@ -155,28 +155,7 @@ CREATE TABLE IF NOT EXISTS tab_Metodos_Pago
     UNIQUE (nombre_metodo)
 );
 
-CREATE TABLE IF NOT EXISTS tab_Usuario_Metodo_Pago
-(
-    id_usuario_metodo_pago  SMALLINT NOT NULL, -- Identificador único de la relación
-    id_usuario              BIGINT NOT NULL, -- Clave foránea a tab_Usuarios
-    id_metodo_pago          SMALLINT NOT NULL, -- Clave foránea a tab_Metodos_Pago
-    num_tarjeta             VARCHAR(20), --  Últimos 4 dígitos o token
-    fecha_vencimiento       DATE,        --  Fecha de vencimiento
-    es_favorito             BOOLEAN DEFAULT FALSE, -- Indica si es el método de pago favorito
 
-    -- Columnas de auditoría
-    usr_insert VARCHAR(100),
-    fec_insert TIMESTAMP,
-    usr_update VARCHAR(100),
-    fec_update TIMESTAMP,
-    usr_delete VARCHAR(100),
-    fec_delete TIMESTAMP,
-
-    PRIMARY KEY (id_usuario_metodo_pago),
-    UNIQUE (id_usuario, id_metodo_pago), 
-    FOREIGN KEY (id_usuario) REFERENCES tab_Usuarios(id_usuario),
-    FOREIGN KEY (id_metodo_pago) REFERENCES tab_Metodos_Pago(id_metodo_pago)
-);
 
 -- Tabla: tab_Promociones
 -- Almacena las promociones disponibles.
@@ -415,7 +394,7 @@ CREATE TABLE IF NOT EXISTS tab_Orden
 
     PRIMARY KEY (id_orden),
     FOREIGN KEY (id_usuario) REFERENCES tab_Usuarios (id_usuario),
-    CHECK (estado_orden IN ('pendiente', 'en proceso', 'cancelado', 'completado')), -- Estado actual de la orden
+    CHECK (estado_orden IN ('pendiente', 'confirmado', 'enviado', 'cancelado')), -- Estado actual de la orden
     CHECK (total_orden >= 0) -- Costo total de la orden (se recomienda calcular a partir de Detalle_Orden y Orden_Servicios)
 );
 CREATE INDEX idx_orden_usuario ON tab_Orden (id_usuario); -- Índice para acelerar búsquedas de órdenes por usuario
@@ -709,3 +688,35 @@ CREATE TABLE IF NOT EXISTS tab_Eventos (
     PRIMARY KEY (id_evento),
     CHECK (fecha_fin >= fecha_inicio)
 );
+-- =====================================================
+-- Tabla: tab_Rate_Limits
+-- Almacena los intentos de acciones para control de tasa (Rate Limiting).
+-- Esto previene ataques de fuerza bruta y denegación de servicio.
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS tab_Rate_Limits (
+    id_rate_limit   SERIAL PRIMARY KEY,
+    nom_accion      VARCHAR(50) NOT NULL,    -- Nombre de la acción (ej: 'login', 'signup')
+    identificador   VARCHAR(100) NOT NULL,   -- Identificador único (IP o ID de usuario)
+    fec_intento     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Auditoría (Siguiendo el estándar del proyecto)
+    usr_insert      VARCHAR(100) DEFAULT CURRENT_USER,
+    fec_insert      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices para optimizar la consulta de intentos recientes
+CREATE INDEX IF NOT EXISTS idx_rate_limit_lookup 
+    ON tab_Rate_Limits (nom_accion, identificador, fec_intento);
+
+-- Comentario de la tabla
+COMMENT ON TABLE tab_Rate_Limits IS 'Registro de intentos de acciones sensibles para control de flujo y seguridad.';
+
+-- =========================================================
+-- DATOS INICIALES (SEEDS)
+-- =========================================================
+
+-- Tabla: tab_Metodos_Pago
+INSERT INTO tab_Metodos_Pago (id_metodo_pago, nombre_metodo, descripcion, usr_insert, fec_insert)
+VALUES (1, 'Consignación / Transferencia', 'Instrucciones de pago por Bancolombia, Nequi o Daviplata mostradas en el checkout.', 'system', NOW())
+ON CONFLICT (id_metodo_pago) DO NOTHING;

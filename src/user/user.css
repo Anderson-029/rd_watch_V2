@@ -352,22 +352,22 @@ main {
 }
 
 .badge.pendiente {
-    background: #ffc107;
+    background: #ffc107; /* Amarillo */
     color: #000;
 }
 
 .badge.enviado {
-    background: #17a2b8;
+    background: #28a745; /* Verde */
     color: #fff;
 }
 
-.badge.completado {
-    background: var(--success-color);
+.badge.confirmado {
+    background: #007bff; /* Azul */
     color: #fff;
 }
 
 .badge.cancelado {
-    background: var(--error-color);
+    background: #dc3545; /* Rojo */
     color: #fff;
 }
 

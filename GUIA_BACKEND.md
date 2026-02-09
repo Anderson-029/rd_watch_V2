@@ -12,7 +12,8 @@ El proyecto utiliza una pila tecnológica moderna basada en PHP y **PostgreSQL 1
 | **Pila (Stack)** | PHP 8.x + PostgreSQL (en lugar de MySQL/MariaDB para mayor seguridad y robustez). |
 | **`config.php`** | Conexión central vía **PDO**. Maneja sesiones, CORS y carga de entorno. |
 | **`.env`** | Almacena credenciales de BD y claves de sesión de forma privada. |
-| **BYTEA Storage** | Los comprobantes de pago no se guardan en carpetas públicas, sino como binarios protegidos directamente en la base de datos. |
+| **BYTEA Storage** | Los comprobantes de pago no se guardan en carpetas públicas, sino como binarios protegidos directamente en la base de datos (columna `bytea`). Esto evita ataques de ejecución de scripts maliciosos. |
+| **`get_comprobante.php`** | Endpoint seguro que extrae el binario, limpia el buffer de salida (`ob_clean`) para evitar corrupción y sirve la imagen con el MIME type correcto, validando permisos de admin. |
 
 ---
 
@@ -27,16 +28,24 @@ A diferencia de sistemas convencionales, la lógica de negocio reside en **Funci
 ---
 
 ## 🔐 3. Flujo de Autenticación
-- **`login.php`**: Valida credenciales contra la función `fun_login_usuario`.
-- **`signup.php`**: Registra usuarios asegurando el hash de contraseña.
+- **`login.php`**: Valida credenciales contra la función `fun_login_usuario` y establece `$_SESSION['user_role']`.
+- **`signup.php`**: Registra usuarios asegurando el hash de contraseña (BCRYPT).
 - **`me.php`**: Sincroniza el estado de la sesión entre el servidor y el navegador.
 
 ---
 
 ## ⚙️ 4. Automatización (DevOps)
-El proyecto incluye un motor de instalación automática:
-- **`install_db.sh`**: Script que recrea la BD, carga el esquema, inyecta las funciones modulares y puebla el catálogo con datos premium.
-- **Logs**: Todas las instalaciones se registran en `install_db.log`.
+El proyecto incluye motores de instalación automática multiplataforma:
+
+### Linux / Mac (`.sh`)
+- **`install_db.sh`**: Script Bash que recrea la BD, carga el esquema, inyecta las funciones modulares y puebla el catálogo.
+- Ejecución: `./install_db.sh`
+
+### Windows (`.bat`)
+- **`install_db.bat`**: Script Batch equivalente que configura el entorno, lee credenciales y ejecuta la secuencia SQL usando `psql`.
+- Ejecución: Doble clic en el archivo o desde CMD.
+
+- **Logs**: Todas las instalaciones se registran en `install_db.log` para auditoría.
 
 ---
 

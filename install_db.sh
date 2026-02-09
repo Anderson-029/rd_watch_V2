@@ -76,9 +76,6 @@ psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "postgres" -c "CREATE DATABASE
 # 3. Esquema
 log "\n${BLUE}--- Paso 2: Estructura (Schema) ---${NC}"
 run_psql "$DB_NAME" "$BASE_DIR/sql/schema/database_rdwatch_3_0.sql"
-if [ -f "$BASE_DIR/sql/schema/rate_limits.sql" ]; then
-    run_psql "$DB_NAME" "$BASE_DIR/sql/schema/rate_limits.sql"
-fi
 
 # 4. Funciones y Procedimientos
 log "\n${BLUE}--- Paso 3: Funciones y Procedimientos ---${NC}"

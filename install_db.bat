@@ -58,7 +58,6 @@ REM 3. Esquema
 echo.
 echo [INFO] --- Paso 1: Estructura (Schema) ---
 call :run_psql "%BASE_DIR%sql\schema\database_rdwatch_3_0.sql"
-if exist "%BASE_DIR%sql\schema\rate_limits.sql" call :run_psql "%BASE_DIR%sql\schema\rate_limits.sql"
 
 REM 4. Funciones
 echo.

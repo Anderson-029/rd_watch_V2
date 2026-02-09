@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let marcas = [];
   let categorias = [];
   let subcategorias = [];
-
+  let citas = []; // NUEVO
 
 
   /* ===== Navegación ===== */
@@ -98,9 +98,16 @@ document.addEventListener("DOMContentLoaded", () => {
         links.forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
         const target = btn.dataset.target || "";
-        sections.forEach((s) => s.classList.remove("is-active"));
-        const targetEl = document.getElementById(target);
-        if (targetEl) targetEl.classList.add("is-active");
+
+        sections.forEach((sec) => {
+          if (sec.id === target) {
+            sec.classList.add("is-active");
+            // Recargar datos específicos si es necesario
+            if (target === 'citas') renderCitas();
+          } else {
+            sec.classList.remove("is-active");
+          }
+        });
       });
     });
   }
@@ -142,24 +149,79 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ===== Dashboard ===== */
+  async function cargarEstadisticas() {
+    try {
+      const res = await secureFetch(`${API_BASE}/stats.php`);
+      const data = await res.json();
+      if (data.ok) {
+        const { productos, pedidos, clientes, servicios, ventas_monto, ventas_cant } = data.stats;
+        const sp = document.getElementById("statProductos");
+        const spe = document.getElementById("statPedidos");
+        const sc = document.getElementById("statClientes");
+        const ss = document.getElementById("statServicios");
+        const svm = document.getElementById("statVentasMonto");
+        const svc = document.getElementById("statVentasCant");
+
+        if (sp) sp.textContent = String(productos);
+        if (spe) spe.textContent = String(pedidos);
+        if (sc) sc.textContent = String(clientes);
+        if (ss) ss.textContent = String(servicios);
+        if (svc) svc.textContent = String(ventas_cant);
+        if (svm) svm.textContent = typeof formatPrice === 'function' ? formatPrice(ventas_monto) : '$' + ventas_monto.toLocaleString();
+      }
+    } catch (error) {
+      console.error("Error cargando estadísticas:", error);
+    }
+  }
+
   function renderDashboard() {
-    const sp = document.getElementById("statProductos");
-    const spe = document.getElementById("statPedidos");
-    const sc = document.getElementById("statClientes");
-    const ss = document.getElementById("statServicios");
-    if (sp) sp.textContent = String(productos.length);
-    if (spe) spe.textContent = String(pedidos.length);
-    if (sc) sc.textContent = String(clientes.length);
-    if (ss) ss.textContent = String(servicios.length);
+    cargarEstadisticas();
 
     const ctx = document.getElementById("estadosChart");
     if (ctx && typeof Chart !== "undefined") {
-      const estados = ["pendiente", "pagado", "enviado", "entregado", "cancelado"];
-      const counts = estados.map((e) => pedidos.filter((p) => p.estado === e).length);
+      const estados = ["pendiente", "confirmado", "enviado", "cancelado"];
+      const mapping = {
+        "pendiente": { label: "Pendientes", color: "#FFD700" }, // Oro brillante
+        "confirmado": { label: "Confirmados", color: "#AF944F" }, // Oro marca
+        "enviado": { label: "Enviados", color: "#2E7D32" }, // Verde esmeralda oscuro
+        "cancelado": { label: "Cancelados", color: "#92000A" } // Rojo carmesí marca
+      };
+
+      const labels = estados.map(e => mapping[e].label);
+      const counts = estados.map(e => pedidos.filter(p => p.estado === e).length);
+      const colors = estados.map(e => mapping[e].color);
+
       if (ctx._chartInstance) ctx._chartInstance.destroy();
       ctx._chartInstance = new Chart(ctx, {
         type: "bar",
-        data: { labels: estados, datasets: [{ label: "Pedidos", data: counts }] },
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "Cantidad de Pedidos",
+            data: counts,
+            backgroundColor: colors,
+            borderRadius: 6,
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(0,0,0,0.05)' },
+              ticks: { font: { family: 'Montserrat' } }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { font: { family: 'Montserrat', weight: '600' } }
+            }
+          }
+        }
       });
     }
   }
@@ -418,11 +480,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Función auxiliar para color de badge
     const getBadgeClass = (estado) => {
       const est = estado.toLowerCase();
-      if (est.includes('pendiente')) return 'pendiente'; // Amarillo (definido en tu CSS)
-      if (est.includes('pagado') || est.includes('completado')) return 'completado'; // Verde
-      if (est.includes('enviado')) return 'enviado'; // Azul
       if (est.includes('cancelado')) return 'cancelado'; // Rojo
-      return 'inactive'; // Gris por defecto
+      if (est.includes('enviado')) return 'enviado'; // Verde
+      if (est.includes('confirmado')) return 'confirmado'; // Azul
+      return 'pendiente'; // Amarillo por defecto
     };
 
     tbodyPedidos.innerHTML = pedidos
@@ -435,9 +496,15 @@ document.addEventListener("DOMContentLoaded", () => {
           </td>
           <td>${p.fecha}</td>
           <td>
-             <span class="badge ${getBadgeClass(p.estado)}">
-                ${p.estado.charAt(0).toUpperCase() + p.estado.slice(1)}
-             </span>
+            <select class="form-control select-estado" onchange="cambiarEstadoPedido(${p.id}, this.value)" 
+              style="padding: 5px; border-radius: 4px; border: 1px solid #ddd; font-weight: bold;
+              background: ${p.estado === 'cancelado' ? '#dc3545' : p.estado === 'confirmado' ? '#007bff' : p.estado === 'enviado' ? '#28a745' : '#ffc107'};
+              color: ${p.estado === 'pendiente' ? '#000' : '#fff'};">
+              <option value="pendiente" ${p.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+              <option value="confirmado" ${p.estado === 'confirmado' ? 'selected' : ''}>Confirmado</option>
+              <option value="enviado" ${p.estado === 'enviado' ? 'selected' : ''}>Enviado</option>
+              <option value="cancelado" ${p.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+            </select>
           </td>
           <td style="text-align:center;">
              ${p.tiene_comprobante
@@ -447,7 +514,30 @@ document.addEventListener("DOMContentLoaded", () => {
           <td style="font-weight:bold">$${p.total.toFixed(2)}</td>
         </tr>`)
       .join("");
-  }
+  };
+
+  window.cambiarEstadoPedido = async function (id_orden, nuevo_estado) {
+    if (!confirm(`¿Deseas cambiar el estado a ${nuevo_estado}?`)) return;
+
+    try {
+      const res = await secureFetch(`${API_BASE}/pedidos.php`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_orden, estado: nuevo_estado })
+      });
+
+      const data = await res.json();
+      if (data.ok) {
+        showNotification(`✅ Pedido #${id_orden} actualizado a ${nuevo_estado}`);
+        cargarPedidos();
+      } else {
+        showNotification(`❌ Error: ${data.msg}`);
+      }
+    } catch (err) {
+      console.error('Error al cambiar estado:', err);
+      showNotification('❌ Error de conexión');
+    }
+  };
 
   /* ==========================
    * FUNCIÓN CARGAR CLIENTES 
@@ -1202,6 +1292,106 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
+  /* =======================
+   * GESTIÓN DE CITAS
+   * ======================= */
+  async function cargarCitasAdmin() {
+    try {
+      const res = await secureFetch(`${API_BASE}/citas.php`);
+      const data = await res.json();
+      if (data.ok) {
+        citas = data.citas;
+        renderCitas();
+      }
+    } catch (error) {
+      console.error("Error al cargar citas:", error);
+    }
+  }
+
+  function renderCitas() {
+    const tbody = document.getElementById('tbodyCitas');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (!citas || citas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No hay citas registradas.</td></tr>';
+      return;
+    }
+
+    citas.forEach(cita => {
+      const tr = document.createElement('tr');
+
+      let badgeClass = 'secondary';
+      const est = (cita.estado || '').toLowerCase();
+
+      if (est === 'confirmada' || est === 'completada') badgeClass = 'success';
+      else if (est === 'cancelada') badgeClass = 'danger';
+      else if (est === 'pendiente') badgeClass = 'warning';
+
+      tr.innerHTML = `
+            <td>#${cita.id_reserva}</td>
+            <td>
+                <strong>${cita.cliente || 'Usuario'}</strong><br>
+                <small>ID: ${cita.id_usuario}</small>
+            </td>
+            <td>${cita.nombre_servicio || 'Servicio'}</td>
+            <td>${cita.fecha_preferida}</td>
+            <td><span class="badge ${cita.prioridad === 'alta' ? 'danger' : 'primary'}">${cita.prioridad}</span></td>
+            <td><span class="badge ${badgeClass}">${cita.estado}</span></td>
+            <td>
+                <div class="action-buttons">
+                    ${est === 'pendiente' ? `
+                        <button class="button button-icon" style="color:var(--success)" title="Confirmar" onclick="cambiarEstadoCita(${cita.id_reserva}, 'confirmada')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    ` : ''}
+                    ${est !== 'completada' && est !== 'cancelada' ? `
+                         <button class="button button-icon" style="color:var(--primary)" title="Completar" onclick="cambiarEstadoCita(${cita.id_reserva}, 'completada')">
+                            <i class="fas fa-check-double"></i>
+                        </button>
+                    ` : ''}
+                    ${est !== 'cancelada' ? `
+                        <button class="button button-icon" style="color:var(--danger)" title="Cancelar" onclick="cambiarEstadoCita(${cita.id_reserva}, 'cancelada')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            </td>
+        `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  window.cambiarEstadoCita = async function (idReserva, nuevoEstado) {
+    if (!confirm(`¿Estás seguro de marcar esta cita como "${nuevoEstado}"?`)) return;
+
+    try {
+      const res = await secureFetch(`${API_BASE}/citas.php`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id_reserva: idReserva,
+          estado: nuevoEstado
+        })
+      });
+
+      const data = await res.json();
+      if (data.ok) {
+        showNotification(`✅ Cita actualizada a: ${nuevoEstado}`);
+        cargarCitasAdmin(); // Recargar lista
+      } else {
+        showNotification(`❌ Error: ${data.msg}`);
+      }
+    } catch (error) {
+      console.error("Error al actualizar cita:", error);
+      showNotification("❌ Error de conexión");
+    }
+  };
+
   /* =======================
    * INIT
    * ======================= */
@@ -1213,7 +1403,9 @@ document.addEventListener("DOMContentLoaded", () => {
       cargarCategorias(),
       cargarClientes(),
       cargarPedidos(),
-      cargarConfiguracion() // NUEVA LLAMADA
+      cargarCitasAdmin(), // NUEVO
+      cargarConfiguracion(),
+      cargarEstadisticas()
     ]);
 
     await cargarSubcategorias();

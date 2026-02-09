@@ -45,6 +45,7 @@
       <button class="admin-link" data-target="pedidos"><i class="fas fa-truck-fast"></i> Pedidos</button>
       <button class="admin-link" data-target="clientes"><i class="fas fa-user-group"></i> Clientes</button>
       <button class="admin-link" data-target="servicios"><i class="fas fa-screwdriver-wrench"></i> Servicios</button>
+      <button class="admin-link" data-target="citas"><i class="fas fa-calendar-check"></i> Citas</button>
       <button class="admin-link" data-target="configuracion"><i class="fas fa-gear"></i> Configuración</button>
     </nav>
     <div class="admin-footer">
@@ -63,26 +64,47 @@
 
       <div class="stats-grid">
         <div class="stat-card">
-          <p class="stat-label">Productos</p>
-          <p class="stat-number" id="statProductos">0</p>
+          <div class="stat-icon"><i class="fas fa-box"></i></div>
+          <div class="stat-content">
+            <p class="stat-label">Productos</p>
+            <p class="stat-number" id="statProductos">0</p>
+          </div>
         </div>
         <div class="stat-card">
-          <p class="stat-label">Pedidos</p>
-          <p class="stat-number" id="statPedidos">0</p>
+          <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+          <div class="stat-content">
+            <p class="stat-label">Pedidos</p>
+            <p class="stat-number" id="statPedidos">0</p>
+          </div>
         </div>
         <div class="stat-card">
-          <p class="stat-label">Clientes</p>
-          <p class="stat-number" id="statClientes">0</p>
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
+          <div class="stat-content">
+            <p class="stat-label">Clientes</p>
+            <p class="stat-number" id="statClientes">0</p>
+          </div>
         </div>
         <div class="stat-card">
-          <p class="stat-label">Servicios</p>
-          <p class="stat-number" id="statServicios">0</p>
+          <div class="stat-icon"><i class="fas fa-tools"></i></div>
+          <div class="stat-content">
+            <p class="stat-label">Servicios</p>
+            <p class="stat-number" id="statServicios">0</p>
+          </div>
+        </div>
+        <div class="stat-card stat-sales">
+          <div class="stat-icon"><i class="fas fa-hand-holding-usd"></i></div>
+          <div class="stat-content">
+            <p class="stat-label">Ventas (<span id="statVentasCant">0</span>)</p>
+            <p class="stat-number" id="statVentasMonto">$0</p>
+          </div>
         </div>
       </div>
 
       <div class="card-chart">
         <h3 class="card-title"><i class="fas fa-signal"></i> Estados de pedidos</h3>
-        <canvas id="estadosChart" height="120"></canvas>
+        <div class="chart-container">
+          <canvas id="estadosChart"></canvas>
+        </div>
       </div>
     </section>
 
@@ -411,6 +433,30 @@
             </div>
           </form>
         </div>
+      </div>
+    </section>
+
+    <!-- Citas (NUEVA SECCIÓN) -->
+    <section id="citas" class="admin-section">
+      <div class="section-header">
+        <h2 class="section-heading">Gestión de Citas</h2>
+        <p class="section-subheading">Solicitudes de servicio técnico</p>
+      </div>
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Servicio</th>
+              <th>Fecha Preferida</th>
+              <th>Prioridad</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyCitas"></tbody>
+        </table>
       </div>
     </section>
 
