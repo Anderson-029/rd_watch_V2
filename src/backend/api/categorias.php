@@ -2,23 +2,36 @@
 /**
  * API: GESTIÓN DE CATEGORÍAS Y SUBCATEGORÍAS
  * ---------------------------------------------------------
- * Este archivo usa el parámetro 'action=subcategoria' para 
- * alternar entre la gestión de categorías principales y sus hijas.
+ * Propósito: Administra la estructura jerárquica del catálogo de la tienda.
+ * Permite organizar los relojes en Grupos (Categorías) y Familias (Subcategorías).
+ * 
+ * Lógica Dual:
+ * - Sin parámetro 'action': Gestiona la tabla maestra tab_Categorias.
+ * - Con ?action=subcategoria: Gestiona la tabla tab_Subcategorias (hijas).
+ * 
+ * Métodos:
+ * - GET: Listado con normalización de estados para JS.
+ * - POST: Registro con validación de ID único y jerarquía.
+ * - PUT: Actualización de nombres y estados.
+ * - DELETE: Borrado seguro (Valida que no existan hijos o productos vinculados).
  */
 
 header('Content-Type: application/json');
 require_once '../config.php';
 
+// Verificación de integridad de la conexión
 if (!isset($pdo)) {
     http_response_code(500);
-    echo json_encode(['ok' => false, 'msg' => 'Error de configuración de BD']);
+    echo json_encode(['ok' => false, 'msg' => 'Error técnico: Conexión a BD no disponible']);
     exit;
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 
-// Helper para leer body JSON
+/**
+ * Captura datos de entrada JSON.
+ */
 function getJsonInput()
 {
     return json_decode(file_get_contents('php://input'), true);
@@ -28,14 +41,14 @@ try {
     if ($action === 'subcategoria') {
         /**
          * ==========================================
-         * 📂 GESTIÓN DE SUBCATEGORÍAS
+         * 📂 MÓDULO: SUBCATEGORÍAS
          * ==========================================
+         * Se identifica por la clave compuesta (id_categoria, id_subcategoria).
          */
         switch ($method) {
             case 'GET':
                 /**
-                 * LISTAR SUBCATEGORÍAS
-                 * Trae el nombre de la categoría padre mediante un JOIN.
+                 * 🔍 Listar Subcategorías con JOIN a su padre para obtener el nombre de la categoría principal.
                  */
                 $sql = "SELECT s.id_categoria, s.id_subcategoria, s.nom_subcategoria, s.estado, c.nom_categoria 
                         FROM tab_Subcategorias s
@@ -45,7 +58,7 @@ try {
                 $stmt->execute();
                 $subs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                // Normalizar booleanos para frontend (PHP PDO a veces trae 0/1 como strings)
+                // Normalización: Aseguramos que el estado regrese como booleano puro para el frontend.
                 foreach ($subs as &$sub) {
                     $sub['estado'] = $sub['estado'] ? true : false;
                 }
@@ -55,102 +68,87 @@ try {
 
             case 'POST':
                 /**
-                 * CREAR SUBCATEGORÍA
-                 * Usa una clave compuesta: id_categoria + id_subcategoria.
+                 * ➕ Crear Subcategoría: Valida que no exista el par Identificador-Padre.
                  */
                 $data = getJsonInput();
                 if (!isset($data['id_categoria'], $data['id_subcategoria'], $data['nom_subcategoria'])) {
-                    echo json_encode(['ok' => false, 'msg' => 'Datos incompletos']);
+                    echo json_encode(['ok' => false, 'msg' => 'Faltan datos obligatorios (ID Categoría, ID Sub o Nombre)']);
                     exit;
                 }
 
-                // Verificar que no se repita el par Categoría-Subcategoría
                 $check = $pdo->prepare("SELECT id_subcategoria FROM tab_Subcategorias WHERE id_categoria = ? AND id_subcategoria = ?");
                 $check->execute([$data['id_categoria'], $data['id_subcategoria']]);
                 if ($check->fetch()) {
-                    echo json_encode(['ok' => false, 'msg' => 'Ya existe esa subcategoría en esta categoría']);
+                    echo json_encode(['ok' => false, 'msg' => 'Ya existe un registro con ese ID de subcategoría en esta categoría']);
                     exit;
                 }
 
                 $sql = "INSERT INTO tab_Subcategorias (id_categoria, id_subcategoria, nom_subcategoria, estado, fec_insert, usr_insert) 
-                        VALUES (?, ?, ?, true, NOW(), 'admin')";
+                        VALUES (?, ?, ?, true, NOW(), 'admin_cat')";
                 $stmt = $pdo->prepare($sql);
-                if (
-                    $stmt->execute([
-                        $data['id_categoria'],
-                        $data['id_subcategoria'],
-                        $data['nom_subcategoria']
-                    ])
-                ) {
-                    echo json_encode(['ok' => true, 'msg' => 'Subcategoría creada']);
+                if ($stmt->execute([$data['id_categoria'], $data['id_subcategoria'], $data['nom_subcategoria']])) {
+                    echo json_encode(['ok' => true, 'msg' => 'Subcategoría registrada']);
                 } else {
-                    echo json_encode(['ok' => false, 'msg' => 'Error al crear subcategoría']);
+                    echo json_encode(['ok' => false, 'msg' => 'Fallo al insertar subcategoría']);
                 }
                 break;
 
             case 'PUT':
                 /**
-                 * ACTUALIZAR SUBCATEGORÍA
+                 * 🔄 Actualizar Subcategoría: Solo permite cambiar el nombre (el ID es clave y no debe cambiar).
                  */
                 $data = getJsonInput();
                 if (!isset($data['id_categoria'], $data['id_subcategoria'], $data['nom_subcategoria'])) {
-                    echo json_encode(['ok' => false, 'msg' => 'Datos incompletos']);
+                    echo json_encode(['ok' => false, 'msg' => 'Datos insuficientes para la actualización']);
                     exit;
                 }
 
                 $sql = "UPDATE tab_Subcategorias 
-                        SET nom_subcategoria = ?, fec_update = NOW(), usr_update = 'admin'
+                        SET nom_subcategoria = ?, fec_update = NOW(), usr_update = 'admin_editor'
                         WHERE id_categoria = ? AND id_subcategoria = ?";
                 $stmt = $pdo->prepare($sql);
-                if (
-                    $stmt->execute([
-                        $data['nom_subcategoria'],
-                        $data['id_categoria'],
-                        $data['id_subcategoria']
-                    ])
-                ) {
-                    echo json_encode(['ok' => true, 'msg' => 'Subcategoría actualizada']);
+                if ($stmt->execute([$data['nom_subcategoria'], $data['id_categoria'], $data['id_subcategoria']])) {
+                    echo json_encode(['ok' => true, 'msg' => 'Nombre de subcategoría actualizado']);
                 } else {
-                    echo json_encode(['ok' => false, 'msg' => 'Error al actualizar subcategoría']);
+                    echo json_encode(['ok' => false, 'msg' => 'Error técnico al actualizar']);
                 }
                 break;
 
             case 'DELETE':
                 /**
-                 * ELIMINAR SUBCATEGORÍA
-                 * Verifica que no haya relojes usando esta subcategoría antes de borrar.
+                 * 🗑️ Eliminar Subcategoría: Bloqueo si hay relojes asociados.
                  */
                 $data = getJsonInput();
                 if (!isset($data['id_categoria'], $data['id_subcategoria'])) {
-                    echo json_encode(['ok' => false, 'msg' => 'IDs requeridos']);
+                    echo json_encode(['ok' => false, 'msg' => 'ID de categoría y subcategoría requeridos']);
                     exit;
                 }
 
                 $check = $pdo->prepare("SELECT COUNT(*) FROM tab_Productos WHERE id_categoria = ? AND id_subcategoria = ?");
                 $check->execute([$data['id_categoria'], $data['id_subcategoria']]);
                 if ($check->fetchColumn() > 0) {
-                    echo json_encode(['ok' => false, 'msg' => 'No se puede eliminar: Hay productos asociados']);
+                    echo json_encode(['ok' => false, 'msg' => 'No es posible borrar: Existen productos cargados en esta subcategoría']);
                     exit;
                 }
 
                 $stmt = $pdo->prepare("DELETE FROM tab_Subcategorias WHERE id_categoria = ? AND id_subcategoria = ?");
                 if ($stmt->execute([$data['id_categoria'], $data['id_subcategoria']])) {
-                    echo json_encode(['ok' => true, 'msg' => 'Subcategoría eliminada']);
+                    echo json_encode(['ok' => true, 'msg' => 'Subcategoría eliminada exitosamente']);
                 } else {
-                    echo json_encode(['ok' => false, 'msg' => 'Error al eliminar subcategoría']);
+                    echo json_encode(['ok' => false, 'msg' => 'Falla al procesar la eliminación']);
                 }
                 break;
         }
     } else {
         /**
          * ==========================================
-         * 🏷️ GESTIÓN DE CATEGORÍAS (PRINCIPAL)
+         * 🏷️ MÓDULO: CATEGORÍAS PRINCIPALES
          * ==========================================
          */
         switch ($method) {
             case 'GET':
                 /**
-                 * LISTAR CATEGORÍAS
+                 * 🔍 Listar Categorías Maetras.
                  */
                 $stmt = $pdo->prepare("SELECT id_categoria, nom_categoria, descripcion_categoria, estado FROM tab_Categorias ORDER BY id_categoria ASC");
                 $stmt->execute();
@@ -165,118 +163,103 @@ try {
 
             case 'POST':
                 /**
-                 * CREAR CATEGORÍA
+                 * ➕ Crear Categoría: Valida unicidad de ID.
                  */
                 $data = getJsonInput();
                 if (!isset($data['id_categoria'], $data['nom_categoria'])) {
-                    echo json_encode(['ok' => false, 'msg' => 'Datos incompletos']);
+                    echo json_encode(['ok' => false, 'msg' => 'ID y Nombre de categoría son obligatorios']);
                     exit;
                 }
 
-                // Validar que el ID no exista
                 $check = $pdo->prepare("SELECT id_categoria FROM tab_Categorias WHERE id_categoria = ?");
                 $check->execute([$data['id_categoria']]);
                 if ($check->fetch()) {
-                    echo json_encode(['ok' => false, 'msg' => 'Ya existe una categoría con ese ID']);
+                    echo json_encode(['ok' => false, 'msg' => 'Ya existe una categoría principal con ese código de ID']);
                     exit;
                 }
 
                 $sql = "INSERT INTO tab_Categorias (id_categoria, nom_categoria, descripcion_categoria, estado, fec_insert, usr_insert) 
-                        VALUES (?, ?, ?, ?, NOW(), 'admin')";
+                        VALUES (?, ?, ?, ?, NOW(), 'admin_root')";
 
                 $estado = isset($data['estado']) ? ($data['estado'] ? 'true' : 'false') : 'true';
                 $desc = $data['descripcion_categoria'] ?? '';
 
                 $stmt = $pdo->prepare($sql);
-                if (
-                    $stmt->execute([
-                        $data['id_categoria'],
-                        $data['nom_categoria'],
-                        $desc,
-                        $estado
-                    ])
-                ) {
-                    echo json_encode(['ok' => true, 'msg' => 'Categoría creada']);
+                if ($stmt->execute([$data['id_categoria'], $data['nom_categoria'], $desc, $estado])) {
+                    echo json_encode(['ok' => true, 'msg' => 'Categoría principal creada correctamente']);
                 } else {
-                    echo json_encode(['ok' => false, 'msg' => 'Error al crear categoría']);
+                    echo json_encode(['ok' => false, 'msg' => 'Error al intentar guardar la categoría']);
                 }
                 break;
 
             case 'PUT':
                 /**
-                 * ACTUALIZAR CATEGORÍA
+                 * 🔄 Actualizar Categoría: Permite editar nombre, descripción y estado.
                  */
                 $data = getJsonInput();
                 if (!isset($data['id_categoria'], $data['nom_categoria'])) {
-                    echo json_encode(['ok' => false, 'msg' => 'Datos incompletos']);
+                    echo json_encode(['ok' => false, 'msg' => 'Datos insuficientes para la modificación']);
                     exit;
                 }
 
                 $sql = "UPDATE tab_Categorias 
-                        SET nom_categoria = ?, descripcion_categoria = ?, estado = ?, fec_update = NOW(), usr_update = 'admin'
+                        SET nom_categoria = ?, descripcion_categoria = ?, estado = ?, fec_update = NOW(), usr_update = 'admin_editor'
                         WHERE id_categoria = ?";
                 $stmt = $pdo->prepare($sql);
 
                 $estado = isset($data['estado']) ? ($data['estado'] ? 'true' : 'false') : 'true';
                 $desc = $data['descripcion_categoria'] ?? '';
 
-                if (
-                    $stmt->execute([
-                        $data['nom_categoria'],
-                        $desc,
-                        $estado,
-                        $data['id_categoria']
-                    ])
-                ) {
-                    echo json_encode(['ok' => true, 'msg' => 'Categoría actualizada']);
+                if ($stmt->execute([$data['nom_categoria'], $desc, $estado, $data['id_categoria']])) {
+                    echo json_encode(['ok' => true, 'msg' => 'Categoría actualizada con éxito']);
                 } else {
-                    echo json_encode(['ok' => false, 'msg' => 'Error al actualizar categoría']);
+                    echo json_encode(['ok' => false, 'msg' => 'Fallo técnico al actualizar registro']);
                 }
                 break;
 
             case 'DELETE':
                 /**
-                 * ELIMINAR CATEGORÍA
-                 * Verifica hijos (subcategorías) y productos antes de borrar.
+                 * 🗑️ Eliminar Categoría: Veracidad de cascada manual.
+                 * Se protege la BD de huérfanos validando 1) Subcategorías y 2) Productos directos.
                  */
                 $data = getJsonInput();
                 if (!isset($data['id_categoria'])) {
-                    echo json_encode(['ok' => false, 'msg' => 'ID requerido']);
+                    echo json_encode(['ok' => false, 'msg' => 'Se requiere el ID de la categoría a eliminar']);
                     exit;
                 }
 
-                // 1. Verificar si tiene subcategorías
+                // 1. Verificación de Dependencias (Subcategorías)
                 $check = $pdo->prepare("SELECT COUNT(*) FROM tab_Subcategorias WHERE id_categoria = ?");
                 $check->execute([$data['id_categoria']]);
                 if ($check->fetchColumn() > 0) {
-                    echo json_encode(['ok' => false, 'msg' => 'No se puede eliminar: Tiene subcategorías asociadas']);
+                    echo json_encode(['ok' => false, 'msg' => 'Error: No puede borrar una categoría que aún tiene subcategorías activas']);
                     exit;
                 }
 
-                // 2. Verificar si tiene productos directos
+                // 2. Verificación de Dependencias (Productos)
                 $checkProd = $pdo->prepare("SELECT COUNT(*) FROM tab_Productos WHERE id_categoria = ?");
                 $checkProd->execute([$data['id_categoria']]);
                 if ($checkProd->fetchColumn() > 0) {
-                    echo json_encode(['ok' => false, 'msg' => 'No se puede eliminar: Tiene productos asociados']);
+                    echo json_encode(['ok' => false, 'msg' => 'Error: Esta categoría posee productos vinculados en el catálogo']);
                     exit;
                 }
 
                 $stmt = $pdo->prepare("DELETE FROM tab_Categorias WHERE id_categoria = ?");
                 if ($stmt->execute([$data['id_categoria']])) {
-                    echo json_encode(['ok' => true, 'msg' => 'Categoría eliminada']);
+                    echo json_encode(['ok' => true, 'msg' => 'Categoría eliminada permanentemente']);
                 } else {
-                    echo json_encode(['ok' => false, 'msg' => 'Error al eliminar categoría']);
+                    echo json_encode(['ok' => false, 'msg' => 'Error al ejecutar el borrado físico']);
                 }
                 break;
 
             default:
                 http_response_code(405);
-                echo json_encode(['ok' => false, 'msg' => 'Método no permitido']);
+                echo json_encode(['ok' => false, 'msg' => 'Método no permitido para este endpoint']);
                 break;
         }
     }
 
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['ok' => false, 'msg' => 'Error de BD: ' . $e->getMessage()]);
+    echo json_encode(['ok' => false, 'msg' => 'Falla crítica de base de datos: ' . $e->getMessage()]);
 }

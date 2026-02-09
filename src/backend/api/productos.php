@@ -1,23 +1,37 @@
 <?php
 /**
- * API: GESTIÓN DE PRODUCTOS (RELOJES)
+ * API: GESTIÓN DE PRODUCTOS (CATÁLOGO DE RELOJES)
  * ---------------------------------------------------------
- * Este archivo centraliza todas las operaciones del catálogo 
- * de relojes de la tienda. Soporta listar, crear, editar y eliminar.
+ * Propósito: Centraliza el ciclo de vida de los productos (relojes). Permite la 
+ * visualización enriquecida para el cliente y la gestión administrativa total.
+ * 
+ * Capas de Integridad:
+ * - Validación de jerarquía Categoría -> Subcategoría.
+ * - Restricciones de borrado lógico vs fisico (Protección de historial).
+ * - Sincronización de catálogos via JOINs.
+ * 
+ * Métodos:
+ * - GET: Listado completo con nombres de marcas y categorías.
+ * - POST: Creación de nuevos productos con validación de ID único.
+ * - PUT: Actualización de atributos y stock.
+ * - DELETE: Eliminación segura (valida que no tenga historial de ventas).
  */
 
 header('Content-Type: application/json');
 require_once '../config.php';
 
+// Verificación de disponibilidad de la base de datos
 if (!isset($pdo)) {
     http_response_code(500);
-    echo json_encode(['ok' => false, 'msg' => 'Error de configuración de BD']);
+    echo json_encode(['ok' => false, 'msg' => 'Error técnico: Conector de datos no inicializado']);
     exit;
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Función auxiliar para leer el cuerpo de la petición en formato JSON
+/**
+ * Captura datos de cuerpo JSON.
+ */
 function getJsonInput()
 {
     return json_decode(file_get_contents('php://input'), true);
@@ -27,9 +41,11 @@ try {
     switch ($method) {
         case 'GET':
             /**
-             * LISTAR PRODUCTOS
-             * Realiza JOINs con marcas y categorías para obtener los nombres 
-             * en lugar de solo los IDs, facilitando el trabajo del frontend.
+             * ==========================================
+             * 🔍 LISTAR PRODUCTOS (GET)
+             * ==========================================
+             * Lógica: Realiza JOINs con tab_Marcas, tab_Categorias y tab_Subcategorias.
+             * Esto evita que el frontend deba hacer múltiples peticiones para resolver IDs.
              */
             $sql = "SELECT p.id_producto, p.nom_producto, p.precio, p.stock, p.url_imagen, p.descripcion, p.estado,
                            m.nom_marca, m.id_marca,
@@ -50,30 +66,31 @@ try {
 
         case 'POST':
             /**
-             * CREAR PRODUCTO
-             * Valida que no exista el ID, y que la subcategoría pertenezca a la categoría.
+             * ==========================================
+             * ➕ CREAR PRODUCTO (POST)
+             * ==========================================
+             * Seguridad: Valida duplicidad de ID y pertenencia correcta de subcategoría.
              */
             $data = getJsonInput();
 
-            // Verificación de campos obligatorios
             if (!isset($data['id_producto'], $data['nom_producto'], $data['precio'], $data['id_marca'], $data['id_categoria'], $data['id_subcategoria'])) {
-                echo json_encode(['ok' => false, 'msg' => 'Faltan datos obligatorios']);
+                echo json_encode(['ok' => false, 'msg' => 'Error: Todos los campos marcados como obligatorios deben ser completados']);
                 exit;
             }
 
-            // Validar que el ID no esté en uso
+            // 1. Validar que el código de producto sea único
             $check = $pdo->prepare("SELECT id_producto FROM tab_Productos WHERE id_producto = ?");
             $check->execute([$data['id_producto']]);
             if ($check->fetch()) {
-                echo json_encode(['ok' => false, 'msg' => 'Ya existe un producto con ese ID']);
+                echo json_encode(['ok' => false, 'msg' => 'El código de producto (ID) ya está registrado en el sistema']);
                 exit;
             }
 
-            // Integridad: Validar que la subcategoría elegida sea hija de la categoría seleccionada
+            // 2. Validar jerarquía: La subcategoría debe pertenecer a la categoría padre elegida
             $checkSub = $pdo->prepare("SELECT id_subcategoria FROM tab_Subcategorias WHERE id_categoria = ? AND id_subcategoria = ?");
             $checkSub->execute([$data['id_categoria'], $data['id_subcategoria']]);
             if (!$checkSub->fetch()) {
-                echo json_encode(['ok' => false, 'msg' => 'La subcategoría no coincide con la categoría seleccionada']);
+                echo json_encode(['ok' => false, 'msg' => 'Inconsistencia: La subcategoría seleccionada no pertenece a la categoría padre']);
                 exit;
             }
 
@@ -81,15 +98,9 @@ try {
                         id_producto, nom_producto, descripcion, precio, stock, url_imagen,
                         id_marca, id_categoria, id_subcategoria, estado,
                         fec_insert, usr_insert
-                    ) VALUES (
-                        ?, ?, ?, ?, ?, ?,
-                        ?, ?, ?, ?,
-                        NOW(), 'admin'
-                    )";
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'admin_inventario')";
 
             $stmt = $pdo->prepare($sql);
-
-            $estado = true; // El producto nace activo por defecto
             $img = $data['url_imagen'] ?? null;
             $desc = $data['descripcion'] ?? '';
 
@@ -104,52 +115,45 @@ try {
                     $data['id_marca'],
                     $data['id_categoria'],
                     $data['id_subcategoria'],
-                    $estado ? 'true' : 'false'
+                    'true'
                 ])
             ) {
-                echo json_encode(['ok' => true, 'msg' => 'Producto creado correctamente']);
+                echo json_encode(['ok' => true, 'msg' => 'Nuevo reloj añadido al catálogo exitosamente']);
             } else {
-                echo json_encode(['ok' => false, 'msg' => 'Error al crear producto']);
+                echo json_encode(['ok' => false, 'msg' => 'Fallo al insertar el registro de producto']);
             }
             break;
 
         case 'PUT':
             /**
-             * ACTUALIZAR PRODUCTO
-             * Permite modificar cualquier atributo del producto identificado por su ID.
+             * ==========================================
+             * 🔄 ACTUALIZAR PRODUCTO (PUT)
+             * ==========================================
              */
             $data = getJsonInput();
 
             if (!isset($data['id_producto'])) {
-                echo json_encode(['ok' => false, 'msg' => 'ID de producto requerido']);
+                echo json_encode(['ok' => false, 'msg' => 'Se requiere el ID del producto para realizar la actualización']);
                 exit;
             }
 
-            // Validar integridad de categoría/subcategoría si se están actualizando
+            // Re-validación de jerarquía si se cambiaron categorías
             if (isset($data['id_categoria'], $data['id_subcategoria'])) {
                 $checkSub = $pdo->prepare("SELECT id_subcategoria FROM tab_Subcategorias WHERE id_categoria = ? AND id_subcategoria = ?");
                 $checkSub->execute([$data['id_categoria'], $data['id_subcategoria']]);
                 if (!$checkSub->fetch()) {
-                    echo json_encode(['ok' => false, 'msg' => 'La subcategoría no coincide con la categoría seleccionada']);
+                    echo json_encode(['ok' => false, 'msg' => 'Categoría y Subcategoría no coinciden']);
                     exit;
                 }
             }
 
             $sql = "UPDATE tab_Productos SET
-                        nom_producto = ?,
-                        descripcion = ?,
-                        precio = ?,
-                        stock = ?,
-                        url_imagen = ?,
-                        id_marca = ?,
-                        id_categoria = ?,
-                        id_subcategoria = ?,
-                        fec_update = NOW(),
-                        usr_update = 'admin'
+                        nom_producto = ?, descripcion = ?, precio = ?, stock = ?, 
+                        url_imagen = ?, id_marca = ?, id_categoria = ?, id_subcategoria = ?,
+                        fec_update = NOW(), usr_update = 'admin_editor'
                     WHERE id_producto = ?";
 
             $stmt = $pdo->prepare($sql);
-
             $img = $data['url_imagen'] ?? null;
             $desc = $data['descripcion'] ?? '';
 
@@ -166,55 +170,59 @@ try {
                     $data['id_producto']
                 ])
             ) {
-                echo json_encode(['ok' => true, 'msg' => 'Producto actualizado']);
+                echo json_encode(['ok' => true, 'msg' => 'Información del producto actualizada correctamente']);
             } else {
-                echo json_encode(['ok' => false, 'msg' => 'Error al actualizar producto']);
+                echo json_encode(['ok' => false, 'msg' => 'Error técnico al intentar actualizar el producto']);
             }
             break;
 
         case 'DELETE':
             /**
-             * ELIMINAR PRODUCTO
-             * Protege la integridad de la base de datos:
-             * 1. No borra si el producto ya ha sido vendido (está en una orden).
-             * 2. No borra si el producto está en el carrito de compras de alguien.
+             * ==========================================
+             * 🗑️ ELIMINACIÓN SEGURA (DELETE)
+             * ==========================================
+             * Bloqueo de Borrado: Un producto no puede borrarse físicamente si:
+             * 1. Ya ha sido vendido (Integridad de facturación/pedidos).
+             * 2. Está en un carrito de compras (Experiencia de usuario).
              */
             $data = getJsonInput();
-            if (!isset($data['id_producto'])) {
-                echo json_encode(['ok' => false, 'msg' => 'ID requerido']);
+            $pid = $data['id_producto'] ?? null;
+
+            if (!$pid) {
+                echo json_encode(['ok' => false, 'msg' => 'ID de producto no proporcionado']);
                 exit;
             }
 
-            // Verificar órdenes históricas
+            // 1. Verificar registros en historial de órdenes
             $check = $pdo->prepare("SELECT COUNT(*) FROM tab_Detalle_Orden WHERE id_producto = ?");
-            $check->execute([$data['id_producto']]);
+            $check->execute([$pid]);
             if ($check->fetchColumn() > 0) {
-                echo json_encode(['ok' => false, 'msg' => 'No se puede eliminar: El producto está en órdenes de compra']);
+                echo json_encode(['ok' => false, 'msg' => 'Imposible borrar: Este reloj posee historial de ventas vinculado']);
                 exit;
             }
 
-            // Verificar carritos activos
+            // 2. Verificar si hay usuarios con este producto en su carrito
             $checkCart = $pdo->prepare("SELECT COUNT(*) FROM tab_Carrito_Detalle WHERE id_producto = ?");
-            $checkCart->execute([$data['id_producto']]);
+            $checkCart->execute([$pid]);
             if ($checkCart->fetchColumn() > 0) {
-                echo json_encode(['ok' => false, 'msg' => 'No se puede eliminar: El producto está en carritos activos']);
+                echo json_encode(['ok' => false, 'msg' => 'Imposible borrar: El producto está siendo procesado en carritos activos']);
                 exit;
             }
 
             $stmt = $pdo->prepare("DELETE FROM tab_Productos WHERE id_producto = ?");
-            if ($stmt->execute([$data['id_producto']])) {
-                echo json_encode(['ok' => true, 'msg' => 'Producto eliminado']);
+            if ($stmt->execute([$pid])) {
+                echo json_encode(['ok' => true, 'msg' => 'Producto eliminado definitivamente del catálogo']);
             } else {
-                echo json_encode(['ok' => false, 'msg' => 'Error al eliminar producto']);
+                echo json_encode(['ok' => false, 'msg' => 'Falla en la base de datos al ejecutar el borrado']);
             }
             break;
 
         default:
             http_response_code(405);
-            echo json_encode(['ok' => false, 'msg' => 'Método no permitido']);
+            echo json_encode(['ok' => false, 'msg' => 'Método HTTP denegado para esta API']);
             break;
     }
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['ok' => false, 'msg' => 'Error de BD: ' . $e->getMessage()]);
+    echo json_encode(['ok' => false, 'msg' => 'Error crítico de base de datos: ' . $e->getMessage()]);
 }

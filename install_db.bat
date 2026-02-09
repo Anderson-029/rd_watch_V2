@@ -77,10 +77,20 @@ for %%f in ("%BASE_DIR%sql\triggers\*.sql") do (
 REM 6. Datos
 echo.
 echo [INFO] --- Paso 4: Carga de Datos ---
+
+REM 6.1. Datos referenciales
 if exist "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql" call :run_psql "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql"
 
+REM 6.2. Usuarios de Prueba (Seeders)
+if exist "%BASE_DIR%sql\scripts\05_seeders.sql" (
+    echo [INFO] Cargando usuarios de prueba...
+    call :run_psql "%BASE_DIR%sql\scripts\05_seeders.sql"
+)
+
+REM 6.3. Scripts adicionales
 for %%f in ("%BASE_DIR%sql\scripts\*.sql") do (
-    call :run_psql "%%f"
+    set "FNAME=%%~nxf"
+    if not "!FNAME!"=="05_seeders.sql" call :run_psql "%%f"
 )
 
 echo.

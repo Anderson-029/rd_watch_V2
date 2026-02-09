@@ -99,16 +99,25 @@ done
 
 # 6. Datos
 log "\n${BLUE}--- Paso 5: Carga de Datos ---${NC}"
-# Departamentos y Ciudades (Referencial)
+
+# 6.1. Departamentos y Ciudades (Referencial)
 if [ -f "$BASE_DIR/sql/functions/inserts_departamentos_y_ciudades.sql" ]; then
     run_psql "$DB_NAME" "$BASE_DIR/sql/functions/inserts_departamentos_y_ciudades.sql"
 fi
 
-# Scripts adicionales de población (Usuarios, etc.)
+# 6.2. Usuarios de Prueba (Seeders)
+if [ -f "$BASE_DIR/sql/scripts/05_seeders.sql" ]; then
+    log "${YELLOW}Cargando usuarios de prueba (Seeders)...${NC}"
+    run_psql "$DB_NAME" "$BASE_DIR/sql/scripts/05_seeders.sql"
+fi
+
+# 6.3. Otros scripts adicionales de población
 for s in "$BASE_DIR"/sql/scripts/*.sql; do
     [ -e "$s" ] || continue
-    # Ignorar create_reviews_table ya que está en schema, pero si existe en scripts lo ejecutamos con precaución
-    # Si create_reviews_table.sql tiene IF NOT EXISTS está bien.
+    
+    # Evitar duplicar la carga de seeders si ya se hizo arriba
+    [[ "$s" == *"05_seeders.sql"* ]] && continue
+    
     run_psql "$DB_NAME" "$s"
 done
 

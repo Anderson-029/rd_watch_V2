@@ -1,43 +1,68 @@
 <?php
 /**
- * API DE ADMINISTRACIÓN: AJUSTES GLOBALES
+ * API DE ADMINISTRACIÓN: AJUSTES GLOBALES DEL SITIO
  * ---------------------------------------------------------
- * Gestiona configuraciones generales del sitio como el 
- * nombre de la tienda, moneda, y otros parámetros de administración.
+ * Propósito: Centraliza la gestión de los parámetros generales de la plataforma 
+ * (Nombre de la marca, Moneda de operación, datos de contacto administrativo).
+ * 
+ * Estado de Implementación:
+ * Actualmente utiliza una estructura de 'mock' (respuesta estática) para proveer 
+ * consistencia visual al panel de administración mientras se desarrolla el 
+ * módulo de persistencia de configuración en base de datos.
  */
 
 header('Content-Type: application/json');
 require_once '../config.php';
 
-// Verificación de la conexión a la base de datos
+// Verificación de integridad operativa
 if (!isset($pdo)) {
     http_response_code(500);
-    echo json_encode(['ok' => false, 'msg' => 'Error de configuración de BD']);
+    echo json_encode(['ok' => false, 'msg' => 'Error técnico: La conexión a la base de datos no es estable']);
     exit;
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 try {
-    if ($method === 'GET') {
-        /**
-         * OBTENER AJUSTES
-         * Retorna la configuración actual. Actualmente usa valores 
-         * estáticos para compatibilidad con el frontend.
-         */
-        echo json_encode([
-            'ok' => true,
-            'store' => ['nombre' => 'RD-Watch', 'moneda' => 'USD'],
-            'admin' => ['usuario' => 'admin']
-        ]);
-    } else {
-        /**
-         * ACTUALIZAR AJUSTES (POST/PUT)
-         * Simulación de éxito para persistencia de configuración.
-         */
-        echo json_encode(['ok' => true, 'msg' => 'Configuración actualizada correctamente (Simulado)']);
+    switch ($method) {
+        case 'GET':
+            /**
+             * ==========================================
+             * 🔍 OBTENER AJUSTES (GET)
+             * ==========================================
+             * Lógica: Retorna la configuración de identidad de la marca.
+             */
+            echo json_encode([
+                'ok' => true,
+                'store' => [
+                    'nombre' => 'RD-Watch',
+                    'moneda' => 'USD',
+                    'version' => '2.0.0-backend-doc'
+                ],
+                'admin' => [
+                    'usuario' => 'admin_central',
+                    'rol' => 'SuperAdmin'
+                ]
+            ]);
+            break;
+
+        case 'POST':
+        case 'PUT':
+            /**
+             * ==========================================
+             * 🔄 ACTUALIZAR AJUSTES (WRITE)
+             * ==========================================
+             * Simulación exitosa para validación de interfaz de usuario.
+             */
+            echo json_encode(['ok' => true, 'msg' => 'Configuración administrativa actualizada correctamente en caché (Simulado)']);
+            break;
+
+        default:
+            http_response_code(405);
+            echo json_encode(['ok' => false, 'msg' => 'Método no soportado para ajustes globales']);
+            break;
     }
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['ok' => false, 'msg' => 'Error: ' . $e->getMessage()]);
+    echo json_encode(['ok' => false, 'msg' => 'Error crítico de comunicación: ' . $e->getMessage()]);
 }

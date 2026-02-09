@@ -216,9 +216,12 @@ textarea:focus {
 
 /* Ajustes específicos para la tarjeta de ventas */
 .stat-sales .stat-number {
-  font-size: 1.8rem;
-  /* Un poco más pequeño para que quepa el monto grande */
-  word-break: break-all;
+  font-size: 1.6rem;
+  /* Ajustado de 1.8rem a 1.6rem */
+  white-space: nowrap;
+  /* Evita el salto de línea */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .stat-sales .stat-label {

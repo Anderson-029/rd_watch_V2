@@ -1,15 +1,33 @@
 <?php
 /**
- * API: CONFIGURACIÓN BANCARIA
+ * API: CONFIGURACIÓN PARA PAGOS BANCARIOS
  * ---------------------------------------------------------
- * Retorna los datos de la cuenta bancaria para pagos
- * por transferencia.
+ * Propósito: Facilita al cliente los datos necesarios para realizar transferencias 
+ * bancarias directas. Este endpoint es consumido durante el flujo de checkout 
+ * cuando se selecciona el método de pago 'Transferencia'.
+ * 
+ * Estado de Implementación:
+ * Actualmente utiliza valores estáticos (Hardcoded). 
+ * RECOMENDACIÓN: Mover estos parámetros a una tabla `tab_Config_Pagos` para permitir 
+ * cambios rápidos desde el panel administrativo sin tocar el código fuente.
  */
 
 header('Content-Type: application/json');
 require_once '../config.php';
 
-// Por ahora devolvemos datos estáticos (pueden venir de una tabla de configuración en el futuro)
+// Verificación de integridad de la base de datos (aunque los datos sean estáticos, config.php es necesario)
+if (!isset($pdo)) {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'msg' => 'Error técnico: No se pudo cargar el motor de configuración']);
+    exit;
+}
+
+/**
+ * ==========================================
+ * 🏦 DATOS DEL NEGOCIO (RELOJERÍA DURÁN)
+ * ==========================================
+ * Estos datos deben ser exactos para evitar devoluciones bancarias.
+ */
 echo json_encode([
     'ok' => true,
     'banco' => [
@@ -17,6 +35,7 @@ echo json_encode([
         'tipo_cuenta' => 'Ahorros',
         'numero_cuenta' => '518-000123-45',
         'titular' => 'Relojería Durán SAS',
-        'breb_llave' => 'relojeria.duran@negocio'
+        'nit_o_llave' => 'relojeria.duran@negocio', // Alias o Llave RED BANCO
+        'instrucciones' => 'Por favor, envíe el comprobante de pago por el formulario de la orden para validar su pedido.'
     ]
 ]);

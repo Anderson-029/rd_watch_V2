@@ -2,13 +2,19 @@
 /**
  * API: GESTIÓN DE CITAS Y RESERVAS
  * ---------------------------------------------------------
- * Gestiona la programación de servicios técnicos por parte 
- * de los clientes, permitiendo ver su historial y crear solicitudes.
+ * Propósito: Gestiona la programación de servicios técnicos por parte 
+ * de los clientes y la administración de dichas solicitudes por el staff técnico.
+ * 
+ * Acciones:
+ * - GET: Listar citas (contexto admin o cliente).
+ * - POST: Crear nueva solicitud de cita o actualizar estado (vía action=update_status).
+ * - PUT: Actualizar estado de cita (exclusivo Admin).
  */
 
 header('Content-Type: application/json');
 require_once '../config.php';
 
+// Verificación de integridad de la base de datos
 if (!isset($pdo)) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error de configuración de BD']);
@@ -17,11 +23,11 @@ if (!isset($pdo)) {
 
 /**
  * 1. SEGURIDAD: VERIFICACIÓN DE SESIÓN
- * Solo usuarios autenticados pueden agendar o ver citas.
+ * Bloqueo de acceso si no existe un usuario logueado en la sesión de PHP.
  */
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
-    echo json_encode(['ok' => false, 'msg' => 'No autorizado']);
+    echo json_encode(['ok' => false, 'msg' => 'No autorizado: Inicie sesión para continuar']);
     exit;
 }
 
@@ -29,24 +35,28 @@ $user_id = $_SESSION['user_id'];
 $method = $_SERVER['REQUEST_METHOD'];
 
 /**
- * Función auxiliar para leer cuerpo JSON.
+ * Captura datos de entrada en formato JSON (Cuerpo de la petición).
  */
 function getJsonInput()
 {
     return json_decode(file_get_contents('php://input'), true);
 }
 
-// Verificar Rol para acciones administrativas
-$rol = $_SESSION['user_role'] ?? 'cliente'; // Asumimos rol guardado en sesión
+// Determinación del nivel de acceso según el rol guardado en la sesión
+$rol = $_SESSION['user_role'] ?? 'cliente';
 
 try {
     if ($method === 'GET') {
         /**
-         * LISTAR CITAS (GET)
-         * - Admin: Ve todas las citas con datos del usuario.
-         * - Cliente: Ve solo sus citas.
+         * ==========================================
+         * 🔍 LISTAR CITAS (GET)
+         * ==========================================
+         * La consulta varía significativamente según el rol.
          */
         if ($rol === 'admin') {
+            /**
+             * VISTA ADMIN: RequiereJOIN con la tabla de usuarios para ver quién solicitó la cita.
+             */
             $sql = "SELECT r.id_reserva, r.id_usuario, u.nom_usuario as cliente, s.nom_servicio as nombre_servicio, 
                            r.fecha_preferida, r.prioridad, r.estado_reserva as estado, r.notas_cliente as notas
                     FROM tab_Reservas r
@@ -56,6 +66,9 @@ try {
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
         } else {
+            /**
+             * VISTA CLIENTE: Filtra estrictamente las citas que le pertenecen al usuario logueado.
+             */
             $sql = "SELECT r.id_reserva, s.nom_servicio as nombre_servicio, r.fecha_preferida, 
                            r.prioridad, r.estado_reserva as estado, r.notas_cliente as notas
                     FROM tab_Reservas r
@@ -71,43 +84,51 @@ try {
 
     } elseif ($method === 'POST') {
         /**
-         * SOLICITAR CITA (POST)
+         * ==========================================
+         * ➕ SOLICITAR O ACTUALIZAR CITA (POST)
+         * ==========================================
          */
         $data = getJsonInput();
 
-        // Si tiene 'action' y es 'update_status', redirigir a lógica de actualización (simulando PUT o manejando actions en POST)
-        // Pero mejor usar PUT real o verificar parámetro
+        /**
+         * SUB-ACCIÓN: update_status
+         * Permite actualizar el estado de una cita desde un formulario POST (compatibilidad).
+         */
         if (isset($data['action']) && $data['action'] === 'update_status') {
             if ($rol !== 'admin') {
                 http_response_code(403);
-                echo json_encode(['ok' => false, 'msg' => 'No autorizado']);
+                echo json_encode(['ok' => false, 'msg' => 'Acción denegada: Solo administradores pueden cambiar estados']);
                 exit;
             }
-            // Lógica de actualización
+
             $id_reserva = $data['id_reserva'];
             $nuevo_estado = $data['estado'];
 
             $sql = "UPDATE tab_Reservas SET estado_reserva = ?, usr_update = ?, fec_update = NOW() WHERE id_reserva = ?";
             $stmt = $pdo->prepare($sql);
             if ($stmt->execute([$nuevo_estado, 'admin_' . $user_id, $id_reserva])) {
-                echo json_encode(['ok' => true, 'msg' => 'Estado actualizado']);
+                echo json_encode(['ok' => true, 'msg' => 'Estado de cita actualizado exitosamente']);
             } else {
-                echo json_encode(['ok' => false, 'msg' => 'Error al actualizar']);
+                echo json_encode(['ok' => false, 'msg' => 'Error técnico al intentar actualizar el estado']);
             }
             exit;
         }
 
-        // Lógica normal de solicitar cita
+        /**
+         * ACCIÓN POR DEFECTO: Crear Cita
+         * Captura parámetros específicos para nueva reserva técnica.
+         */
         $id_servicio = $data['p_id_servicio'] ?? null;
         $fecha_pref = $data['p_fecha_pref'] ?? null;
         $prioridad = $data['p_prioridad'] ?? 'normal';
         $notas = $data['p_notas'] ?? '';
 
         if (!$id_servicio || !$fecha_pref) {
-            echo json_encode(['ok' => false, 'msg' => 'Servicio y fecha son obligatorios']);
+            echo json_encode(['ok' => false, 'msg' => 'El servicio y la fecha preferida son datos obligatorios']);
             exit;
         }
 
+        // Generación manual de ID autoincremental para entornos sin SERIAL
         $maxId = $pdo->query("SELECT COALESCE(MAX(id_reserva), 0) + 1 FROM tab_Reservas")->fetchColumn();
 
         $sql = "INSERT INTO tab_Reservas (id_reserva, id_usuario, id_servicio, fecha_preferida, notas_cliente, prioridad, estado_reserva, fecha_reserva, usr_insert, fec_insert) 
@@ -115,14 +136,16 @@ try {
         $stmt = $pdo->prepare($sql);
 
         if ($stmt->execute([$maxId, $user_id, $id_servicio, $fecha_pref, $notas, $prioridad, 'user_' . $user_id])) {
-            echo json_encode(['ok' => true, 'msg' => 'Cita solicitada correctamente']);
+            echo json_encode(['ok' => true, 'msg' => 'Su solicitud de cita ha sido registrada']);
         } else {
-            echo json_encode(['ok' => false, 'msg' => 'Error al crear la reserva']);
+            echo json_encode(['ok' => false, 'msg' => 'Hubo un problema al crear su solicitud en la base de datos']);
         }
 
     } elseif ($method === 'PUT') {
         /**
-         * ACTUALIZAR ESTADO (PUT) - Solo Admin
+         * ==========================================
+         * 🛠️ ACTUALIZAR ESTADO (PUT) - Estándar REST
+         * ==========================================
          */
         if ($rol !== 'admin') {
             http_response_code(403);
@@ -135,7 +158,7 @@ try {
         $nuevo_estado = $data['estado'] ?? null;
 
         if (!$id_reserva || !$nuevo_estado) {
-            echo json_encode(['ok' => false, 'msg' => 'Datos incompletos']);
+            echo json_encode(['ok' => false, 'msg' => 'Faltan parámetros críticos (ID o Estado)']);
             exit;
         }
 
@@ -143,16 +166,16 @@ try {
         $stmt = $pdo->prepare($sql);
 
         if ($stmt->execute([$nuevo_estado, 'admin_' . $user_id, $id_reserva])) {
-            echo json_encode(['ok' => true, 'msg' => 'Estado actualizado correctamente']);
+            echo json_encode(['ok' => true, 'msg' => 'El estado de la cita fue actualizado correctamente']);
         } else {
-            echo json_encode(['ok' => false, 'msg' => 'Error al actualizar estado']);
+            echo json_encode(['ok' => false, 'msg' => 'Error al intentar actualizar el registro']);
         }
 
     } else {
         http_response_code(405);
-        echo json_encode(['ok' => false, 'msg' => 'Método no permitido']);
+        echo json_encode(['ok' => false, 'msg' => 'Método HTTP diseñado solo para GET, POST y PUT']);
     }
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['ok' => false, 'msg' => 'Error de base de datos: ' . $e->getMessage()]);
+    echo json_encode(['ok' => false, 'msg' => 'Falla en la base de datos: ' . $e->getMessage()]);
 }

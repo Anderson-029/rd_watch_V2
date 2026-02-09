@@ -2,8 +2,12 @@
 /**
  * API: ACCIONES DEL CLIENTE (Panel de Usuario)
  * ---------------------------------------------------------
- * Centraliza las acciones que un cliente puede realizar sobre su propia 
- * cuenta, como ver su perfil, actualizar datos y gestionar su dirección.
+ * Propósito: Centraliza las acciones que un cliente puede realizar sobre su propia 
+ * cuenta, como ver su perfil, actualizar datos, gestionar su dirección y ver su resumen de actividad.
+ * 
+ * Métodos Soportados:
+ * - GET: Consultar información (perfil, pedidos, resumen).
+ * - POST: Modificar información (actualizar perfil, dirección).
  */
 
 header('Content-Type: application/json');
@@ -19,7 +23,8 @@ if (!isset($pdo)) {
 $method = $_SERVER['REQUEST_METHOD'];
 
 /**
- * Función auxiliar para capturar datos enviados en formato JSON.
+ * Función auxiliar para capturar datos enviados en formato JSON (Peticiones POST).
+ * @return array|null Datos decodificados del cuerpo de la petición.
  */
 function getJsonInput()
 {
@@ -32,14 +37,15 @@ try {
          * ==========================================
          * 🔍 OBTENCIÓN DE DATOS (GET)
          * ==========================================
+         * Parámetros esperados: ?action=(perfil|pedidos|resumen)&uid=(ID_USUARIO)
          */
         $action = $_GET['action'] ?? '';
         $uid = $_GET['uid'] ?? null;
 
         if ($action === 'perfil' && $uid) {
             /**
-             * OBTENER PERFIL
-             * Retorna la información personal del usuario.
+             * ACCIÓN: perfil
+             * Propósito: Retorna la información personal básica y de contacto del usuario.
              */
             $stmt = $pdo->prepare("SELECT id_usuario, nom_usuario, correo_usuario, num_telefono_usuario, direccion_principal, activo, fecha_registro FROM tab_Usuarios WHERE id_usuario = ?");
             $stmt->execute([$uid]);
@@ -50,10 +56,11 @@ try {
             } else {
                 echo json_encode(['ok' => false, 'msg' => 'Usuario no encontrado']);
             }
+
         } elseif ($action === 'pedidos' && $uid) {
             /**
-             * OBTENER PEDIDOS DEL USUARIO
-             * Retorna el historial de órdenes del cliente.
+             * ACCIÓN: pedidos
+             * Propósito: Retorna el historial de órdenes realizadas por el cliente, ordenadas por fecha reciente.
              */
             $stmt = $pdo->prepare("
                 SELECT id_orden, concepto, fecha_orden as fecha, total_orden, estado_orden 
@@ -65,14 +72,50 @@ try {
             $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             echo json_encode(['ok' => true, 'data' => $pedidos]);
+
+        } elseif ($action === 'resumen' && $uid) {
+            /**
+             * ACCIÓN: resumen
+             * Propósito: Proporciona conteos rápidos para el dashboard del usuario.
+             * - Pedidos Activos: Órdenes no finalizadas/canceladas.
+             * - Pedidos Completados: Órdenes ya enviadas.
+             * - Citas Pendientes: Solicitudes de servicio técnico aún no procesadas.
+             */
+
+            // 1. Conteo de Pedidos Activos
+            $stmtActivos = $pdo->prepare("SELECT COUNT(*) FROM tab_Orden WHERE id_usuario = ? AND estado_orden IN ('pendiente', 'confirmado', 'enviado')");
+            $stmtActivos->execute([$uid]);
+            $pedidosActivos = $stmtActivos->fetchColumn();
+
+            // 2. Conteo de Pedidos Completados (Historial terminado)
+            $stmtCompletados = $pdo->prepare("SELECT COUNT(*) FROM tab_Orden WHERE id_usuario = ? AND estado_orden = 'entregado' "); // Nota: se ajusta a estado lógico futuro si cambia
+            $stmtCompletados->execute([$uid]);
+            $pedidosCompletados = $stmtCompletados->fetchColumn();
+
+            // 3. Conteo de Citas Pendientes (Servicio Técnico)
+            $stmtCitas = $pdo->prepare("SELECT COUNT(*) FROM tab_Reservas WHERE id_usuario = ? AND estado_reserva = 'pendiente'");
+            $stmtCitas->execute([$uid]);
+            $citasPendientes = $stmtCitas->fetchColumn();
+
+            echo json_encode([
+                'ok' => true,
+                'data' => [
+                    'pedidosActivos' => (int) $pedidosActivos,
+                    'pedidosCompletados' => (int) $pedidosCompletados,
+                    'citasPendientes' => (int) $citasPendientes
+                ]
+            ]);
+
         } else {
-            echo json_encode(['ok' => false, 'msg' => 'Acción o ID de usuario no proporcionado']);
+            echo json_encode(['ok' => false, 'msg' => 'Acción o ID de usuario no proporcionado o inválido']);
         }
+
     } elseif ($method === 'POST') {
         /**
          * ==========================================
          * 🔄 PROCESAMIENTO DE ACCIONES (POST)
          * ==========================================
+         * Espera JSON con { action, uid, ...datos }
          */
         $data = getJsonInput();
         $action = $data['action'] ?? '';
@@ -80,8 +123,9 @@ try {
 
         if ($action === 'update_profile' && $uid) {
             /**
-             * ACTUALIZAR PERFIL
-             * Actualiza nombre, correo y teléfono. Valida que el correo sea único.
+             * ACCIÓN: update_profile
+             * Propósito: Actualiza los datos de contacto.
+             * Seguridad: Valida duplicidad de correo electrónico antes de guardar.
              */
             $nombre = $data['nombre'] ?? '';
             $email = $data['email'] ?? '';
@@ -92,7 +136,7 @@ try {
                 exit;
             }
 
-            // Validar que el nuevo correo no esté en uso por otro ID de usuario
+            // Validar que el nuevo correo no lo tenga otra cuenta
             $checkEmail = $pdo->prepare("SELECT id_usuario FROM tab_Usuarios WHERE correo_usuario = ? AND id_usuario <> ?");
             $checkEmail->execute([$email, $uid]);
             if ($checkEmail->fetch()) {
@@ -106,10 +150,12 @@ try {
             } else {
                 echo json_encode(['ok' => false, 'msg' => 'Error al actualizar el perfil']);
             }
+
         } elseif ($action === 'update_address' && $uid) {
             /**
-             * ACTUALIZAR DIRECCIÓN
-             * Gestiona tanto la tabla tab_Usuarios como tab_Direcciones_Envio usando transacciones.
+             * ACCIÓN: update_address
+             * Propósito: Sincroniza la dirección principal en Usuarios y el detalle en Direcciones_Envio.
+             * Lógica: Usa transacciones SQL para asegurar atomicidad (o se guardan ambos o nada).
              */
             $direccion = $data['direccion'] ?? '';
             $ciudad_id = $data['ciudad_id'] ?? null;
@@ -120,26 +166,24 @@ try {
                 exit;
             }
 
-            // Iniciamos una transacción para asegurar que ambas tablas se actualicen correctamente
             $pdo->beginTransaction();
             try {
-                // 1. Actualizar la dirección rápida en la tabla Usuarios
+                // 1. Actualizar caché de dirección en tabla Usuarios
                 $stmtUser = $pdo->prepare("UPDATE tab_Usuarios SET direccion_principal = ?, fec_update = NOW(), usr_update = 'self' WHERE id_usuario = ?");
                 $stmtUser->execute([$direccion, $uid]);
 
-                // 2. Gestionar el detalle en la tabla de Direcciones de Envío
-                // Buscamos si el usuario ya tiene una dirección marcada como predeterminada
+                // 2. Gestionar la tabla de Direcciones detallada
                 $check = $pdo->prepare("SELECT id_direccion FROM tab_Direcciones_Envio WHERE id_usuario = ? AND es_predeterminada = TRUE");
                 $check->execute([$uid]);
                 $dirExistente = $check->fetch();
 
                 if ($dirExistente) {
-                    // Si existe, la actualizamos
+                    // Actualizar si ya existe una predeterminada
                     $sqlDir = "UPDATE tab_Direcciones_Envio SET direccion_completa = ?, id_ciudad = ?, codigo_postal = ?, fec_update = NOW(), usr_update = 'self' WHERE id_direccion = ?";
                     $stmtDir = $pdo->prepare($sqlDir);
                     $stmtDir->execute([$direccion, $ciudad_id, $postal, $dirExistente['id_direccion']]);
                 } else {
-                    // Si no existe, creamos una nueva dirección predeterminada
+                    // Insertar nueva si no tiene
                     $maxId = $pdo->query("SELECT COALESCE(MAX(id_direccion), 0) + 1 FROM tab_Direcciones_Envio")->fetchColumn();
                     $sqlDir = "INSERT INTO tab_Direcciones_Envio (id_direccion, id_usuario, direccion_completa, id_ciudad, codigo_postal, es_predeterminada, fec_insert, usr_insert) 
                                VALUES (?, ?, ?, ?, ?, TRUE, NOW(), 'self')";
@@ -150,19 +194,17 @@ try {
                 $pdo->commit();
                 echo json_encode(['ok' => true, 'msg' => 'Dirección actualizada correctamente']);
             } catch (Exception $e) {
-                // Si algo falla, deshacemos todos los cambios en la BD
                 $pdo->rollBack();
                 echo json_encode(['ok' => false, 'msg' => 'Error al procesar dirección: ' . $e->getMessage()]);
             }
-        } elseif ($action === 'update_payment') {
-            // Placeholder para futura gestión de métodos de pago
+        } else {
             echo json_encode(['ok' => false, 'msg' => 'Acción POST no reconocida o datos incompletos']);
         }
     } else {
         http_response_code(405);
-        echo json_encode(['ok' => false, 'msg' => 'Método no permitido']);
+        echo json_encode(['ok' => false, 'msg' => 'Método HTTP no permitido']);
     }
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['ok' => false, 'msg' => 'Error de base de datos: ' . $e->getMessage()]);
+    echo json_encode(['ok' => false, 'msg' => 'Error crítico de base de datos: ' . $e->getMessage()]);
 }

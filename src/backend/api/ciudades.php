@@ -1,52 +1,74 @@
 <?php
 /**
- * API: DIVISIÓN TERRITORIAL (Departamentos y Ciudades)
+ * API: DIVISIÓN TERRITORIAL (UBICACIONES)
  * ---------------------------------------------------------
- * Este archivo provee los datos de ubicación necesarios para 
- * las direcciones de envío de los clientes.
+ * Propósito: Proveer el catálogo geográfico (Departamentos y Ciudades) 
+ * necesario para la recolección de direcciones de envío precisas durante 
+ * el registro de usuario y el proceso de checkout.
+ * 
+ * Lógica:
+ * - Sin 'action': No realiza operación.
+ * - action=departamentos: Lista todas las regiones administrativas.
+ * - action=ciudades: Lista los municipios vinculados a un departamento específico.
  */
 
 header('Content-Type: application/json');
 require_once '../config.php';
 
-// Verificación de la conexión a la base de datos
+// Verificación de integridad de la conexión a la base de datos
 if (!isset($pdo)) {
     http_response_code(500);
-    echo json_encode(['ok' => false, 'msg' => 'Error de configuración de BD']);
+    echo json_encode(['ok' => false, 'msg' => 'Error técnico: El servicio de datos geográficos no está disponible']);
     exit;
 }
 
-// Acción solicitada: 'departamentos' o 'ciudades'
+// Discriminador de acción
 $action = $_GET['action'] ?? '';
 
 try {
     if ($action === 'departamentos') {
         /**
-         * OBTENER DEPARTAMENTOS
-         * Devuelve la lista completa de departamentos disponibles.
+         * ==========================================
+         * 🌐 OBTENER DEPARTAMENTOS
+         * ==========================================
          */
-        $stmt = $pdo->query("SELECT id_departamento, nombre_departamento FROM tab_Departamentos ORDER BY nombre_departamento");
+        $stmt = $pdo->query("SELECT id_departamento, nombre_departamento FROM tab_Departamentos ORDER BY nombre_departamento ASC");
         $departamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_encode(['ok' => true, 'departamentos' => $departamentos]);
+
+        echo json_encode([
+            'ok' => true,
+            'count' => count($departamentos),
+            'departamentos' => $departamentos
+        ]);
     } elseif ($action === 'ciudades') {
         /**
-         * OBTENER CIUDADES
-         * Recibe el ID de un departamento y filtra las ciudades asociadas.
+         * ==========================================
+         * 🏙️ OBTENER CIUDADES
+         * ==========================================
+         * Seguridad: Requiere un id_departamento válido para evitar volcados masivos innecesarios.
          */
         $id_depto = $_GET['id_departamento'] ?? null;
         if (!$id_depto) {
-            echo json_encode(['ok' => false, 'msg' => 'ID de departamento requerido']);
+            echo json_encode(['ok' => false, 'msg' => 'Entrada inválida: Se requiere el identificador del departamento']);
             exit;
         }
-        $stmt = $pdo->prepare("SELECT id_ciudad, nombre_ciudad, codigo_postal FROM tab_Ciudades WHERE id_departamento = ? ORDER BY nombre_ciudad");
+
+        $stmt = $pdo->prepare("SELECT id_ciudad, nombre_ciudad, codigo_postal FROM tab_Ciudades WHERE id_departamento = ? ORDER BY nombre_ciudad ASC");
         $stmt->execute([$id_depto]);
         $ciudades = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_encode(['ok' => true, 'ciudades' => $ciudades]);
+
+        echo json_encode([
+            'ok' => true,
+            'count' => count($ciudades),
+            'ciudades' => $ciudades
+        ]);
     } else {
-        // En caso de que no se envíe una acción válida
-        echo json_encode(['ok' => false, 'msg' => 'Acción no reconocida']);
+        /**
+         * Manejo de rutas inválidas.
+         */
+        echo json_encode(['ok' => false, 'msg' => 'Solicitud malformada: Acción geográfica no reconocida']);
     }
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['ok' => false, 'msg' => 'Error de base de datos: ' . $e->getMessage()]);
+    echo json_encode(['ok' => false, 'msg' => 'Error crítico en consulta geográfica: ' . $e->getMessage()]);
 }

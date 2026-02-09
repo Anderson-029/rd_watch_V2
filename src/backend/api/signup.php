@@ -2,13 +2,20 @@
 /**
  * API: REGISTRO DE USUARIOS (SIGNUP)
  * ---------------------------------------------------------
- * Permite la creación de nuevas cuentas para clientes.
+ * Propósito: Permitir a nuevos visitantes crear una cuenta de 'cliente' 
+ * en la plataforma de forma autónoma.
+ * 
+ * Flujo de Seguridad:
+ * 1. Sanitización y validación de campos obligatorios.
+ * 2. Verificación de identidad única (Email) para evitar cuentas duplicadas.
+ * 3. Encriptación de alta seguridad mediante BCRYPT antes de la persistencia.
+ * 4. Asignación automática de rol 'cliente' y estado inicial 'activo'.
  */
 
 require_once '../config.php';
 header('Content-Type: application/json');
 
-// 1. OBTENCIÓN DE DATOS
+// Captura de datos JSON desde el flujo de entrada
 $input = json_decode(file_get_contents('php://input'), true);
 
 $nombre = $input['nombre'] ?? '';
@@ -16,29 +23,38 @@ $email = $input['email'] ?? '';
 $telefono = $input['telefono'] ?? '';
 $pass = $input['password'] ?? '';
 
-// Validaciones básicas de campos obligatorios
+// 1. REGLAS DE NEGOCIO: VALIDACIÓN DE CAMPOS
 if (empty($email) || empty($pass) || empty($nombre)) {
-    echo json_encode(["ok" => false, "msg" => "Faltan datos obligatorios"]);
+    echo json_encode(["ok" => false, "msg" => "Faltan datos obligatorios para completar el registro"]);
     exit;
 }
 
 try {
-    // 2. VERIFICACIÓN DE DUPLICADOS
-    // Comprobamos si el correo electrónico ya está registrado en la base de datos
+    /**
+     * ==========================================
+     * 🔍 COMPROBACIÓN DE EXISTENCIA
+     * ==========================================
+     */
     $stmt = $pdo->prepare("SELECT id_usuario FROM tab_Usuarios WHERE correo_usuario = ?");
     $stmt->execute([$email]);
     if ($stmt->fetch()) {
-        echo json_encode(["ok" => false, "msg" => "El correo ya está registrado"]);
+        echo json_encode(["ok" => false, "msg" => "Inconsistencia: Esta dirección de correo electrónico ya posee una cuenta activa"]);
         exit;
     }
 
-    // 3. SEGURIDAD DE CONTRASEÑA
-    // Encriptamos la contraseña usando el algoritmo BCRYPT antes de guardarla
+    /**
+     * ==========================================
+     * 🔐 PROTECCIÓN DE CREDENCIALES
+     * ==========================================
+     */
     $hash = password_hash($pass, PASSWORD_BCRYPT);
 
     /**
-     * 4. INSERCIÓN DEL NUEVO USUARIO
-     * Calculamos el ID manualmente (MAX + 1) para mayor control sobre el esquema.
+     * ==========================================
+     * 💾 PERSISTENCIA DEL NUEVO REGISTRO
+     * ==========================================
+     * Nota Técnica: Se utiliza una subconsulta para el ID_USUARIO para garantizar 
+     * continuidad numérica en ausencia de disparadores de autoincremento explícitos en el motor.
      */
     $sql = "INSERT INTO tab_Usuarios (
                 id_usuario, nom_usuario, correo_usuario, num_telefono_usuario, 
@@ -49,11 +65,17 @@ try {
             )";
 
     $stmtInsert = $pdo->prepare($sql);
-    $stmtInsert->execute([$nombre, $email, $telefono, $hash]);
 
-    echo json_encode(["ok" => true, "msg" => "Usuario registrado correctamente"]);
+    if ($stmtInsert->execute([$nombre, $email, $telefono, $hash])) {
+        echo json_encode([
+            "ok" => true,
+            "msg" => "¡Bienvenido a RD-Watch, " . $nombre . "! Tu cuenta ha sido creada exitosamente. Ya puedes iniciar sesión."
+        ]);
+    } else {
+        throw new Exception("Error interno al ejecutar la sentencia de inserción");
+    }
 
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(["ok" => false, "msg" => "Error de servidor: " . $e->getMessage()]);
+    echo json_encode(["ok" => false, "msg" => "Fallo técnico en el sistema de registro: " . $e->getMessage()]);
 }
