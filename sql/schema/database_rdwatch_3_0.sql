@@ -187,7 +187,7 @@ CREATE TABLE IF NOT EXISTS tab_Servicios
     id_servicio             BIGINT NOT NULL, -- Identificador único del servicio
     nom_servicio            VARCHAR(100) NOT NULL, -- Nombre del servicio
     descripcion             TEXT NOT NULL, -- Descripción del servicio
-    precio_servicio         DECIMAL(10, 2) NOT NULL, -- Costo del servicio, no puede ser negativo
+    precio_servicio         DECIMAL(15, 2) NOT NULL, -- Costo del servicio, no puede ser negativo
     duracion_estimada       VARCHAR(50) NOT NULL, -- Duración estimada del servicio (ej. "1 hora", "2-3 días")
 
     -- Columnas de auditoría
@@ -330,7 +330,7 @@ CREATE INDEX idx_producto_nombre ON tab_Productos (nom_producto); -- Índice par
 -- Almacena la cabecera de los carritos de compra de los usuarios.
 CREATE TABLE IF NOT EXISTS tab_Carrito
 (
-    id_carrito              INT NOT NULL, -- Identificador único del carrito
+    id_carrito              BIGINT NOT NULL, -- Identificador único del carrito
     id_usuario              BIGINT NOT NULL, -- Clave foránea a tab_Usuarios, un usuario tiene un único carrito activo
     fecha_creacion          TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de creación del carrito
     fecha_ultima_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de la última modificación del carrito
@@ -353,8 +353,8 @@ CREATE TABLE IF NOT EXISTS tab_Carrito
 -- Almacena los productos individuales dentro de cada carrito de compra.
 CREATE TABLE IF NOT EXISTS tab_Carrito_Detalle
 (
-    id_carrito_detalle      INT NOT NULL, -- Identificador único del detalle del carrito
-    id_carrito              INT NOT NULL, -- Clave foránea a tab_Carrito
+    id_carrito_detalle      BIGINT NOT NULL, -- Identificador único del detalle del carrito
+    id_carrito              BIGINT NOT NULL, -- Clave foránea a tab_Carrito
     id_producto             BIGINT NOT NULL, -- Clave foránea a tab_Productos
     cantidad                INT NOT NULL, -- Cantidad del producto en esta línea del carrito
 
@@ -382,7 +382,7 @@ CREATE TABLE IF NOT EXISTS tab_Orden
     fecha_orden             TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora en que se realizó la orden
     estado_orden            VARCHAR(50) NOT NULL, -- Estado actual de la orden
     concepto                VARCHAR(100), -- Descripción o concepto general de la orden
-    total_orden             DECIMAL(10, 2) NOT NULL, -- Costo total de la orden (se recomienda calcular a partir de Detalle_Orden y Orden_Servicios)
+    total_orden             DECIMAL(15, 2) NOT NULL, -- Costo total de la orden (se recomienda calcular a partir de Detalle_Orden y Orden_Servicios)
 
     -- Columnas de auditoría
     usr_insert VARCHAR(100),
@@ -407,7 +407,7 @@ CREATE TABLE IF NOT EXISTS tab_Detalle_Orden
     id_orden                BIGINT NOT NULL, -- Clave foránea a tab_Orden
     id_producto             BIGINT NOT NULL, -- Clave foránea a tab_Productos
     cantidad                INT NOT NULL, -- Cantidad del producto en esta línea de la orden
-    precio_unitario         DECIMAL(10, 2) NOT NULL, -- Precio del producto al momento de la compra
+    precio_unitario         DECIMAL(15, 2) NOT NULL, -- Precio del producto al momento de la compra
     id_promocion_aplicada   SMALLINT, -- Clave foránea a tab_Promociones (puede ser nulo si no hay promoción directa)
 
     -- Columnas de auditoría
@@ -430,11 +430,11 @@ CREATE TABLE IF NOT EXISTS tab_Detalle_Orden
 -- Almacena los servicios individuales comprados como parte de una orden.
 CREATE TABLE IF NOT EXISTS tab_Orden_Servicios
 (
-    id_orden_servicio       INT NOT NULL, -- Identificador único del detalle de servicio en la orden
-    id_orden                INT NOT NULL, -- Clave foránea a tab_Orden
+    id_orden_servicio       BIGINT NOT NULL, -- Identificador único del detalle de servicio en la orden
+    id_orden                BIGINT NOT NULL, -- Clave foránea a tab_Orden
     id_servicio             BIGINT NOT NULL, -- Clave foránea a tab_Servicios
     cantidad                INT NOT NULL, -- Cantidad de veces que se aplica el servicio
-    precio_servicio_aplicado DECIMAL(10, 2) NOT NULL, -- Precio del servicio al momento de la orden
+    precio_servicio_aplicado DECIMAL(15, 2) NOT NULL, -- Precio del servicio al momento de la orden
 
     -- Columnas de auditoría
     usr_insert VARCHAR(100),
@@ -458,7 +458,7 @@ CREATE TABLE IF NOT EXISTS tab_Facturas (
     id_orden        BIGINT NOT NULL,     -- ID de la orden asociada a la factura
     id_usuario      BIGINT NOT NULL,     -- ID del usuario (cliente) asociado a la factura
     fecha_emision   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de emisión de la factura
-    total_factura   DECIMAL(10, 2) NOT NULL, -- Total de la factura
+    total_factura   DECIMAL(15, 2) NOT NULL, -- Total de la factura
     estado_factura  VARCHAR(50) NOT NULL DEFAULT 'Emitida', -- Estado de la factura
 
        -- Columnas de auditoría
@@ -483,8 +483,8 @@ CREATE TABLE IF NOT EXISTS tab_Detalle_Factura (
     id_factura            BIGINT NOT NULL,              -- ID de la factura a la que pertenece este detalle
     id_producto           BIGINT NOT NULL,             -- ID del producto incluido en este detalle
     cantidad              SMALLINT NOT NULL,                -- Cantidad del producto
-    precio_unitario       DECIMAL(10, 2) NOT NULL, -- Precio del producto al momento de la facturación
-    subtotal_linea        DECIMAL(10, 2) NOT NULL, -- Subtotal para esta línea
+    precio_unitario       DECIMAL(15, 2) NOT NULL, -- Precio del producto al momento de la facturación
+    subtotal_linea        DECIMAL(15, 2) NOT NULL, -- Subtotal para esta línea
 
     -- Columnas de auditoría
     usr_insert VARCHAR(100),
@@ -515,7 +515,7 @@ CREATE TABLE IF NOT EXISTS tab_Envios
     estado_envio            VARCHAR(50) NOT NULL, -- Estado actual del envío
     fecha_envio             TIMESTAMP NOT NULL, -- Fecha y hora en que se realizó el envío
     fecha_entrega_estimada  TIMESTAMP NOT NULL, -- Fecha y hora estimada de entrega
-    costo_envio             DECIMAL(10,2) NOT NULL, -- Costo del envío
+    costo_envio             DECIMAL(15, 2) NOT NULL, -- Costo del envío
 
     -- Columnas de auditoría
     usr_insert VARCHAR(100),
@@ -538,7 +538,7 @@ CREATE TABLE IF NOT EXISTS tab_Envios
 -- Almacena las calificaciones y reseñas de los usuarios sobre los productos.
 CREATE TABLE IF NOT EXISTS tab_Opiniones
 (
-    id_opinion              INT NOT NULL, -- Identificador único de la opinión
+    id_opinion              BIGINT NOT NULL, -- Identificador único de la opinión
     id_usuario              BIGINT NOT NULL, -- Identificador del usuario que realizó la opinión
     id_producto             BIGINT  NULL, -- Identificador del producto sobre el que se realizó la opinión
     calificacion            SMALLINT NOT NULL, -- Calificación del producto (1 a 5 estrellas)
@@ -567,7 +567,7 @@ CREATE TABLE IF NOT EXISTS tab_Pagos
 (
     id_pago                 BIGINT NOT NULL, -- Identificador único del pago
     id_orden                BIGINT NOT NULL, -- Clave foránea a tab_Orden, una orden tiene un único pago
-    monto                   DECIMAL(10, 2) NOT NULL, -- Monto del pago
+    monto                   DECIMAL(15, 2) NOT NULL, -- Monto del pago
     id_metodo_pago          SMALLINT NOT NULL, -- Clave foránea a tab_Metodos_Pago
     estado_pago             VARCHAR(50) NOT NULL, -- Estado actual del pago
     fecha_pago              TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora en que se realizó el pago
