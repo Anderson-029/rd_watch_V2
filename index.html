@@ -118,7 +118,9 @@
                                 </div>
                                 <div class="input-block">
                                     <label for="signup-phone">Teléfono</label>
-                                    <input id="signup-phone" type="tel" placeholder="+57 300 123 4567" required>
+                                    <input id="signup-phone" type="tel" placeholder="3001234567" maxlength="10"
+                                        minlength="10" pattern="\d{10}"
+                                        title="El teléfono debe tener 10 dígitos numéricos" required>
                                 </div>
                                 <div class="input-block">
                                     <label for="signup-password">Contraseña</label>
@@ -189,7 +191,7 @@
                 </div>
                 <div class="hero-media-area">
                     <video autoplay muted loop playsinline class="hero-video-element">
-                        <source src="src/css/reloj_4.mp4" type="video/mp4">
+                        <source src="src/css/hero_video.mp4" type="video/mp4">
                     </video>
                     <div class="hero-video-overlay"></div>
                 </div>
@@ -243,25 +245,26 @@
                             incomparables. Cada reloj que pasa por nuestras manos recibe el mismo cuidado meticuloso que
                             le daríamos a una pieza de museo.</p>
                     </div>
-                    <div class="about-us-stats">
+                    <div class="stats-grid">
                         <div class="stat-item">
-                            <div class="stat-number" data-count="53">0</div>
+                            <div class="stat-number" id="stat-years" data-count="50">0</div>
                             <div class="stat-label">Años de experiencia</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number" data-count="12000">0</div>
+                            <div class="stat-number" id="stat-repaired" data-count="12000">0</div>
                             <div class="stat-label">Relojes reparados</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number" data-count="98">0</div>
+                            <div class="stat-number" id="stat-satisfaction" data-count="98">0</div>
                             <div class="stat-label">% Clientes satisfechos</div>
                         </div>
                     </div>
-                    <a href="#" class="button button-primary">Conoce nuestra historia completa</a>
                 </div>
                 <div class="about-us-image-wrapper">
                     <div class="image-frame">
-                        <img src="img/watchmaker.jpg" alt="Maestro relojero trabajando" class="about-us-image">
+                        <video autoplay muted loop playsinline class="about-us-image">
+                            <source src="src/css/reel_duran_3.mp4" type="video/mp4">
+                        </video>
                         <div class="frame-decoration"></div>
                     </div>
                     <div class="experience-badge">
@@ -283,48 +286,26 @@
                         <div class="divider-line"></div>
                     </div>
                 </div>
-                <div class="gallery-grid">
-                    <div class="gallery-item">
-                        <img src="img/gallery-1.jpg" alt="Reloj de lujo">
-                        <div class="gallery-overlay">
-                            <h3>Rolex Daytona</h3>
-                            <p>Servicio completo</p>
-                            <button class="gallery-zoom"><i class="fas fa-search-plus"></i></button>
+                <div class="gallery-carousel-container">
+                    <button class="gallery-btn prev"><i class="fas fa-chevron-left"></i></button>
+                    <div class="gallery-track-wrapper">
+                        <div class="gallery-track" id="gallery-track">
+                            <div class="gallery-slide active">
+                                <video controls playsinline>
+                                    <source src="src/css/reel%20duran%20%231.mp4" type="video/mp4">
+                                </video>
+                            </div>
+                            <div class="gallery-slide">
+                                <video controls playsinline>
+                                    <source src="src/css/reel%20duran%20%232.mp4" type="video/mp4">
+                                </video>
+                            </div>
                         </div>
                     </div>
-                    <div class="gallery-item">
-                        <img src="img/gallery-2.jpg" alt="Reparación de reloj">
-                        <div class="gallery-overlay">
-                            <h3>Omega Speedmaster</h3>
-                            <p>Cambio de cristal</p>
-                            <button class="gallery-zoom"><i class="fas fa-search-plus"></i></button>
-                        </div>
-                    </div>
-                    <div class="gallery-item">
-                        <img src="img/gallery-3.jpg" alt="Reloj antiguo">
-                        <div class="gallery-overlay">
-                            <h3>Reloj de bolsillo 1890</h3>
-                            <p>Restauración completa</p>
-                            <button class="gallery-zoom"><i class="fas fa-search-plus"></i></button>
-                        </div>
-                    </div>
-                    <div class="gallery-item">
-                        <img src="img/gallery-4.jpg" alt="Taller de relojería">
-                        <div class="gallery-overlay">
-                            <h3>Nuestro taller</h3>
-                            <p>Zona de reparación</p>
-                            <button class="gallery-zoom"><i class="fas fa-search-plus"></i></button>
-                        </div>
-                    </div>
-                </div>
-                <div class="gallery-controls">
-                    <button class="gallery-prev"><i class="fas fa-chevron-left"></i></button>
-                    <div class="gallery-dots"></div>
-                    <button class="gallery-next"><i class="fas fa-chevron-right"></i></button>
+                    <button class="gallery-btn next"><i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
         </section>
-
         <section id="reviews-section" class="reviews-section">
             <div class="container">
                 <div class="section-header">
@@ -439,15 +420,7 @@
                         </div>
                     </div>
 
-                    <div class="contact-social">
-                        <h3>Síguenos</h3>
-                        <div class="social-icons">
-                            <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                            <a href="#" class="social-icon"><i class="fab fa-whatsapp"></i></a>
-                            <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
-                        </div>
-                    </div>
+
                 </div>
 
                 <div class="contact-form-wrapper">
@@ -499,47 +472,7 @@
             </div>
         </section>
 
-        <section class="brands-section">
-            <div class="container">
-                <h3 class="brands-title">Marcas que confían en nosotros</h3>
-            </div>
-            <div class="brands-carousel-container">
-                <div class="brands-slider">
-                    <!-- Logos: Original Set -->
-                    <div class="brand-item">
-                        <img src="img/brand-rolex.png" alt="Rolex">
-                    </div>
-                    <div class="brand-item">
-                        <img src="img/brand-omega.png" alt="Omega">
-                    </div>
-                    <div class="brand-item">
-                        <img src="img/brand-tagheuer.png" alt="Tag Heuer">
-                    </div>
-                    <div class="brand-item">
-                        <img src="img/brand-patek.png" alt="Patek Philippe">
-                    </div>
-                    <div class="brand-item">
-                        <img src="img/brand-cartier.png" alt="Cartier">
-                    </div>
-                    <!-- Logos: Duplicated Set (Loop) -->
-                    <div class="brand-item">
-                        <img src="img/brand-rolex.png" alt="Rolex">
-                    </div>
-                    <div class="brand-item">
-                        <img src="img/brand-omega.png" alt="Omega">
-                    </div>
-                    <div class="brand-item">
-                        <img src="img/brand-tagheuer.png" alt="Tag Heuer">
-                    </div>
-                    <div class="brand-item">
-                        <img src="img/brand-patek.png" alt="Patek Philippe">
-                    </div>
-                    <div class="brand-item">
-                        <img src="img/brand-cartier.png" alt="Cartier">
-                    </div>
-                </div>
-            </div>
-        </section>
+
     </main>
 
     <div id="cookie-banner" class="cookie-banner">
@@ -552,71 +485,24 @@
         </div>
     </div>
     <footer class="footer">
-        <div class="container footer-grid">
+        <div class="container footer-grid" style="display:flex; justify-content:center; text-align:center;">
             <!-- Columna 1: Branding -->
-            <div class="footer-col footer-brand">
-                <a href="index.html" class="footer-logo">
+            <div class="footer-col footer-brand" style="max-width: 600px;">
+                <a href="index.html" class="footer-logo" style="justify-content:center;">
                     <i class="fas fa-clock logo-icon"></i>
                     <span>Relojería</span> DURÁN
                 </a>
-                <p class="footer-description">
-                    Líderes en alta relojería desde 1970. Nos especializamos en la restauración y mantenimiento de
-                    piezas de lujo, preservando el legado del tiempo con precisión técnica y pasión artesanal.
-                </p>
-                <div class="footer-social">
-                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-                </div>
-            </div>
-
-            <!-- Columna 2: Navegación -->
-            <div class="footer-col">
-                <h4 class="footer-title">Navegación</h4>
-                <ul class="footer-links-list">
-                    <li><a href="#services-section">Servicios</a></li>
-                    <li><a href="#about-section">Sobre Nosotros</a></li>
-                    <li><a href="#reviews-section">Reseñas</a></li>
-                    <li><a href="#portfolio-section">Galería</a></li>
-                </ul>
-            </div>
-
-            <!-- Columna 3: Especialidades -->
-            <div class="footer-col">
-                <h4 class="footer-title">Especialidades</h4>
-                <ul class="footer-links-list">
-                    <li><a href="#">Restauración Vintage</a></li>
-                    <li><a href="#">Servicio Técnico Rolex</a></li>
-                    <li><a href="#">Reparación de Cronógrafos</a></li>
-                    <li><a href="#">Tasación Especializada</a></li>
-                </ul>
-            </div>
-
-            <!-- Columna 4: Contacto -->
-            <div class="footer-col">
-                <h4 class="footer-title">Atención Directa</h4>
-                <ul class="footer-contact-info">
-                    <li><i class="fas fa-map-marker-alt"></i> Calle del Tiempo, 12, Ciudad Central</li>
-                    <li><i class="fas fa-phone"></i> +34 900 000 000</li>
-                    <li><i class="fas fa-envelope"></i> info@relojeriaduran.com</li>
-                    <li><i class="fas fa-clock"></i> Lun - Vie: 10:00 - 19:00</li>
-                </ul>
-                <div class="footer-payment">
-                    <i class="fab fa-cc-visa" title="Visa"></i>
-                    <i class="fab fa-cc-mastercard" title="Mastercard"></i>
-                    <i class="fab fa-cc-paypal" title="PayPal"></i>
-                    <i class="fas fa-university" title="Transferencia"></i>
+                <div class="footer-legal-links">
+                    <a href="src/politica-privacidad.html">Política de cookies</a>
+                    <a href="src/politica-privacidad.html">Política de privacidad</a>
+                    <a href="src/aviso-legal.html">Aviso legal</a>
+                    <a href="https://maps.app.goo.gl/2gRieJjKkeFFvC9m6" target="_blank">Mapa del sitio</a>
                 </div>
             </div>
         </div>
 
         <div class="footer-bottom">
-            <div class="container footer-bottom-content">
-                <div class="footer-legal">
-                    <a href="src/politica-privacidad.html">Privacidad</a>
-                    <a href="src/politica-privacidad.html">Cookies</a>
-                    <a href="src/aviso-legal.html">Aviso Legal</a>
-                </div>
+            <div class="container footer-bottom-content" style="justify-content:center;">
                 <p class="copyright">&copy; 2025 Relojería Durán. La excelencia en cada segundo.</p>
             </div>
         </div>

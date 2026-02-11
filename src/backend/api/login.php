@@ -17,7 +17,17 @@ require_once '../config.php';
 header('Content-Type: application/json');
 
 // Captura de datos JSON del cliente
+require_once '../utils/security_utils.php'; // Utilerías de seguridad
+
 $input = json_decode(file_get_contents('php://input'), true);
+
+$clientIP = getClientIP();
+// 🛡️ RATE LIMITING: Verificar intentos previos (5 intentos en 15 min)
+if (!checkRateLimit($pdo, $clientIP, 'login_attempt', 5, 15)) {
+    http_response_code(429); // Too Many Requests
+    echo json_encode(["ok" => false, "msg" => "Demasiados intentos fallidos. Por favor espere 15 minutos."]);
+    exit;
+}
 
 $email = $input['email'] ?? '';
 $pass = $input['password'] ?? ($input['contra'] ?? '');
@@ -38,6 +48,8 @@ try {
     $user = $stmt->fetch();
 
     if (!$user) {
+        // 🛡️ Registrar el intento fallido (incluso si user no existe, para evitar enumeración rápida)
+        logRateLimit($pdo, $clientIP, 'login_attempt');
         echo json_encode(["ok" => false, "msg" => "Las credenciales no coinciden con nuestros registros"]);
         exit;
     }
@@ -80,6 +92,11 @@ try {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+        // 🛡️ Seguridad de Sesión: Prevenir Session Fixation
+        session_regenerate_id(true);
+
+        // 🛡️ Limpiar conteo de fallos tras éxito
+        clearRateLimit($pdo, $clientIP, 'login_attempt');
 
         $_SESSION['user_id'] = $user['id_usuario'];
         $_SESSION['user_role'] = $user['rol'];
@@ -98,6 +115,8 @@ try {
             ]
         ]);
     } else {
+        // 🛡️ Registrar el intento fallido
+        logRateLimit($pdo, $clientIP, 'login_attempt');
         echo json_encode(["ok" => false, "msg" => "La contraseña ingresada es incorrecta"]);
     }
 

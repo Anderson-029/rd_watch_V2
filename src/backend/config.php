@@ -15,11 +15,28 @@
 
 /* 
  * 1. GESTIÓN DE ERRORES (ERROR HANDLING)
- * Se activa el reporte de errores para agilizar el ciclo de desarrollo y soporte.
- * En PRODUCCIÓN, 'display_errors' debería establecerse en 0 para seguridad.
+ * 🛡️ SEGURIDAD A05: En producción 'display_errors' debe ser 0.
+ * Los errores se registran silenciosamente en el log del servidor.
  */
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 error_reporting(E_ALL);
+
+// 🛡️ SEGURIDAD DE SESIONES (COOKIES)
+// Nota: 'cookie_secure' está en 0 para permitir funcionamiento en HTTP (Entorno de Pruebas).
+// En Producción con HTTPS, cambiar a 1.
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_secure', 0); // 0 = Permitir HTTP
+ini_set('session.cookie_samesite', 'Lax');
+
+// 🛡️ CABECERAS DE SEGURIDAD HTTP
+header("X-Frame-Options: DENY");
+header("X-Content-Type-Options: nosniff");
+header("X-XSS-Protection: 1; mode=block");
+header("Referrer-Policy: strict-origin-when-cross-origin");
+// CSP Básico (Permitir scripts propios y de fuentes confiables usadas en el proyecto)
+// CSP Básico (Nivel Desarrollo): Permite scripts propios y conexiones HTTP/HTTPS para evitar bloqueos en red local
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' http: https:; frame-src 'self' https://js.stripe.com;");
 
 /**
  * ==========================================

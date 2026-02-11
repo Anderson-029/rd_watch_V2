@@ -12,8 +12,11 @@
 
 header('Content-Type: application/json');
 require_once '../config.php';
+require_once '../utils/security_utils.php';
 
-// Verificación de la conexión a la base de datos
+// 🛡️ SEGURIDAD: Se requiere inicio de sesión para CUALQUIER acción
+requireLogin();
+
 if (!isset($pdo)) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error de configuración de BD']);
@@ -37,12 +40,12 @@ try {
          * ==========================================
          * 🔍 OBTENCIÓN DE DATOS (GET)
          * ==========================================
-         * Parámetros esperados: ?action=(perfil|pedidos|resumen)&uid=(ID_USUARIO)
+         * 🛡️ SEGURIDAD IDOR: Se ignora el 'uid' de la URL para usar el de la sesión.
          */
+        $uid = $_SESSION['user_id'];
         $action = $_GET['action'] ?? '';
-        $uid = $_GET['uid'] ?? null;
 
-        if ($action === 'perfil' && $uid) {
+        if ($action === 'perfil') {
             /**
              * ACCIÓN: perfil
              * Propósito: Retorna la información personal básica y de contacto del usuario.
@@ -57,7 +60,7 @@ try {
                 echo json_encode(['ok' => false, 'msg' => 'Usuario no encontrado']);
             }
 
-        } elseif ($action === 'pedidos' && $uid) {
+        } elseif ($action === 'pedidos') {
             /**
              * ACCIÓN: pedidos
              * Propósito: Retorna el historial de órdenes realizadas por el cliente, ordenadas por fecha reciente.
@@ -73,13 +76,10 @@ try {
 
             echo json_encode(['ok' => true, 'data' => $pedidos]);
 
-        } elseif ($action === 'resumen' && $uid) {
+        } elseif ($action === 'resumen') {
             /**
              * ACCIÓN: resumen
              * Propósito: Proporciona conteos rápidos para el dashboard del usuario.
-             * - Pedidos Activos: Órdenes no finalizadas/canceladas.
-             * - Pedidos Completados: Órdenes ya enviadas.
-             * - Citas Pendientes: Solicitudes de servicio técnico aún no procesadas.
              */
 
             // 1. Conteo de Pedidos Activos
@@ -87,12 +87,12 @@ try {
             $stmtActivos->execute([$uid]);
             $pedidosActivos = $stmtActivos->fetchColumn();
 
-            // 2. Conteo de Pedidos Completados (Historial terminado)
-            $stmtCompletados = $pdo->prepare("SELECT COUNT(*) FROM tab_Orden WHERE id_usuario = ? AND estado_orden = 'entregado' "); // Nota: se ajusta a estado lógico futuro si cambia
+            // 2. Conteo de Pedidos Completados
+            $stmtCompletados = $pdo->prepare("SELECT COUNT(*) FROM tab_Orden WHERE id_usuario = ? AND estado_orden = 'entregado' "); 
             $stmtCompletados->execute([$uid]);
             $pedidosCompletados = $stmtCompletados->fetchColumn();
 
-            // 3. Conteo de Citas Pendientes (Servicio Técnico)
+            // 3. Conteo de Citas Pendientes
             $stmtCitas = $pdo->prepare("SELECT COUNT(*) FROM tab_Reservas WHERE id_usuario = ? AND estado_reserva = 'pendiente'");
             $stmtCitas->execute([$uid]);
             $citasPendientes = $stmtCitas->fetchColumn();
@@ -107,7 +107,7 @@ try {
             ]);
 
         } else {
-            echo json_encode(['ok' => false, 'msg' => 'Acción o ID de usuario no proporcionado o inválido']);
+            echo json_encode(['ok' => false, 'msg' => 'Acción no especificada o inválida']);
         }
 
     } elseif ($method === 'POST') {
@@ -118,8 +118,17 @@ try {
          * Espera JSON con { action, uid, ...datos }
          */
         $data = getJsonInput();
+        validateCsrfToken();
         $action = $data['action'] ?? '';
-        $uid = $data['uid'] ?? null;
+
+        // 🛡️ SEGURIDAD IDOR: El ID de usuario NUNCA debe venir del cliente para operaciones de escritura.
+        // Se debe usar estrictamente el ID de la sesión activa.
+        if (!isset($_SESSION['user_id'])) {
+            http_response_code(401);
+            echo json_encode(['ok' => false, 'msg' => 'Sesión expirada o no válida']);
+            exit;
+        }
+        $uid = $_SESSION['user_id'];
 
         if ($action === 'update_profile' && $uid) {
             /**
@@ -127,9 +136,9 @@ try {
              * Propósito: Actualiza los datos de contacto.
              * Seguridad: Valida duplicidad de correo electrónico antes de guardar.
              */
-            $nombre = $data['nombre'] ?? '';
-            $email = $data['email'] ?? '';
-            $telefono = $data['telefono'] ?? '';
+            $nombre = sanitizeHtml(trim($data['nombre'] ?? ''));
+            $email = filter_var(trim($data['email'] ?? ''), FILTER_SANITIZE_EMAIL);
+            $telefono = preg_replace('/\D/', '', $data['telefono'] ?? ''); // Solo números
 
             if (empty($nombre) || empty($email)) {
                 echo json_encode(['ok' => false, 'msg' => 'El nombre y el correo son obligatorios']);

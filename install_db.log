@@ -2,55 +2,51 @@
  pg_terminate_backend 
 ----------------------
  t
- t
- t
- t
- t
-(5 filas)
+(1 fila)
 
 DROP DATABASE
 CREATE DATABASE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:1: NOTICE:  la tabla «tab_opiniones» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:1: NOTICE:  table "tab_opiniones" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:2: NOTICE:  la tabla «tab_envios» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:2: NOTICE:  table "tab_envios" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:3: NOTICE:  la tabla «tab_orden» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:3: NOTICE:  table "tab_orden" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:4: NOTICE:  la tabla «tab_carrito» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:4: NOTICE:  table "tab_carrito" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:5: NOTICE:  la tabla «tab_productos_promociones» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:5: NOTICE:  table "tab_productos_promociones" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:6: NOTICE:  la tabla «tab_productos» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:6: NOTICE:  table "tab_productos" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:7: NOTICE:  la tabla «tab_direcciones_envio» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:7: NOTICE:  table "tab_direcciones_envio" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:8: NOTICE:  la tabla «tab_ciudades» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:8: NOTICE:  table "tab_ciudades" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:9: NOTICE:  la tabla «tab_departamentos» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:9: NOTICE:  table "tab_departamentos" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:10: NOTICE:  la tabla «tab_reservas» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:10: NOTICE:  table "tab_reservas" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:11: NOTICE:  la tabla «tab_contacto» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:11: NOTICE:  table "tab_contacto" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:12: NOTICE:  la tabla «tab_usuario_metodo_pago» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:12: NOTICE:  table "tab_usuario_metodo_pago" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:13: NOTICE:  la tabla «tab_metodos_pago» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:13: NOTICE:  table "tab_metodos_pago" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:14: NOTICE:  la tabla «tab_servicios» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:14: NOTICE:  table "tab_servicios" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:15: NOTICE:  la tabla «tab_promociones» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:15: NOTICE:  table "tab_promociones" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:16: NOTICE:  la tabla «tab_marcas» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:16: NOTICE:  table "tab_marcas" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:17: NOTICE:  la tabla «tab_subcategorias» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:17: NOTICE:  table "tab_subcategorias" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:18: NOTICE:  la tabla «tab_categorias» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:18: NOTICE:  table "tab_categorias" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:19: NOTICE:  la tabla «tab_usuarios» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:19: NOTICE:  table "tab_usuarios" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:20: NOTICE:  la tabla «tab_empleados» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:20: NOTICE:  table "tab_empleados" does not exist, skipping
 DROP TABLE
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:21: NOTICE:  la tabla «tab_eventos» no existe, omitiendo
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/schema/database_rdwatch_3_0.sql:21: NOTICE:  table "tab_eventos" does not exist, skipping
 DROP TABLE
 CREATE TABLE
 CREATE INDEX
@@ -96,339 +92,344 @@ CREATE TABLE
 CREATE INDEX
 COMMENT
 INSERT 0 1
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/business_logic.sql:35: NOTICE:  la referencia al tipo tab_usuarios.correo_usuario%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/business_logic.sql:60: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_carrito.sql:115: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_carrito.sql:115: NOTICE:  la referencia al tipo tab_productos.id_producto%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_carrito.sql:115: NOTICE:  la referencia al tipo tab_carrito_detalle.cantidad%TYPE convertida a integer
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:30: NOTICE:  la referencia al tipo tab_subcategorias.id_categoria%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:30: NOTICE:  la referencia al tipo tab_subcategorias.id_subcategoria%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:30: NOTICE:  la referencia al tipo tab_subcategorias.nom_subcategoria%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:54: NOTICE:  la referencia al tipo tab_subcategorias.id_categoria%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:54: NOTICE:  la referencia al tipo tab_subcategorias.id_subcategoria%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:54: NOTICE:  la referencia al tipo tab_subcategorias.nom_subcategoria%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:54: NOTICE:  la referencia al tipo tab_subcategorias.estado%TYPE convertida a boolean
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:75: NOTICE:  la referencia al tipo tab_subcategorias.id_categoria%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:75: NOTICE:  la referencia al tipo tab_subcategorias.id_subcategoria%TYPE convertida a integer
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:110: NOTICE:  la referencia al tipo tab_categorias.id_categoria%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:110: NOTICE:  la referencia al tipo tab_categorias.nom_categoria%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:110: NOTICE:  la referencia al tipo tab_categorias.descripcion_categoria%TYPE convertida a text
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:149: NOTICE:  la referencia al tipo tab_categorias.id_categoria%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:149: NOTICE:  la referencia al tipo tab_categorias.nom_categoria%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:149: NOTICE:  la referencia al tipo tab_categorias.descripcion_categoria%TYPE convertida a text
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:149: NOTICE:  la referencia al tipo tab_categorias.estado%TYPE convertida a boolean
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_categorias.sql:169: NOTICE:  la referencia al tipo tab_categorias.id_categoria%TYPE convertida a integer
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  la referencia al tipo tab_contacto.id_contacto%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  la referencia al tipo tab_contacto.nombre_remitente%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  la referencia al tipo tab_contacto.correo_remitente%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  la referencia al tipo tab_contacto.telefono_remitente%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  la referencia al tipo tab_contacto.asunto%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  la referencia al tipo tab_contacto.mensaje%TYPE convertida a text
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_contacto.sql:40: NOTICE:  la referencia al tipo tab_contacto.id_contacto%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_contacto.sql:40: NOTICE:  la referencia al tipo tab_contacto.estado%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_contacto.sql:59: NOTICE:  la referencia al tipo tab_contacto.id_contacto%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  la referencia al tipo tab_empleados.id_empleado%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  la referencia al tipo tab_empleados.nom_empleado%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  la referencia al tipo tab_empleados.apellido_empleado%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  la referencia al tipo tab_empleados.correo%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  la referencia al tipo tab_empleados.telefono%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  la referencia al tipo tab_empleados.puesto%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  la referencia al tipo tab_empleados.fecha_contratacion%TYPE convertida a date
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  la referencia al tipo tab_empleados.id_empleado%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  la referencia al tipo tab_empleados.nom_empleado%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  la referencia al tipo tab_empleados.apellido_empleado%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  la referencia al tipo tab_empleados.correo%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  la referencia al tipo tab_empleados.telefono%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  la referencia al tipo tab_empleados.puesto%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:71: NOTICE:  la referencia al tipo tab_empleados.id_empleado%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  la referencia al tipo tab_empleados.id_empleado%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  la referencia al tipo tab_empleados.num_documento%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  la referencia al tipo tab_empleados.nom_empleado%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  la referencia al tipo tab_empleados.apellido_empleado%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  la referencia al tipo tab_empleados.correo%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  la referencia al tipo tab_empleados.telefono%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  la referencia al tipo tab_empleados.puesto%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  la referencia al tipo tab_empleados.fecha_contratacion%TYPE convertida a date
-CREATE FUNCTION
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  la referencia al tipo tab_direcciones_envio.id_direccion%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  la referencia al tipo tab_direcciones_envio.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  la referencia al tipo tab_direcciones_envio.id_ciudad%TYPE convertida a smallint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  la referencia al tipo tab_direcciones_envio.direccion_completa%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  la referencia al tipo tab_direcciones_envio.codigo_postal%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  la referencia al tipo tab_direcciones_envio.es_predeterminada%TYPE convertida a boolean
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  la referencia al tipo tab_direcciones_envio.id_direccion%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  la referencia al tipo tab_direcciones_envio.id_ciudad%TYPE convertida a smallint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  la referencia al tipo tab_direcciones_envio.direccion_completa%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  la referencia al tipo tab_direcciones_envio.codigo_postal%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  la referencia al tipo tab_direcciones_envio.es_predeterminada%TYPE convertida a boolean
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:183: NOTICE:  la referencia al tipo tab_direcciones_envio.id_direccion%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  la referencia al tipo tab_eventos.id_evento%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  la referencia al tipo tab_eventos.titulo%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  la referencia al tipo tab_eventos.descripcion%TYPE convertida a text
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  la referencia al tipo tab_eventos.fecha_inicio%TYPE convertida a timestamp without time zone
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  la referencia al tipo tab_eventos.fecha_fin%TYPE convertida a timestamp without time zone
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  la referencia al tipo tab_eventos.id_evento%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  la referencia al tipo tab_eventos.titulo%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  la referencia al tipo tab_eventos.descripcion%TYPE convertida a text
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  la referencia al tipo tab_eventos.fecha_inicio%TYPE convertida a timestamp without time zone
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  la referencia al tipo tab_eventos.fecha_fin%TYPE convertida a timestamp without time zone
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_eventos.sql:68: NOTICE:  la referencia al tipo tab_eventos.id_evento%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:227: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:227: NOTICE:  la referencia al tipo tab_metodos_pago.id_metodo_pago%TYPE convertida a smallint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:227: NOTICE:  la referencia al tipo tab_facturas.id_factura%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:260: NOTICE:  la referencia al tipo tab_facturas.id_orden%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:260: NOTICE:  la referencia al tipo tab_facturas.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:260: NOTICE:  la referencia al tipo tab_facturas.total_factura%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:260: NOTICE:  la referencia al tipo tab_facturas.estado_factura%TYPE convertida a character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/scripts/create_reviews_table.sql:23: NOTICE:  relation "tab_opiniones" already exists, skipping
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/scripts/create_reviews_table.sql:28: ERROR:  column "activo" does not exist
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/business_logic.sql:35: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/business_logic.sql:60: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_carrito.sql:115: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_carrito.sql:115: NOTICE:  type reference tab_productos.id_producto%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_carrito.sql:115: NOTICE:  type reference tab_carrito_detalle.cantidad%TYPE converted to integer
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:30: NOTICE:  type reference tab_subcategorias.id_categoria%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:30: NOTICE:  type reference tab_subcategorias.id_subcategoria%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:30: NOTICE:  type reference tab_subcategorias.nom_subcategoria%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:54: NOTICE:  type reference tab_subcategorias.id_categoria%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:54: NOTICE:  type reference tab_subcategorias.id_subcategoria%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:54: NOTICE:  type reference tab_subcategorias.nom_subcategoria%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:54: NOTICE:  type reference tab_subcategorias.estado%TYPE converted to boolean
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:75: NOTICE:  type reference tab_subcategorias.id_categoria%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:75: NOTICE:  type reference tab_subcategorias.id_subcategoria%TYPE converted to integer
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:110: NOTICE:  type reference tab_categorias.id_categoria%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:110: NOTICE:  type reference tab_categorias.nom_categoria%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:110: NOTICE:  type reference tab_categorias.descripcion_categoria%TYPE converted to text
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:149: NOTICE:  type reference tab_categorias.id_categoria%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:149: NOTICE:  type reference tab_categorias.nom_categoria%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:149: NOTICE:  type reference tab_categorias.descripcion_categoria%TYPE converted to text
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:149: NOTICE:  type reference tab_categorias.estado%TYPE converted to boolean
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_categorias.sql:169: NOTICE:  type reference tab_categorias.id_categoria%TYPE converted to integer
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  type reference tab_contacto.id_contacto%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  type reference tab_contacto.nombre_remitente%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  type reference tab_contacto.correo_remitente%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  type reference tab_contacto.telefono_remitente%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  type reference tab_contacto.asunto%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_contacto.sql:20: NOTICE:  type reference tab_contacto.mensaje%TYPE converted to text
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_contacto.sql:40: NOTICE:  type reference tab_contacto.id_contacto%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_contacto.sql:40: NOTICE:  type reference tab_contacto.estado%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_contacto.sql:59: NOTICE:  type reference tab_contacto.id_contacto%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.id_empleado%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.nom_empleado%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.apellido_empleado%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.correo%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.telefono%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.puesto%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:25: NOTICE:  type reference tab_empleados.fecha_contratacion%TYPE converted to date
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  type reference tab_empleados.id_empleado%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  type reference tab_empleados.nom_empleado%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  type reference tab_empleados.apellido_empleado%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  type reference tab_empleados.correo%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  type reference tab_empleados.telefono%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:52: NOTICE:  type reference tab_empleados.puesto%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:71: NOTICE:  type reference tab_empleados.id_empleado%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.id_empleado%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.num_documento%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.nom_empleado%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.apellido_empleado%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.correo%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.telefono%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.puesto%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_empleados.sql:108: NOTICE:  type reference tab_empleados.fecha_contratacion%TYPE converted to date
+CREATE FUNCTION
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  type reference tab_direcciones_envio.id_direccion%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  type reference tab_direcciones_envio.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  type reference tab_direcciones_envio.id_ciudad%TYPE converted to smallint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  type reference tab_direcciones_envio.direccion_completa%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  type reference tab_direcciones_envio.codigo_postal%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:105: NOTICE:  type reference tab_direcciones_envio.es_predeterminada%TYPE converted to boolean
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  type reference tab_direcciones_envio.id_direccion%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  type reference tab_direcciones_envio.id_ciudad%TYPE converted to smallint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  type reference tab_direcciones_envio.direccion_completa%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  type reference tab_direcciones_envio.codigo_postal%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:158: NOTICE:  type reference tab_direcciones_envio.es_predeterminada%TYPE converted to boolean
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_envios_locaciones.sql:183: NOTICE:  type reference tab_direcciones_envio.id_direccion%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  type reference tab_eventos.id_evento%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  type reference tab_eventos.titulo%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  type reference tab_eventos.descripcion%TYPE converted to text
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  type reference tab_eventos.fecha_inicio%TYPE converted to timestamp without time zone
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_eventos.sql:23: NOTICE:  type reference tab_eventos.fecha_fin%TYPE converted to timestamp without time zone
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  type reference tab_eventos.id_evento%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  type reference tab_eventos.titulo%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  type reference tab_eventos.descripcion%TYPE converted to text
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  type reference tab_eventos.fecha_inicio%TYPE converted to timestamp without time zone
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_eventos.sql:49: NOTICE:  type reference tab_eventos.fecha_fin%TYPE converted to timestamp without time zone
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_eventos.sql:68: NOTICE:  type reference tab_eventos.id_evento%TYPE converted to bigint
 CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  la referencia al tipo tab_detalle_factura.id_factura%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  la referencia al tipo tab_detalle_factura.id_producto%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  la referencia al tipo tab_detalle_factura.cantidad%TYPE convertida a smallint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  la referencia al tipo tab_detalle_factura.precio_unitario%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  la referencia al tipo tab_detalle_factura.subtotal_linea%TYPE convertida a numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:227: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:227: NOTICE:  type reference tab_metodos_pago.id_metodo_pago%TYPE converted to smallint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:227: NOTICE:  type reference tab_facturas.id_factura%TYPE converted to bigint
 CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  la referencia al tipo tab_facturas.id_factura%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  la referencia al tipo tab_facturas.id_orden%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  la referencia al tipo tab_facturas.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  la referencia al tipo tab_facturas.total_factura%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  la referencia al tipo tab_facturas.estado_factura%TYPE convertida a character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:260: NOTICE:  type reference tab_facturas.id_orden%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:260: NOTICE:  type reference tab_facturas.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:260: NOTICE:  type reference tab_facturas.total_factura%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:260: NOTICE:  type reference tab_facturas.estado_factura%TYPE converted to character varying
 CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_facturas.sql:395: NOTICE:  la referencia al tipo tab_orden.id_orden%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:36: NOTICE:  la referencia al tipo tab_ciudades.id_ciudad%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:36: NOTICE:  la referencia al tipo tab_ciudades.id_departamento%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:36: NOTICE:  la referencia al tipo tab_ciudades.nombre_ciudad%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:36: NOTICE:  la referencia al tipo tab_ciudades.codigo_postal%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:75: NOTICE:  la referencia al tipo tab_ciudades.id_ciudad%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:75: NOTICE:  la referencia al tipo tab_ciudades.id_departamento%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:75: NOTICE:  la referencia al tipo tab_ciudades.nombre_ciudad%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:75: NOTICE:  la referencia al tipo tab_ciudades.codigo_postal%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:101: NOTICE:  la referencia al tipo tab_ciudades.id_ciudad%TYPE convertida a integer
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:139: NOTICE:  la referencia al tipo tab_departamentos.id_departamento%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:139: NOTICE:  la referencia al tipo tab_departamentos.nombre_departamento%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:139: NOTICE:  la referencia al tipo tab_departamentos.codigo_iso%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:178: NOTICE:  la referencia al tipo tab_departamentos.id_departamento%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:178: NOTICE:  la referencia al tipo tab_departamentos.nombre_departamento%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:178: NOTICE:  la referencia al tipo tab_departamentos.codigo_iso%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_locaciones.sql:204: NOTICE:  la referencia al tipo tab_departamentos.id_departamento%TYPE convertida a integer
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_marcas.sql:30: NOTICE:  la referencia al tipo tab_marcas.id_marca%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_marcas.sql:30: NOTICE:  la referencia al tipo tab_marcas.nom_marca%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_marcas.sql:63: NOTICE:  la referencia al tipo tab_marcas.id_marca%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_marcas.sql:63: NOTICE:  la referencia al tipo tab_marcas.nom_marca%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_marcas.sql:63: NOTICE:  la referencia al tipo tab_marcas.estado_marca%TYPE convertida a boolean
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_marcas.sql:83: NOTICE:  la referencia al tipo tab_marcas.id_marca%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  la referencia al tipo tab_detalle_orden.id_orden%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  la referencia al tipo tab_detalle_orden.id_producto%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  la referencia al tipo tab_detalle_orden.cantidad%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  la referencia al tipo tab_detalle_orden.precio_unitario%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  la referencia al tipo tab_detalle_orden.id_promocion_aplicada%TYPE convertida a smallint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:134: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  la referencia al tipo tab_orden.id_orden%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  la referencia al tipo tab_orden.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  la referencia al tipo tab_orden.estado_orden%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  la referencia al tipo tab_orden.concepto%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  la referencia al tipo tab_orden.total_orden%TYPE convertida a numeric
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  la referencia al tipo tab_orden.id_orden%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  la referencia al tipo tab_orden.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  la referencia al tipo tab_orden.estado_orden%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  la referencia al tipo tab_orden.total_orden%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  la referencia al tipo tab_orden.concepto%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:227: NOTICE:  la referencia al tipo tab_orden.id_orden%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:227: NOTICE:  la referencia al tipo tab_orden.estado_orden%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:227: NOTICE:  la referencia al tipo tab_orden.concepto%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:227: NOTICE:  la referencia al tipo tab_orden.total_orden%TYPE convertida a numeric
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_ordenes.sql:249: NOTICE:  la referencia al tipo tab_orden.id_orden%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:76: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:76: NOTICE:  la referencia al tipo tab_metodos_pago.id_metodo_pago%TYPE convertida a smallint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:143: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:143: NOTICE:  la referencia al tipo tab_metodos_pago.id_metodo_pago%TYPE convertida a smallint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:183: NOTICE:  la referencia al tipo tab_pagos.id_orden%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:183: NOTICE:  la referencia al tipo tab_pagos.monto%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:183: NOTICE:  la referencia al tipo tab_pagos.id_metodo_pago%TYPE convertida a smallint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:183: NOTICE:  la referencia al tipo tab_pagos.estado_pago%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  la referencia al tipo tab_pagos.id_pago%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  la referencia al tipo tab_pagos.id_orden%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  la referencia al tipo tab_pagos.monto%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  la referencia al tipo tab_pagos.id_metodo_pago%TYPE convertida a smallint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  la referencia al tipo tab_pagos.estado_pago%TYPE convertida a character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  type reference tab_detalle_factura.id_factura%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  type reference tab_detalle_factura.id_producto%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  type reference tab_detalle_factura.cantidad%TYPE converted to smallint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  type reference tab_detalle_factura.precio_unitario%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:299: NOTICE:  type reference tab_detalle_factura.subtotal_linea%TYPE converted to numeric
 CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:233: NOTICE:  la referencia al tipo tab_metodos_pago.id_metodo_pago%TYPE convertida a smallint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:233: NOTICE:  la referencia al tipo tab_metodos_pago.nombre_metodo%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:233: NOTICE:  la referencia al tipo tab_metodos_pago.descripcion%TYPE convertida a text
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:256: NOTICE:  la referencia al tipo tab_metodos_pago.id_metodo_pago%TYPE convertida a smallint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:256: NOTICE:  la referencia al tipo tab_metodos_pago.nombre_metodo%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:256: NOTICE:  la referencia al tipo tab_metodos_pago.descripcion%TYPE convertida a text
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_pagos.sql:278: NOTICE:  la referencia al tipo tab_metodos_pago.id_metodo_pago%TYPE convertida a smallint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:56: NOTICE:  la referencia al tipo tab_productos.id_producto%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:56: NOTICE:  la referencia al tipo tab_productos.stock%TYPE convertida a smallint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:56: NOTICE:  la referencia al tipo tab_productos.stock%TYPE convertida a smallint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:107: NOTICE:  la referencia al tipo tab_productos.id_producto%TYPE convertida a bigint
-CREATE FUNCTION
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  la referencia al tipo tab_productos.id_producto%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  la referencia al tipo tab_productos.id_marca%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  la referencia al tipo tab_productos.nom_producto%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  la referencia al tipo tab_productos.descripcion%TYPE convertida a text
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  la referencia al tipo tab_productos.precio%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  la referencia al tipo tab_productos.id_categoria%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  la referencia al tipo tab_productos.id_subcategoria%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  la referencia al tipo tab_productos.stock%TYPE convertida a smallint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  la referencia al tipo tab_productos.url_imagen%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  la referencia al tipo tab_productos.estado%TYPE convertida a boolean
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  la referencia al tipo tab_productos.id_producto%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  la referencia al tipo tab_productos.id_marca%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  la referencia al tipo tab_productos.nom_producto%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  la referencia al tipo tab_productos.descripcion%TYPE convertida a text
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  la referencia al tipo tab_productos.precio%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  la referencia al tipo tab_productos.id_categoria%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  la referencia al tipo tab_productos.id_subcategoria%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  la referencia al tipo tab_productos.stock%TYPE convertida a smallint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  la referencia al tipo tab_productos.url_imagen%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  la referencia al tipo tab_productos.estado%TYPE convertida a boolean
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_productos.sql:304: NOTICE:  la referencia al tipo tab_productos.id_producto%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  la referencia al tipo tab_promociones.id_promocion%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  la referencia al tipo tab_promociones.descripcion%TYPE convertida a text
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  la referencia al tipo tab_promociones.descuento%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  la referencia al tipo tab_promociones.fecha_inicio%TYPE convertida a timestamp without time zone
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  la referencia al tipo tab_promociones.fecha_fin%TYPE convertida a timestamp without time zone
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  la referencia al tipo tab_promociones.id_promocion%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  la referencia al tipo tab_promociones.descripcion%TYPE convertida a text
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  la referencia al tipo tab_promociones.descuento%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  la referencia al tipo tab_promociones.fecha_inicio%TYPE convertida a timestamp without time zone
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  la referencia al tipo tab_promociones.fecha_fin%TYPE convertida a timestamp without time zone
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:76: NOTICE:  la referencia al tipo tab_promociones.id_promocion%TYPE convertida a integer
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  la referencia al tipo tab_promociones.id_promocion%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  la referencia al tipo tab_promociones.descripcion%TYPE convertida a text
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  la referencia al tipo tab_promociones.descuento%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  la referencia al tipo tab_promociones.fecha_inicio%TYPE convertida a timestamp without time zone
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  la referencia al tipo tab_promociones.fecha_fin%TYPE convertida a timestamp without time zone
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:37: NOTICE:  la referencia al tipo tab_orden_servicios.id_orden%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:37: NOTICE:  la referencia al tipo tab_orden_servicios.id_servicio%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:37: NOTICE:  la referencia al tipo tab_orden_servicios.cantidad%TYPE convertida a integer
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:37: NOTICE:  la referencia al tipo tab_orden_servicios.precio_servicio_aplicado%TYPE convertida a numeric
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:89: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:89: NOTICE:  la referencia al tipo tab_servicios.id_servicio%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  la referencia al tipo tab_servicios.id_servicio%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  la referencia al tipo tab_servicios.nom_servicio%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  la referencia al tipo tab_servicios.descripcion%TYPE convertida a text
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  la referencia al tipo tab_servicios.precio_servicio%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  la referencia al tipo tab_servicios.duracion_estimada%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  la referencia al tipo tab_servicios.id_servicio%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  la referencia al tipo tab_servicios.nom_servicio%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  la referencia al tipo tab_servicios.descripcion%TYPE convertida a text
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  la referencia al tipo tab_servicios.precio_servicio%TYPE convertida a numeric
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  la referencia al tipo tab_servicios.duracion_estimada%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_servicios.sql:181: NOTICE:  la referencia al tipo tab_servicios.id_servicio%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  la referencia al tipo tab_usuarios.nom_usuario%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  la referencia al tipo tab_usuarios.correo_usuario%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  la referencia al tipo tab_usuarios.num_telefono_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  la referencia al tipo tab_usuarios.direccion_principal%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:114: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:142: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:169: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:221: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-CREATE FUNCTION
-CREATE FUNCTION
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  la referencia al tipo tab_usuarios.correo_usuario%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  la referencia al tipo tab_usuarios.nom_usuario%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  la referencia al tipo tab_usuarios.correo_usuario%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  la referencia al tipo tab_usuarios.num_telefono_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  la referencia al tipo tab_usuarios.direccion_principal%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:414: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:414: NOTICE:  la referencia al tipo tab_usuarios.rol%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  la referencia al tipo tab_usuarios.nom_usuario%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  la referencia al tipo tab_usuarios.correo_usuario%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  la referencia al tipo tab_usuarios.num_telefono_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  la referencia al tipo tab_usuarios.direccion_principal%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  la referencia al tipo tab_usuarios.activo%TYPE convertida a boolean
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  la referencia al tipo tab_usuarios.nom_usuario%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  la referencia al tipo tab_usuarios.correo_usuario%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  la referencia al tipo tab_usuarios.num_telefono_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  la referencia al tipo tab_usuarios.direccion_principal%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  la referencia al tipo tab_usuarios.nom_usuario%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  la referencia al tipo tab_usuarios.correo_usuario%TYPE convertida a character varying
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  la referencia al tipo tab_usuarios.num_telefono_usuario%TYPE convertida a bigint
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  la referencia al tipo tab_usuarios.direccion_principal%TYPE convertida a character varying
-CREATE FUNCTION
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/functions/crud_usuarios.sql:537: NOTICE:  la referencia al tipo tab_usuarios.id_usuario%TYPE convertida a bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  type reference tab_facturas.id_factura%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  type reference tab_facturas.id_orden%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  type reference tab_facturas.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  type reference tab_facturas.total_factura%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:326: NOTICE:  type reference tab_facturas.estado_factura%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_facturas.sql:395: NOTICE:  type reference tab_orden.id_orden%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:36: NOTICE:  type reference tab_ciudades.id_ciudad%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:36: NOTICE:  type reference tab_ciudades.id_departamento%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:36: NOTICE:  type reference tab_ciudades.nombre_ciudad%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:36: NOTICE:  type reference tab_ciudades.codigo_postal%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:75: NOTICE:  type reference tab_ciudades.id_ciudad%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:75: NOTICE:  type reference tab_ciudades.id_departamento%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:75: NOTICE:  type reference tab_ciudades.nombre_ciudad%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:75: NOTICE:  type reference tab_ciudades.codigo_postal%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:101: NOTICE:  type reference tab_ciudades.id_ciudad%TYPE converted to integer
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:139: NOTICE:  type reference tab_departamentos.id_departamento%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:139: NOTICE:  type reference tab_departamentos.nombre_departamento%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:139: NOTICE:  type reference tab_departamentos.codigo_iso%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:178: NOTICE:  type reference tab_departamentos.id_departamento%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:178: NOTICE:  type reference tab_departamentos.nombre_departamento%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:178: NOTICE:  type reference tab_departamentos.codigo_iso%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_locaciones.sql:204: NOTICE:  type reference tab_departamentos.id_departamento%TYPE converted to integer
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_marcas.sql:30: NOTICE:  type reference tab_marcas.id_marca%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_marcas.sql:30: NOTICE:  type reference tab_marcas.nom_marca%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_marcas.sql:63: NOTICE:  type reference tab_marcas.id_marca%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_marcas.sql:63: NOTICE:  type reference tab_marcas.nom_marca%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_marcas.sql:63: NOTICE:  type reference tab_marcas.estado_marca%TYPE converted to boolean
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_marcas.sql:83: NOTICE:  type reference tab_marcas.id_marca%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  type reference tab_detalle_orden.id_orden%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  type reference tab_detalle_orden.id_producto%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  type reference tab_detalle_orden.cantidad%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  type reference tab_detalle_orden.precio_unitario%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:38: NOTICE:  type reference tab_detalle_orden.id_promocion_aplicada%TYPE converted to smallint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:134: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  type reference tab_orden.id_orden%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  type reference tab_orden.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  type reference tab_orden.estado_orden%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  type reference tab_orden.concepto%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:159: NOTICE:  type reference tab_orden.total_orden%TYPE converted to numeric
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  type reference tab_orden.id_orden%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  type reference tab_orden.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  type reference tab_orden.estado_orden%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  type reference tab_orden.total_orden%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:199: NOTICE:  type reference tab_orden.concepto%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:227: NOTICE:  type reference tab_orden.id_orden%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:227: NOTICE:  type reference tab_orden.estado_orden%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:227: NOTICE:  type reference tab_orden.concepto%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:227: NOTICE:  type reference tab_orden.total_orden%TYPE converted to numeric
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_ordenes.sql:249: NOTICE:  type reference tab_orden.id_orden%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:76: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:76: NOTICE:  type reference tab_metodos_pago.id_metodo_pago%TYPE converted to smallint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:143: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:143: NOTICE:  type reference tab_metodos_pago.id_metodo_pago%TYPE converted to smallint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:183: NOTICE:  type reference tab_pagos.id_orden%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:183: NOTICE:  type reference tab_pagos.monto%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:183: NOTICE:  type reference tab_pagos.id_metodo_pago%TYPE converted to smallint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:183: NOTICE:  type reference tab_pagos.estado_pago%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  type reference tab_pagos.id_pago%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  type reference tab_pagos.id_orden%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  type reference tab_pagos.monto%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  type reference tab_pagos.id_metodo_pago%TYPE converted to smallint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:210: NOTICE:  type reference tab_pagos.estado_pago%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:233: NOTICE:  type reference tab_metodos_pago.id_metodo_pago%TYPE converted to smallint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:233: NOTICE:  type reference tab_metodos_pago.nombre_metodo%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:233: NOTICE:  type reference tab_metodos_pago.descripcion%TYPE converted to text
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:256: NOTICE:  type reference tab_metodos_pago.id_metodo_pago%TYPE converted to smallint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:256: NOTICE:  type reference tab_metodos_pago.nombre_metodo%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:256: NOTICE:  type reference tab_metodos_pago.descripcion%TYPE converted to text
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_pagos.sql:278: NOTICE:  type reference tab_metodos_pago.id_metodo_pago%TYPE converted to smallint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:56: NOTICE:  type reference tab_productos.id_producto%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:56: NOTICE:  type reference tab_productos.stock%TYPE converted to smallint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:56: NOTICE:  type reference tab_productos.stock%TYPE converted to smallint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:107: NOTICE:  type reference tab_productos.id_producto%TYPE converted to bigint
+CREATE FUNCTION
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.id_producto%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.id_marca%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.nom_producto%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.descripcion%TYPE converted to text
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.precio%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.id_categoria%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.id_subcategoria%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.stock%TYPE converted to smallint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.url_imagen%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:222: NOTICE:  type reference tab_productos.estado%TYPE converted to boolean
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.id_producto%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.id_marca%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.nom_producto%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.descripcion%TYPE converted to text
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.precio%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.id_categoria%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.id_subcategoria%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.stock%TYPE converted to smallint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.url_imagen%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:282: NOTICE:  type reference tab_productos.estado%TYPE converted to boolean
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_productos.sql:304: NOTICE:  type reference tab_productos.id_producto%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  type reference tab_promociones.id_promocion%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  type reference tab_promociones.descripcion%TYPE converted to text
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  type reference tab_promociones.descuento%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  type reference tab_promociones.fecha_inicio%TYPE converted to timestamp without time zone
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:27: NOTICE:  type reference tab_promociones.fecha_fin%TYPE converted to timestamp without time zone
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  type reference tab_promociones.id_promocion%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  type reference tab_promociones.descripcion%TYPE converted to text
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  type reference tab_promociones.descuento%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  type reference tab_promociones.fecha_inicio%TYPE converted to timestamp without time zone
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:57: NOTICE:  type reference tab_promociones.fecha_fin%TYPE converted to timestamp without time zone
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:76: NOTICE:  type reference tab_promociones.id_promocion%TYPE converted to integer
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  type reference tab_promociones.id_promocion%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  type reference tab_promociones.descripcion%TYPE converted to text
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  type reference tab_promociones.descuento%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  type reference tab_promociones.fecha_inicio%TYPE converted to timestamp without time zone
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_promociones.sql:107: NOTICE:  type reference tab_promociones.fecha_fin%TYPE converted to timestamp without time zone
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:37: NOTICE:  type reference tab_orden_servicios.id_orden%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:37: NOTICE:  type reference tab_orden_servicios.id_servicio%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:37: NOTICE:  type reference tab_orden_servicios.cantidad%TYPE converted to integer
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:37: NOTICE:  type reference tab_orden_servicios.precio_servicio_aplicado%TYPE converted to numeric
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:89: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:89: NOTICE:  type reference tab_servicios.id_servicio%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  type reference tab_servicios.id_servicio%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  type reference tab_servicios.nom_servicio%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  type reference tab_servicios.descripcion%TYPE converted to text
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  type reference tab_servicios.precio_servicio%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:120: NOTICE:  type reference tab_servicios.duracion_estimada%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  type reference tab_servicios.id_servicio%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  type reference tab_servicios.nom_servicio%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  type reference tab_servicios.descripcion%TYPE converted to text
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  type reference tab_servicios.precio_servicio%TYPE converted to numeric
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:161: NOTICE:  type reference tab_servicios.duracion_estimada%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_servicios.sql:181: NOTICE:  type reference tab_servicios.id_servicio%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  type reference tab_usuarios.nom_usuario%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  type reference tab_usuarios.num_telefono_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  type reference tab_usuarios.direccion_principal%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:91: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:114: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:142: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:169: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:221: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  type reference tab_usuarios.nom_usuario%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  type reference tab_usuarios.num_telefono_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:378: NOTICE:  type reference tab_usuarios.direccion_principal%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:414: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:414: NOTICE:  type reference tab_usuarios.rol%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  type reference tab_usuarios.nom_usuario%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  type reference tab_usuarios.num_telefono_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  type reference tab_usuarios.direccion_principal%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:442: NOTICE:  type reference tab_usuarios.activo%TYPE converted to boolean
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  type reference tab_usuarios.nom_usuario%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  type reference tab_usuarios.num_telefono_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:476: NOTICE:  type reference tab_usuarios.direccion_principal%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  type reference tab_usuarios.nom_usuario%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  type reference tab_usuarios.correo_usuario%TYPE converted to character varying
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  type reference tab_usuarios.num_telefono_usuario%TYPE converted to bigint
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:517: NOTICE:  type reference tab_usuarios.direccion_principal%TYPE converted to character varying
+CREATE FUNCTION
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/functions/crud_usuarios.sql:537: NOTICE:  type reference tab_usuarios.id_usuario%TYPE converted to bigint
 CREATE FUNCTION
 CREATE FUNCTION
 CREATE TRIGGER
 CREATE TRIGGER
 CREATE TRIGGER
 CREATE TRIGGER
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/triggers/audit_trail.sql:49: ERROR:  no existe la relación «tab_proveedor»
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/triggers/audit_trail.sql:49: ERROR:  relation "tab_proveedor" does not exist
 CREATE TRIGGER
 CREATE TRIGGER
 CREATE TRIGGER
@@ -440,9 +441,9 @@ CREATE TRIGGER
 CREATE TRIGGER
 CREATE TRIGGER
 CREATE TRIGGER
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/triggers/audit_trail.sql:97: ERROR:  no existe la relación «tab_recepciones_proveedor»
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/triggers/audit_trail.sql:97: ERROR:  relation "tab_recepciones_proveedor" does not exist
 CREATE TRIGGER
-psql:C:/Users/Sena cset/Documents/rd_2/rd_watch_V2/sql/triggers/audit_trail.sql:105: ERROR:  no existe la relación «tab_usuario_metodo_pago»
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/triggers/audit_trail.sql:105: ERROR:  relation "tab_usuario_metodo_pago" does not exist
 CREATE TRIGGER
 CREATE TRIGGER
 CREATE TRIGGER
@@ -1764,3 +1765,66 @@ INSERT 0 4
 INSERT 0 8
 INSERT 0 10
 INSERT 0 55
+INSERT 0 28
+DELETE 0
+DELETE 0
+DELETE 0
+DELETE 0
+DELETE 0
+DELETE 0
+DELETE 0
+INSERT 0 3
+INSERT 0 2
+DO
+DO
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/scripts/04_populate_reviews.sql:12: ERROR:  null value in column "id_opinion" of relation "tab_opiniones" violates not-null constraint
+DETALLE:  Failing row contains (null, 1, null, 5, ¡Excelente servicio! Mi reloj quedó como nuevo. Muy recomendad..., 2026-02-11 16:33:55.969823, postgres, 2026-02-11 16:33:55.969823, postgres, 2026-02-11 16:33:55.969823, null, null).
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/scripts/04_populate_reviews.sql:17: ERROR:  null value in column "id_opinion" of relation "tab_opiniones" violates not-null constraint
+DETALLE:  Failing row contains (null, 2, null, 4, Muy buena atención, aunque tardaron un poco más de lo esperado..., 2026-02-11 16:33:55.974563, postgres, 2026-02-11 16:33:55.974563, postgres, 2026-02-11 16:33:55.974563, null, null).
+psql:C:/Users/Anderson/Documents/rd_watch_V2/sql/scripts/04_populate_reviews.sql:22: ERROR:  null value in column "id_opinion" of relation "tab_opiniones" violates not-null constraint
+DETALLE:  Failing row contains (null, 3, null, 5, La mejor relojería de Bucaramanga. Tres generaciones de confian..., 2026-02-11 16:33:55.97726, postgres, 2026-02-11 16:33:55.97726, postgres, 2026-02-11 16:33:55.97726, null, null).
+          fun_registrar_usuario          
+-----------------------------------------
+ (ERROR,"El email ya está registrado",,)
+(1 fila)
+
+UPDATE 1
+ id_usuario |      nom_usuario       |  correo_usuario   |  rol  
+------------+------------------------+-------------------+-------
+          1 | Administrador RD Watch | admin@rdwatch.com | admin
+(1 fila)
+
+ id_usuario |      nom_usuario       |    correo_usuario    | num_telefono_usuario |     direccion_principal      |       fecha_registro       | activo |                            contra                            |   rol   | salt | intentos_fallidos | bloqueado | fecha_bloqueo | ultimo_acceso | token_recuperacion | token_expiracion | usr_insert |         fec_insert         | usr_update |         fec_update         | usr_delete | fec_delete 
+------------+------------------------+----------------------+----------------------+------------------------------+----------------------------+--------+--------------------------------------------------------------+---------+------+-------------------+-----------+---------------+---------------+--------------------+------------------+------------+----------------------------+------------+----------------------------+------------+------------
+          2 | Cliente de Prueba      | cliente@rdwatch.com  |           3001234567 | Carrera 10 #20-30, Bogotá    | 2026-02-11 16:33:55.378329 | t      | $2y$10$I.llqxg0unGZ6GZ2ey1pYOLDIKDCLDy9XO9j03BDe0m2.nCPqKeYu | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.378329 | postgres   | 2026-02-11 16:33:55.378329 |            | 
+          3 | Cliente 3              | cliente3@email.com   |           3001234503 | Dirección Cliente 3, Bogotá  | 2026-02-11 16:33:55.669816 | t      | $2y$10$eXpfTHhAzquzf6S0ZRSI3uWn0/dQpsqIT.BXF4n324UYoQuI6MMwu | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+          4 | Cliente 4              | cliente4@rdwatch.com |           3001234504 | Dirección Cliente 4, Bogotá  | 2026-02-11 16:33:55.669816 | t      | $2b$12$t/z3kyX1eA6/80lJkivCxeKw2c5KUyNbQo4dturZdfgo9Bfe.AnVq | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+          5 | Cliente 5              | cliente5@email.com   |           3001234505 | Dirección Cliente 5, Bogotá  | 2026-02-11 16:33:55.669816 | t      | $2y$10$thwoHTw.dGQaGr1zGCkCV.8cWR0oW.1tdibQWQzmfGECrkOFB7Pdi | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+          6 | Cliente 6              | cliente6@email.com   |           3001234506 | Dirección Cliente 6, Bogotá  | 2026-02-11 16:33:55.669816 | t      | $2y$10$NraFqISoJnFb77wlU217su.hOkkBO1g9PszvkqDm8aeqBJr98WOIK | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+          7 | Cliente 7              | cliente7@email.com   |           3001234507 | Dirección Cliente 7, Bogotá  | 2026-02-11 16:33:55.669816 | t      | $2y$10$huDaQBUL/P10ba0kS3PVzulrVTkxLbtKaGBFH99F2XEMeqBhcvPdu | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+          8 | Cliente 8              | cliente8@email.com   |           3001234508 | Dirección Cliente 8, Bogotá  | 2026-02-11 16:33:55.669816 | t      | $2y$10$.AKC2D4uaUjUieTJ85UOEOKhhhfaH0Y8b2Vcs6ASdjahFyaOksZSO | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+          9 | Cliente 9              | cliente9@email.com   |           3001234509 | Dirección Cliente 9, Bogotá  | 2026-02-11 16:33:55.669816 | t      | $2y$10$Kl4csRwVWtkZDpWTWerx2eKmXxOIBog.ieoLLLzMGeiSsjMXVoSvS | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         10 | Cliente 10             | cliente10@email.com  |           3001234510 | Dirección Cliente 10, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$vUFMMNCFzUfzwxtDPeD9Wuv2ehBdnCxtijpP4j8zWZgCMzmPhppWq | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         11 | Cliente 11             | cliente11@email.com  |           3001234511 | Dirección Cliente 11, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$5QQ4DMrx0WRVfw3LH94g6OnwuDRbjg2FpuQiWcbWLHuNPXZLnLq66 | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         12 | Cliente 12             | cliente12@email.com  |           3001234512 | Dirección Cliente 12, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$F0JK484y1WHH5QceEPQrcujiXuPyugKZM0YNPpd.OrZVJHCK0tchS | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         13 | Cliente 13             | cliente13@email.com  |           3001234513 | Dirección Cliente 13, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$aJQOsacK6CKeqc3PvwPycujmc8YH2yIDvnqd4FN9lZhVPRyt0ljt2 | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         14 | Cliente 14             | cliente14@email.com  |           3001234514 | Dirección Cliente 14, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$jGPNx6c75Dz6FD8c576ufeLWm/dLVIKaM0wmRDW0zZmMVUb3nKzAK | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         15 | Cliente 15             | cliente15@email.com  |           3001234515 | Dirección Cliente 15, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$MkbEtb44sF0xEX6OLaP6guUmf6u4YdNM9QiyytgZOFWxbwedxkjxu | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         16 | Cliente 16             | cliente16@email.com  |           3001234516 | Dirección Cliente 16, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$9O0y6Z.tnGP/NyG.6tSQ9OK0hmtX.kKAuoEWeZ/kuyM7JgnlbJjx2 | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         17 | Cliente 17             | cliente17@email.com  |           3001234517 | Dirección Cliente 17, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$EuUq4e73WZhrXlolxHcmb.j39cfQ9jzBHl.AoAZid9Er1xrtnEDCS | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         18 | Cliente 18             | cliente18@email.com  |           3001234518 | Dirección Cliente 18, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$.sGPRkHsIPbe8uxLqCVc1eI9xGXoPa54A3/SOWJdTX.MFtLta75Ka | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         19 | Cliente 19             | cliente19@email.com  |           3001234519 | Dirección Cliente 19, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$odTLQKTcKzhPf2mtjlJK/OU6vL/ocSps6q668Pq4JrZ0XsDY4RZ3y | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         20 | Cliente 20             | cliente20@email.com  |           3001234520 | Dirección Cliente 20, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$7cei0TpEdwly7k6mIhwT2u.acEuctUDxxaAXFGy4dN5IC6U1NEMea | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         21 | Cliente 21             | cliente21@email.com  |           3001234521 | Dirección Cliente 21, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$fgQaIcq3AfYVWyYLLoBN1u.Ghk46A1Orf4dQUxHeESD7fWU6/TTua | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         22 | Cliente 22             | cliente22@email.com  |           3001234522 | Dirección Cliente 22, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$6UV74pcsaBOM0j2EFlhA5uci2fE74vIi1OB9cdZF43WKQF6sLY3WG | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         23 | Cliente 23             | cliente23@email.com  |           3001234523 | Dirección Cliente 23, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$vRFCvo90KOaTzdKcrx9uceI6e1.P1oacHJz29kMQqAsxBdHb34qau | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         24 | Cliente 24             | cliente24@email.com  |           3001234524 | Dirección Cliente 24, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$jQcQ6En54EK4BhRKPgfaFumaMcz3ffndo1m7Tz2puBz8NEPAQl6QO | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         25 | Cliente 25             | cliente25@email.com  |           3001234525 | Dirección Cliente 25, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$9RYf3Oh15eKkEPJ16v6iVehwxAjAcUOgbgWqlwV7yu82RBIJAZlju | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         26 | Cliente 26             | cliente26@email.com  |           3001234526 | Dirección Cliente 26, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$XiKhN1Qdv8LVKUuPFp/ZMuv61AfCORDCzg97ZmlHetQHxX6ryaT/K | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         27 | Cliente 27             | cliente27@email.com  |           3001234527 | Dirección Cliente 27, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$4cI4WQbfYL6.4nfYks8sku7Lpjx4hsdFtZWAZmWeT9eNUGvN3gXgK | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         28 | Cliente 28             | cliente28@email.com  |           3001234528 | Dirección Cliente 28, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$e4XyIvbT2bGV9uEN3JegJObLMFVjhvr9Fk.fGIS9bCUMIS7.Xyti2 | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         29 | Cliente 29             | cliente29@email.com  |           3001234529 | Dirección Cliente 29, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$vPXYucKlCn7bnCaq.vaxhumqBkwCrT8ByffL7eDbjaur9d1fNSlrm | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+         30 | Cliente 30             | cliente30@email.com  |           3001234530 | Dirección Cliente 30, Bogotá | 2026-02-11 16:33:55.669816 | t      | $2y$10$DHGJR2.AyDXsI3cH5z6G3e3mEF8giML5ZfRZIvHDiDJqQILNDzQfy | cliente |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.669816 | postgres   | 2026-02-11 16:33:55.669816 |            | 
+          1 | Administrador RD Watch | admin@rdwatch.com    |           3115460069 | Calle 34 #18-40 local 107    | 2026-02-11 16:33:55.370307 | t      | $2b$12$7piCEjqRgZvt0S9b.hrRC.u9IEZvceySXtJzlWtO6SweGlqQQuJu. | admin   |      |                 0 | f         |               |               |                    |                  | postgres   | 2026-02-11 16:33:55.370307 | postgres   | 2026-02-11 16:33:56.288198 |            | 
+(30 filas)
+

@@ -441,14 +441,40 @@ async function guardarPerfil(e) {
     e.preventDefault();
     const user = getUser();
     if (!user) { showNotification('❌ Error de sesión', true); return; }
+
     const nombre = document.getElementById('inputNombre').value;
     const email = document.getElementById('inputEmail').value;
     const telefono = document.getElementById('inputTelefono').value;
+
     try {
-        const response = await secureFetch(`${API_BASE_URL}/user_actions.php?action=update_profile`, {
+        // Cambio de contraseña (opcional) - si existen los campos
+        const pOld = document.getElementById('inputPassActual')?.value;
+        const pNew = document.getElementById('inputPassNueva')?.value;
+
+        if (pOld && pNew) {
+            const resPass = await secureFetch(`${API_BASE_URL}/user_actions.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    uid: user.id,
+                    action: 'change_password',
+                    old_pass: pOld,
+                    new_pass: pNew
+                })
+            });
+            const dataPass = await resPass.json();
+            if (!dataPass.ok) {
+                showNotification('❌ ' + dataPass.msg, true);
+                return;
+            }
+            showNotification('✅ Contraseña actualizada');
+        }
+
+        // Actualizar perfil
+        const response = await secureFetch(`${API_BASE_URL}/user_actions.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ uid: user.id, nombre, email, telefono })
+            body: JSON.stringify({ action: 'update_profile', uid: user.id, nombre, email, telefono })
         });
         const result = await response.json();
         if (result.ok) {
@@ -475,10 +501,10 @@ async function guardarDireccion(e) {
     const postal = document.getElementById('inputPostal').value;
     if (!ciudadId) { showNotification('❌ Debes seleccionar una ciudad', true); return; }
     try {
-        const response = await secureFetch(`${API_BASE_URL}/user_actions.php?action=update_address`, {
+        const response = await secureFetch(`${API_BASE_URL}/user_actions.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ uid: user.id, direccion, ciudad_id: parseInt(ciudadId), postal })
+            body: JSON.stringify({ action: 'update_address', uid: user.id, direccion, ciudad_id: parseInt(ciudadId), postal })
         });
         const result = await response.json();
         if (result.ok) {
@@ -556,25 +582,76 @@ if (inputT) {
 
 async function enviarResena(e) {
     e.preventDefault();
+    console.log('🔵 Iniciando envío de reseña...');
+
+    // 1. Verificar sesión de usuario
     const user = getUser();
-    if (!user) return;
+    if (!user) {
+        showNotification('❌ Debes iniciar sesión para enviar una reseña', true);
+        console.error('❌ Usuario no autenticado');
+        return;
+    }
+    console.log('✅ Usuario autenticado:', user);
+
+    // 2. Obtener calificación seleccionada
     const ratingInputs = document.getElementsByName('rating');
     let calificacion = 0;
-    for (const input of ratingInputs) { if (input.checked) { calificacion = input.value; break; } }
-    const comentario = document.getElementById('resenaTexto').value;
+    for (const input of ratingInputs) {
+        if (input.checked) {
+            calificacion = parseInt(input.value);
+            break;
+        }
+    }
+
+    if (!calificacion || calificacion < 1 || calificacion > 5) {
+        showNotification('❌ Por favor selecciona una calificación de 1 a 5 estrellas', true);
+        console.error('❌ Calificación inválida:', calificacion);
+        return;
+    }
+    console.log('✅ Calificación:', calificacion);
+
+    // 3. Obtener comentario
+    const comentario = document.getElementById('resenaTexto')?.value?.trim();
+    if (!comentario) {
+        showNotification('❌ Por favor escribe un comentario', true);
+        console.error('❌ Comentario vacío');
+        return;
+    }
+    console.log('✅ Comentario:', comentario.substring(0, 50) + '...');
+
+    // 4. Preparar datos para enviar
+    const payload = {
+        calificacion: calificacion,
+        comentario: comentario
+    };
+    console.log('📤 Payload:', payload);
+
     try {
-        const res = await secureFetch(`${API_BASE_URL}/resenas.php`, {
+        // 5. Enviar petición
+        const response = await secureFetch(`${API_BASE_URL}/resenas.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id_usuario: user.id, calificacion: parseInt(calificacion), comentario })
+            body: JSON.stringify(payload)
         });
-        const data = await res.json();
+
+        console.log('📡 Respuesta HTTP:', response.status, response.statusText);
+
+        // 6. Procesar respuesta
+        const data = await response.json();
+        console.log('📥 Datos recibidos:', data);
+
         if (data.ok) {
-            showNotification('✅ Reseña enviada');
+            showNotification('✅ ' + (data.msg || 'Reseña enviada correctamente'));
             e.target.reset();
             setTimeout(() => showSection('inicio'), 1500);
+        } else {
+            showNotification('❌ ' + (data.msg || 'Error al enviar la reseña'), true);
+            console.error('❌ Error del servidor:', data.msg);
         }
-    } catch (err) { }
+    } catch (error) {
+        console.error('❌ Error en enviarResena:', error);
+        showNotification('❌ Error de conexión: ' + error.message, true);
+    }
 }
 
 async function cargarServiciosPanel() {

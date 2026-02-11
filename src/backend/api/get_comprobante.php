@@ -13,6 +13,7 @@
  */
 
 require_once '../config.php';
+require_once '../utils/security_utils.php';
 
 // Verificación de integridad de la infraestructura
 if (!isset($pdo)) {
@@ -25,14 +26,7 @@ if (!isset($pdo)) {
  * 🛡️ 1. BARRERA DE ACCESO ADMINISTRATIVO
  * ==========================================
  */
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    http_response_code(403);
-    die('Acceso Denegado: Se requieren privilegios de auditoría para ver este recurso');
-}
+requireRole('admin');
 
 $id_orden = $_GET['id_orden'] ?? null;
 if (!$id_orden) {

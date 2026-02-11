@@ -706,6 +706,38 @@ if (paymentForm) {
 // 7. INICIALIZACIÓN GLOBAL (Event Listeners)
 // =========================================================
 
+
+function initGalleryCarousel() {
+    const track = document.getElementById('gallery-track');
+    if (!track) return;
+
+    const slides = Array.from(track.children);
+    const nextBtn = document.querySelector('.gallery-btn.next');
+    const prevBtn = document.querySelector('.gallery-btn.prev');
+
+    if (slides.length === 0) return;
+
+    let currentIndex = 0;
+
+    const updateSlidePosition = () => {
+        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+    };
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % slides.length;
+            updateSlidePosition();
+        });
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+            updateSlidePosition();
+        });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Inicializar visuales
     const preloader = document.querySelector('.preloader');
@@ -713,6 +745,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const header = document.querySelector('.header');
     if (header) window.addEventListener('scroll', () => { if (window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled'); });
+
+    // Inicializar Carrusel de Galería
+    initGalleryCarousel();
 
     // SECURITY: Inicializar CSRF token si hay sesión
     const userLoggedIn = sessionStorage.getItem('user_logged_in');
@@ -904,20 +939,43 @@ async function loadTestimonials() {
 }
 
 // Función para cargar servicios dinámicamente
+// Función para cargar servicios dinámicamente en CAROUSEL
 async function loadServices() {
-    const servicesGrid = document.getElementById('public-services-grid');
-    if (!servicesGrid) return;
+    const servicesContainer = document.querySelector('#services-section .container'); // Parent container
+    const originalGrid = document.getElementById('public-services-grid');
+
+    // Si no existe el contenedor principal o el grid original está fallando, abortamos
+    if (!servicesContainer) return;
 
     try {
         const res = await fetch(`${API_BASE_SHOP}/servicios.php`);
         const data = await res.json();
 
         if (data.ok && data.servicios.length > 0) {
-            servicesGrid.innerHTML = ''; // Limpiar loader
+            // 1. Crear estructura del Carrusel
+            // Reemplazamos el grid original con la estructura del slider
+            if (originalGrid) originalGrid.remove(); // Quitamos el div viejo
+
+            // Verificamos si ya existe el slider para evitar duplicados si se recarga
+            let sliderWrapper = document.querySelector('.services-slider-container');
+            if (!sliderWrapper) {
+                sliderWrapper = document.createElement('div');
+                sliderWrapper.className = 'services-slider-container';
+
+                sliderWrapper.innerHTML = `
+                    <button class="slider-btn prev"><i class="fas fa-chevron-left"></i></button>
+                    <div class="services-slider" id="services-carousel"></div>
+                    <button class="slider-btn next"><i class="fas fa-chevron-right"></i></button>
+                `;
+                servicesContainer.appendChild(sliderWrapper);
+            }
+
+            const carouselTrack = document.getElementById('services-carousel');
+            carouselTrack.innerHTML = '';
 
             data.servicios.forEach(s => {
                 // Asignar icono basado en palabras clave
-                let iconClass = 'fas fa-clock'; // Default
+                let iconClass = 'fas fa-clock';
                 const nameLower = s.nom_servicio.toLowerCase();
 
                 if (nameLower.includes('reparación') || nameLower.includes('reparacion')) iconClass = 'fas fa-tools';
@@ -925,6 +983,8 @@ async function loadServices() {
                 else if (nameLower.includes('repuesto') || nameLower.includes('pieza')) iconClass = 'fas fa-box-open';
                 else if (nameLower.includes('diagnostico') || nameLower.includes('diagnóstico')) iconClass = 'fas fa-stethoscope';
                 else if (nameLower.includes('limpieza')) iconClass = 'fas fa-broom';
+                else if (nameLower.includes('batería') || nameLower.includes('pila')) iconClass = 'fas fa-battery-full';
+                else if (nameLower.includes('pulsera') || nameLower.includes('correa')) iconClass = 'fas fa-link';
 
                 const card = `
                     <div class="service-card">
@@ -934,27 +994,80 @@ async function loadServices() {
                         <h3 class="card-title">${s.nom_servicio}</h3>
                         <p class="card-text">${s.descripcion}</p>
                         <ul class="service-features">
-                            <li><i class="fas fa-check-circle"></i> Duración: ${s.duracion_estimada}</li>
-                            <li><i class="fas fa-check-circle"></i> Precio: ${formatPrice(s.precio_servicio)}</li>
-                            <li><i class="fas fa-check-circle"></i> Garantizado</li>
+                            <li><i class="fas fa-hourglass-half"></i> ${s.duracion_estimada}</li>
+                            <li><i class="fas fa-tag"></i> ${formatPrice(s.precio_servicio)}</li>
                         </ul>
                         <a href="#contact-section" class="service-link btn-request-service" data-search="${s.nom_servicio}">
-                            Solicitar <i class="fas fa-arrow-down"></i>
+                            Agendar <i class="fas fa-chevron-down"></i>
                         </a>
                     </div>
                 `;
-                servicesGrid.innerHTML += card;
+                carouselTrack.innerHTML += card;
             });
+
+            // 2. Inicializar lógica del Carrusel
+            initServicesCarousel();
 
             // Re-asignar eventos a los nuevos botones
             initRequestButtons();
         } else {
-            servicesGrid.innerHTML = '<p style="width:100%;text-align:center">No hay servicios disponibles.</p>';
+            if (originalGrid) originalGrid.innerHTML = '<p style="width:100%;text-align:center">No hay servicios disponibles.</p>';
         }
     } catch (error) {
         console.error('Error cargando servicios:', error);
-        servicesGrid.innerHTML = '<p style="width:100%;text-align:center;color:red">Error al cargar servicios.</p>';
+        if (originalGrid) originalGrid.innerHTML = '<p style="width:100%;text-align:center;color:red">Error al cargar servicios.</p>';
     }
+}
+
+function initServicesCarousel() {
+    const track = document.getElementById('services-carousel');
+    const prevBtn = document.querySelector('.services-slider-container .prev');
+    const nextBtn = document.querySelector('.services-slider-container .next');
+
+    if (!track || !prevBtn || !nextBtn) return;
+
+    // Helper to get actual card width + gap
+    const getCardWidth = () => {
+        const card = track.querySelector('.service-card');
+        if (!card) return 320; // Fallback
+        const style = window.getComputedStyle(track);
+        const gap = parseFloat(style.gap) || 20;
+        return card.offsetWidth + gap;
+    };
+
+    nextBtn.addEventListener('click', () => {
+        const cardWidth = getCardWidth();
+        const maxScroll = track.scrollWidth - track.clientWidth;
+
+        // Scroll exactly one card width, but don't overshoot max
+        let targetScroll = track.scrollLeft + cardWidth;
+
+        // If we are close to the end, snap to end to show last card fully
+        if (targetScroll >= maxScroll - 10) { // Tolerance
+            targetScroll = maxScroll;
+        }
+
+        track.scrollTo({
+            top: 0,
+            left: targetScroll,
+            behavior: 'smooth'
+        });
+    });
+
+    prevBtn.addEventListener('click', () => {
+        const cardWidth = getCardWidth();
+        let targetScroll = track.scrollLeft - cardWidth;
+
+        if (targetScroll < 0) targetScroll = 0;
+
+        track.scrollTo({
+            top: 0,
+            left: targetScroll,
+            behavior: 'smooth'
+        });
+    });
+
+    // Optional: Add resize listener to adjust if needed, though scrollLeft handles it naturally
 }
 
 // Función auxiliar para inicializar botones de solicitud (extraída para reuso)
@@ -1310,20 +1423,45 @@ if (authModal) {
         }
     });
 }
-// 10. STATS ANIMATION & LOADING
+// 10. STATS ANIMATION & LOADING (LANDING PAGE)
 // =========================================================
 async function loadStats() {
     try {
         const res = await fetch(`${API_BASE}/stats.php`);
         const data = await res.json();
 
-        if (data.ok && data.stats) {
-            animateValue("stat-years", 0, data.stats.years, 2000);
-            animateValue("stat-repaired", 0, data.stats.repaired, 2000);
-            animateValue("stat-satisfaction", 0, data.stats.satisfaction, 2000);
+        if (data.ok && data.public) {
+            // Update the stat numbers with real data from backend
+            const statYears = document.getElementById('stat-years');
+            const statRepaired = document.getElementById('stat-repaired');
+            const statSatisfaction = document.getElementById('stat-satisfaction');
+
+            if (statYears) {
+                statYears.setAttribute('data-count', data.public.years);
+                animateValue("stat-years", 0, data.public.years, 2000);
+            }
+
+            if (statRepaired) {
+                statRepaired.setAttribute('data-count', data.public.repaired);
+                animateValue("stat-repaired", 0, data.public.repaired, 2000);
+            }
+
+            if (statSatisfaction) {
+                statSatisfaction.setAttribute('data-count', data.public.satisfaction);
+                animateValue("stat-satisfaction", 0, data.public.satisfaction, 2000);
+            }
+        } else {
+            // Fallback: animate with default values already in HTML
+            animateValue("stat-years", 0, 50, 2000);
+            animateValue("stat-repaired", 0, 12000, 2000);
+            animateValue("stat-satisfaction", 0, 98, 2000);
         }
     } catch (error) {
         console.error('Error loading stats:', error);
+        // Fallback animation with default values
+        animateValue("stat-years", 0, 50, 2000);
+        animateValue("stat-repaired", 0, 12000, 2000);
+        animateValue("stat-satisfaction", 0, 98, 2000);
     }
 }
 
@@ -1345,7 +1483,75 @@ function animateValue(id, start, end, duration) {
     window.requestAnimationFrame(step);
 }
 
+// =========================================================
+// 11. CONTACT FORM HANDLER
+// =========================================================
+async function handleContactForm(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoader = submitBtn.querySelector('.btn-loader');
+
+    // Get form data
+    const nombre = document.getElementById('contact-name').value.trim();
+    const email = document.getElementById('contact-email').value.trim();
+    const telefono = document.getElementById('contact-phone').value.trim();
+    const servicio = document.getElementById('contact-service').value;
+    const mensaje = document.getElementById('contact-message').value.trim();
+
+    // Validation
+    if (!nombre || !email || !servicio || !mensaje) {
+        showNotification('❌ Por favor completa todos los campos obligatorios', true);
+        return;
+    }
+
+    // UI Loading
+    if (btnText) btnText.style.display = 'none';
+    if (btnLoader) btnLoader.style.display = 'inline-block';
+    submitBtn.disabled = true;
+
+    try {
+        const response = await fetch(`${API_BASE}/contacto.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                nombre,
+                email,
+                telefono,
+                servicio,
+                mensaje
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+            showNotification('✅ ' + data.msg);
+            form.reset();
+        } else {
+            showNotification('❌ ' + (data.msg || 'Error al enviar el mensaje'), true);
+        }
+    } catch (error) {
+        console.error('Error en formulario de contacto:', error);
+        showNotification('❌ Error de conexión. Por favor intenta nuevamente.', true);
+    } finally {
+        // Restore button
+        if (btnText) btnText.style.display = 'inline-block';
+        if (btnLoader) btnLoader.style.display = 'none';
+        submitBtn.disabled = false;
+    }
+}
+
 // Inicialización final
 document.addEventListener('DOMContentLoaded', () => {
     loadStats();
+
+    // Conectar formulario de contacto
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', handleContactForm);
+    }
 });

@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS tab_Usuarios
     id_usuario              BIGINT NOT NULL,              -- Identificador único del usuario
     nom_usuario             VARCHAR(100) NOT NULL,        -- Nombre completo del usuario
     correo_usuario          VARCHAR(100) NOT NULL,        -- Correo electrónico del usuario
-    num_telefono_usuario    BIGINT NOT NULL,              -- Número de teléfono del usuario
+    num_telefono_usuario    BIGINT NOT NULL CHECK (LENGTH(CAST(num_telefono_usuario AS TEXT)) = 10), -- Número de teléfono (10 dígitos)
     direccion_principal     VARCHAR(255),                 -- Dirección del usuario
     fecha_registro          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     activo                  BOOLEAN DEFAULT TRUE,

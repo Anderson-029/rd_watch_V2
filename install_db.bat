@@ -1,31 +1,27 @@
 @echo off
 setlocal EnableDelayedExpansion
+
+REM Configuración de colores (simulados) y log
 set "BASE_DIR=%~dp0"
 set "ENV_FILE=%BASE_DIR%src\backend\.env"
 set "LOG_FILE=%BASE_DIR%install_db.log"
-set "PSQL_PATH=C:\Program Files\PostgreSQL\18\bin\psql.exe"
 
-REM --- ESTÉTICA ---
+REM Limpiar log anterior
+echo. > "%LOG_FILE%"
+
 echo ==================================================
-echo       RELOJERÍA RD WATCH - INSTALACIÓN BD
+echo      Iniciando instalacion de base de datos
 echo ==================================================
 echo.
 
-REM 1. Validar psql
-if not exist "%PSQL_PATH%" (
-    echo [ERROR] No se encuentra psql.exe en: %PSQL_PATH%
-    echo Verifique la ruta en el archivo .bat
-    pause
-    exit /b 1
-)
-
-REM 2. Cargar configuración
+REM 1. Cargar configuración desde .env
 if not exist "%ENV_FILE%" (
-    echo [ERROR] No existe el archivo .env en: %ENV_FILE%
+    echo [ERROR] Archivo .env no encontrado en: %ENV_FILE%
     pause
     exit /b 1
 )
 
+echo [INFO] Cargando configuracion...
 for /f "usebackq tokens=1* delims==" %%A in ("%ENV_FILE%") do (
     if "%%A"=="DB_HOST" set DB_HOST=%%B
     if "%%A"=="DB_PORT" set DB_PORT=%%B
@@ -34,57 +30,118 @@ for /f "usebackq tokens=1* delims==" %%A in ("%ENV_FILE%") do (
     if "%%A"=="DB_PASS" set DB_PASS=%%B
 )
 
+if "%DB_NAME%"=="" ( echo [ERROR] DB_NAME no definido & pause & exit /b 1 )
+if "%DB_PASS%"=="" ( echo [ERROR] DB_PASS no definido & pause & exit /b 1 )
+
+REM Configurar variables de entorno para psql
 set PGPASSWORD=%DB_PASS%
+set PGUSER=%DB_USER%
 set PGCLIENTENCODING=UTF8
 
-REM 3. Preparar Base de Datos
-echo [INFO] Recreando base de datos '%DB_NAME%' en %DB_HOST%...
-echo. > "%LOG_FILE%"
-"%PSQL_PATH%" -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '%DB_NAME%' AND pid <> pg_backend_pid();" >> "%LOG_FILE%" 2>&1
-"%PSQL_PATH%" -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -c "DROP DATABASE IF EXISTS \"%DB_NAME%\";" >> "%LOG_FILE%" 2>&1
-"%PSQL_PATH%" -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -c "CREATE DATABASE \"%DB_NAME%\";" >> "%LOG_FILE%" 2>&1
-
+REM 2. Verificar conexión y recrear DB
+echo [INFO] Verificando conexion a PostgreSQL...
+psql -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -c "SELECT 1" >NUL 2>&1
 if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] No se pudo crear la base de datos. Revise install_db.log
+    echo [ERROR] No se pudo conectar a PostgreSQL en %DB_HOST%:%DB_PORT%
+    echo Verifique credenciales y que el servicio este corriendo.
     pause
     exit /b 1
 )
 
-REM 4. Ejecución de Scripts en Orden
-echo [INFO] Instalando Estructura...
-call :run_sql "%BASE_DIR%sql\schema\database_rdwatch_3_0.sql"
+echo [INFO] Terminando sesiones activas en '%DB_NAME%'...
+psql -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '%DB_NAME%' AND pid <> pg_backend_pid();" >> "%LOG_FILE%" 2>&1
 
-echo [INFO] Instalando Funciones...
-for %%f in ("%BASE_DIR%sql\functions\*.sql") do (
-    echo %%~nxf | find /i "inserts_" >NUL
-    if errorlevel 1 call :run_sql "%%f"
+echo [INFO] Recreando base de datos '%DB_NAME%'...
+psql -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -c "DROP DATABASE IF EXISTS \"%DB_NAME%\";" >> "%LOG_FILE%" 2>&1
+psql -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -c "CREATE DATABASE \"%DB_NAME%\";" >> "%LOG_FILE%" 2>&1
+
+REM 3. Esquema Base
+echo.
+echo [INFO] --- Paso 1: Estructura Base (Schema) ---
+call :run_psql "%BASE_DIR%sql\schema\database_rdwatch_3_0.sql"
+
+REM 3.1. Tablas Adicionales (Corrección de Dependencias)
+if exist "%BASE_DIR%sql\scripts\create_reviews_table.sql" (
+    echo [INFO] Creando tablas adicionales...
+    call :run_psql "%BASE_DIR%sql\scripts\create_reviews_table.sql"
 )
 
-echo [INFO] Instalando Triggers...
-for %%f in ("%BASE_DIR%sql\triggers\*.sql") do call :run_sql "%%f"
+REM 4. Funciones
+echo.
+echo [INFO] --- Paso 2: Funciones y Procedimientos ---
+for %%f in ("%BASE_DIR%sql\functions\*.sql") do (
+    echo %%~nxf | find /i "inserts_" >NUL
+    if errorlevel 1 call :run_psql "%%f"
+)
 
-echo [INFO] Cargando Datos Iniciales...
-if exist "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql" call :run_sql "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql"
+REM 5. Triggers
+echo.
+echo [INFO] --- Paso 3: Triggers ---
+for %%f in ("%BASE_DIR%sql\triggers\*.sql") do (
+    call :run_psql "%%f"
+)
 
-REM 5. Población de Scripts (Solo 01 y 02 según lo acordado)
-for %%f in ("%BASE_DIR%sql\scripts\*.sql") do call :run_sql "%%f"
+REM 6. Datos
+echo.
+echo [INFO] --- Paso 4: Carga de Datos ---
+
+REM 6.1. Datos referenciales
+if exist "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql" call :run_psql "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql"
+
+REM 6.2. Scripts de Población en Orden Numérico
+for %%i in (01 02) do (
+    for %%f in ("%BASE_DIR%sql\scripts\%%i_*.sql") do (
+        call :run_psql "%%f"
+    )
+)
+
+REM 6.3. Usuarios de Prueba (Seeders)
+if exist "%BASE_DIR%sql\scripts\05_seeders.sql" (
+    echo [INFO] Cargando usuarios de prueba...
+    call :run_psql "%BASE_DIR%sql\scripts\05_seeders.sql"
+)
+
+REM 6.4. Actividad y Reseñas (Requieren usuarios existentes)
+if exist "%BASE_DIR%sql\scripts\03_populate_activity.sql" (
+    echo [INFO] Generando actividad simulada...
+    call :run_psql "%BASE_DIR%sql\scripts\03_populate_activity.sql"
+)
+if exist "%BASE_DIR%sql\scripts\04_populate_reviews.sql" (
+    echo [INFO] Generando reseñas...
+    call :run_psql "%BASE_DIR%sql\scripts\04_populate_reviews.sql"
+)
+
+REM 6.4. Otros scripts adicionales (excepto los ya procesados)
+for %%f in ("%BASE_DIR%sql\scripts\*.sql") do (
+    set "FNAME=%%~nxf"
+    set "SKIP="
+    if "!FNAME!"=="05_seeders.sql" set SKIP=1
+    if "!FNAME!"=="create_reviews_table.sql" set SKIP=1
+    if "!FNAME!"=="03_populate_activity.sql" set SKIP=1
+    if "!FNAME!"=="04_populate_reviews.sql" set SKIP=1
+    
+    REM Evitar doble ejecución de scripts numéricos
+    echo !FNAME! | findstr /R "^0[1-4]_" >NUL
+    if !ERRORLEVEL! EQU 0 set SKIP=1
+    
+    if not defined SKIP call :run_psql "%%f"
+)
 
 echo.
 echo ==================================================
-echo      PROCESO FINALIZADO EXITOSAMENTE
+echo      INSTALACION COMPLETADA EXITOSAMENTE
 echo ==================================================
-echo Usuario Admin: admin@rdwatch.com / admin123.
-echo Usuario Cliente: cliente@rdwatch.com / cliente123.
-echo.
+echo Log guardado en: install_db.log
 pause
 exit /b 0
 
-:run_sql
+REM Subrutina para ejecutar psql
+:run_psql
 set "FILE=%~1"
-echo   - Procesando: %~nx1
-"%PSQL_PATH%" -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d %DB_NAME% -f "%FILE%" >> "%LOG_FILE%" 2>&1
+echo Ejecutando %~nx1...
+psql -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d %DB_NAME% -f "%FILE%" >> "%LOG_FILE%" 2>&1
 if %ERRORLEVEL% NEQ 0 (
-    echo     [!] ERROR en %~nx1. Verifique install_db.log
+    echo [ERROR] Fallo al ejecutar %~nx1. Revise el log.
     exit /b 1
 )
 goto :eof

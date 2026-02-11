@@ -11,6 +11,14 @@
  */
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../utils/security_utils.php';
+header('Content-Type: application/json');
+
+// Log para debugging
+error_log("=== RESENAS.PHP INICIADO ===");
+error_log("Método: " . $_SERVER['REQUEST_METHOD']);
+error_log("Sesión activa: " . (session_status() === PHP_SESSION_ACTIVE ? 'SI' : 'NO'));
+error_log("Session ID: " . session_id());
 
 // Integridad de la conexión a la base de datos
 if (!isset($pdo)) {
@@ -27,14 +35,12 @@ try {
          * ==========================================
          * 🔍 LISTAR RESEÑAS PÚBLICAS (GET)
          * ==========================================
-         * Lógica: Solo muestra reseñas marcadas como 'activas' (moderadas) y realiza 
-         * un JOIN para obtener el nombre legible del autor.
+         * Lógica: Muestra todas las reseñas ordenadas por fecha reciente.
          */
         $stmt = $pdo->prepare("
             SELECT o.id_opinion, o.calificacion, o.comentario, o.fecha_opinion, u.nom_usuario
             FROM tab_Opiniones o
             JOIN tab_Usuarios u ON o.id_usuario = u.id_usuario
-            WHERE o.activo = TRUE
             ORDER BY o.fecha_opinion DESC
             LIMIT 10
         ");
@@ -61,54 +67,128 @@ try {
          */
 
         // 1. Verificación de Identidad
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        error_log("Verificando sesión...");
+        error_log("user_id en sesión: " . ($_SESSION['user_id'] ?? 'NO EXISTE'));
+        error_log("logged_in en sesión: " . ($_SESSION['logged_in'] ?? 'NO EXISTE'));
+        error_log("Todas las variables de sesión: " . print_r($_SESSION, true));
 
-        if (!isset($_SESSION['user_id'])) {
+        if (!isset($_SESSION['user_id']) && !isset($_SESSION['logged_in'])) {
+            error_log("❌ Sesión no existe - Rechazando petición");
             http_response_code(401);
-            echo json_encode(["ok" => false, "msg" => "Acceso restringido: Inicie sesión para compartir su experiencia"]);
+            echo json_encode([
+                "ok" => false,
+                "msg" => "Sesión no detectada. Por favor inicia sesión nuevamente.",
+                "debug" => "No hay user_id ni logged_in en sesión"
+            ]);
             exit;
         }
 
-        // 2. Extracción de inputs JSON
-        $input = json_decode(file_get_contents('php://input'), true);
+        if (!isset($_SESSION['user_id'])) {
+            error_log("❌ user_id no encontrado en sesión - Rechazando petición");
+            http_response_code(401);
+            echo json_encode([
+                "ok" => false,
+                "msg" => "Acceso restringido: Inicie sesión para compartir su experiencia",
+                "debug" => "Falta user_id en sesión"
+            ]);
+            exit;
+        }
 
         $id_usuario = $_SESSION['user_id'];
+        validateCsrfToken();
+        error_log("✅ Usuario autenticado: ID = " . $id_usuario);
+
+        // 2. Extracción de inputs JSON
+        $rawInput = file_get_contents('php://input');
+        error_log("📥 Raw input: " . $rawInput);
+
+        $input = json_decode($rawInput, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log("❌ Error decodificando JSON: " . json_last_error_msg());
+            http_response_code(400);
+            echo json_encode([
+                "ok" => false,
+                "msg" => "Formato de datos inválido",
+                "debug" => "JSON decode error: " . json_last_error_msg()
+            ]);
+            exit;
+        }
+
+        error_log("📦 Input decodificado: " . print_r($input, true));
+
         $calificacion = isset($input['calificacion']) ? (int) $input['calificacion'] : 0;
-        $comentario = isset($input['comentario']) ? trim($input['comentario']) : '';
+        $comentario = isset($input['comentario']) ? sanitizeHtml(trim($input['comentario'])) : '';
+
+        error_log("Calificación recibida: " . $calificacion);
+        error_log("Comentario recibido: " . substr($comentario, 0, 50) . "...");
 
         // 3. Validación de Reglas de Negocio
         if ($calificacion < 1 || $calificacion > 5) {
-            echo json_encode(["ok" => false, "msg" => "Calificación inválida: El rango permitido es de 1 a 5 estrellas"]);
+            error_log("❌ Calificación inválida: " . $calificacion);
+            http_response_code(400);
+            echo json_encode([
+                "ok" => false,
+                "msg" => "Calificación inválida: El rango permitido es de 1 a 5 estrellas",
+                "debug" => "calificacion = " . $calificacion
+            ]);
             exit;
         }
 
         if (empty($comentario)) {
-            echo json_encode(["ok" => false, "msg" => "Error: El cuerpo del comentario es obligatorio"]);
+            error_log("❌ Comentario vacío");
+            http_response_code(400);
+            echo json_encode([
+                "ok" => false,
+                "msg" => "Error: El cuerpo del comentario es obligatorio",
+                "debug" => "comentario está vacío"
+            ]);
             exit;
         }
 
         /**
          * 4. PERSISTENCIA
-         * La reseña entra en estado inicial pendiente de moderación o activa según política.
+         * La reseña se guarda directamente en la base de datos.
+         * Nota: id_producto es NULL porque estas son reseñas generales del servicio, no de productos específicos.
+         * Como id_opinion es BIGINT NOT NULL (no SERIAL), debemos generar el ID manualmente.
          */
+        error_log("💾 Insertando en base de datos...");
+        error_log("Datos a insertar - usuario: $id_usuario, calificación: $calificacion, comentario: " . substr($comentario, 0, 30));
+
+        // Generar el próximo ID para id_opinion
+        $stmtId = $pdo->query("SELECT COALESCE(MAX(id_opinion), 0) + 1 AS next_id FROM tab_Opiniones");
+        $nextId = $stmtId->fetch()['next_id'];
+        error_log("📌 Próximo ID a usar: " . $nextId);
+
         $stmt = $pdo->prepare("
-            INSERT INTO tab_Opiniones (id_usuario, calificacion, comentario, usr_insert, fec_insert, activo)
-            VALUES (?, ?, ?, ?, NOW(), TRUE)
+            INSERT INTO tab_Opiniones (id_opinion, id_usuario, id_producto, calificacion, comentario, fecha_opinion)
+            VALUES (?, ?, NULL, ?, ?, CURRENT_TIMESTAMP)
         ");
 
-        $stmt->execute([
+        $result = $stmt->execute([
+            $nextId,
             $id_usuario,
             $calificacion,
-            $comentario,
-            $_SESSION['user_name'] ?? 'autor_web'
+            $comentario
         ]);
 
-        echo json_encode([
-            "ok" => true,
-            "msg" => "¡Gracias por tu aporte! Tu opinión ha sido publicada y ayudará a otros coleccionistas."
-        ]);
+        if ($result) {
+            error_log("✅ Reseña insertada exitosamente. ID: " . $nextId);
+
+            echo json_encode([
+                "ok" => true,
+                "msg" => "¡Gracias por tu aporte! Tu opinión ha sido publicada y ayudará a otros coleccionistas.",
+                "id_opinion" => $nextId
+            ]);
+        } else {
+            error_log("❌ Error al insertar - execute() retornó false");
+            http_response_code(500);
+            echo json_encode([
+                "ok" => false,
+                "msg" => "Error al guardar la reseña",
+                "debug" => "execute() retornó false"
+            ]);
+        }
         exit;
     }
 
@@ -118,7 +198,23 @@ try {
 
 } catch (PDOException $e) {
     http_response_code(500);
-    // Logueamos el error técnico internamente pero devolvemos un mensaje amigable al cliente.
-    error_log("Falla en resenas.php: " . $e->getMessage());
-    echo json_encode(["ok" => false, "msg" => "Inconsistencia temporal en el motor de opiniones"]);
+    // Logueamos el error técnico internamente
+    error_log("❌ PDOException en resenas.php: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
+
+    echo json_encode([
+        "ok" => false,
+        "msg" => "Error al procesar la reseña. Por favor intenta de nuevo.",
+        "debug" => $e->getMessage(),
+        "code" => $e->getCode()
+    ]);
+} catch (Exception $e) {
+    http_response_code(500);
+    error_log("❌ Exception en resenas.php: " . $e->getMessage());
+
+    echo json_encode([
+        "ok" => false,
+        "msg" => "Error inesperado en el servidor",
+        "debug" => $e->getMessage()
+    ]);
 }

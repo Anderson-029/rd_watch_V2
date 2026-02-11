@@ -19,6 +19,7 @@
 
 header('Content-Type: application/json');
 require_once '../config.php';
+require_once '../utils/security_utils.php';
 
 // Verificación de disponibilidad de la base de datos
 if (!isset($pdo)) {
@@ -34,7 +35,11 @@ $method = $_SERVER['REQUEST_METHOD'];
  */
 function getJsonInput()
 {
-    return json_decode(file_get_contents('php://input'), true);
+    // Usamos la versión cacheada en security_utils.php para evitar conflictos con validateCsrfToken
+    if (function_exists('getCachedJsonInput')) {
+        return getCachedJsonInput();
+    }
+    return json_decode(file_get_contents('php://input'), true) ?? [];
 }
 
 try {
@@ -69,8 +74,11 @@ try {
              * ==========================================
              * ➕ CREAR PRODUCTO (POST)
              * ==========================================
-             * Seguridad: Valida duplicidad de ID y pertenencia correcta de subcategoría.
+             * Seguridad: Solo accesible por administradores.
              */
+            requireRole('admin');
+            validateCsrfToken();
+
             $data = getJsonInput();
 
             if (!isset($data['id_producto'], $data['nom_producto'], $data['precio'], $data['id_marca'], $data['id_categoria'], $data['id_subcategoria'])) {
@@ -107,8 +115,8 @@ try {
             if (
                 $stmt->execute([
                     $data['id_producto'],
-                    $data['nom_producto'],
-                    $desc,
+                    sanitizeHtml($data['nom_producto']),
+                    sanitizeHtml($desc),
                     $data['precio'],
                     $data['stock'],
                     $img,
@@ -129,7 +137,11 @@ try {
              * ==========================================
              * 🔄 ACTUALIZAR PRODUCTO (PUT)
              * ==========================================
+             * Seguridad: Solo accesible por administradores.
              */
+            requireRole('admin');
+            validateCsrfToken();
+
             $data = getJsonInput();
 
             if (!isset($data['id_producto'])) {
@@ -159,8 +171,8 @@ try {
 
             if (
                 $stmt->execute([
-                    $data['nom_producto'],
-                    $desc,
+                    sanitizeHtml($data['nom_producto']),
+                    sanitizeHtml($desc),
                     $data['precio'],
                     $data['stock'],
                     $img,
@@ -181,10 +193,11 @@ try {
              * ==========================================
              * 🗑️ ELIMINACIÓN SEGURA (DELETE)
              * ==========================================
-             * Bloqueo de Borrado: Un producto no puede borrarse físicamente si:
-             * 1. Ya ha sido vendido (Integridad de facturación/pedidos).
-             * 2. Está en un carrito de compras (Experiencia de usuario).
+             * Seguridad: Solo accesible por administradores.
              */
+            requireRole('admin');
+            validateCsrfToken();
+
             $data = getJsonInput();
             $pid = $data['id_producto'] ?? null;
 

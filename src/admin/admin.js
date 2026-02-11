@@ -1,8 +1,18 @@
-/* global Chart */
+/**
+ * RD WATCH - PANEL DE ADMINISTRACIÓN (CORE UI)
+ * ---------------------------------------------------------
+ * Propósito: Orquestar la interfaz administrativa de RD-Watch. Gestiona 
+ * inventarios, clientes, órdenes y estadísticas en tiempo real.
+ * 
+ * Pilares de Seguridad:
+ * 1. Auth Gate: Valida el rol de 'admin' antes de cargar la interfaz.
+ * 2. Secure Fetch: Centraliza las peticiones API con protección CSRF.
+ * 3. Atomic Updates: Maneja estados locales para una UI fluida y consistente.
+ */
 "use strict";
 
 // ==========================================
-// 1. VERIFICACIÓN DE AUTENTICACIÓN (RUTAS CORREGIDAS)
+// 1. VERIFICACIÓN DE AUTENTICACIÓN
 // ==========================================
 (function checkAuth() {
   // Definimos la base de la API apuntando a la carpeta EXACTA

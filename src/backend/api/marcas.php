@@ -14,6 +14,7 @@
 
 header('Content-Type: application/json');
 require_once '../config.php';
+require_once '../utils/security_utils.php';
 
 // Verificación de salud de la conexión a la base de datos
 if (!isset($pdo)) {
@@ -29,7 +30,11 @@ $method = $_SERVER['REQUEST_METHOD'];
  */
 function getJsonInput()
 {
-    return json_decode(file_get_contents('php://input'), true);
+    // Usamos la versión cacheada en security_utils.php para evitar conflictos con validateCsrfToken
+    if (function_exists('getCachedJsonInput')) {
+        return getCachedJsonInput();
+    }
+    return json_decode(file_get_contents('php://input'), true) ?? [];
 }
 
 try {
@@ -52,8 +57,11 @@ try {
              * ==========================================
              * ➕ CREAR MARCA (POST)
              * ==========================================
-             * Lógica: Se asegura de que no existan colisiones de ID ni de Nombre.
+             * Seguridad: Solo Admin y CSRF Protegido.
              */
+            requireRole('admin');
+            validateCsrfToken();
+
             $data = getJsonInput();
             if (!isset($data['id_marca'], $data['nom_marca'])) {
                 echo json_encode(['ok' => false, 'msg' => 'Error: ID y Nombre son obligatorios para crear una marca']);
@@ -95,7 +103,11 @@ try {
              * ==========================================
              * 🔄 ACTUALIZAR MARCA (PUT)
              * ==========================================
+             * Seguridad: Solo Admin y CSRF Protegido.
              */
+            requireRole('admin');
+            validateCsrfToken();
+
             $data = getJsonInput();
             if (!isset($data['id_marca'], $data['nom_marca'])) {
                 echo json_encode(['ok' => false, 'msg' => 'Error: Faltan datos críticos para actualizar']);
@@ -121,8 +133,12 @@ try {
              * ==========================================
              * 🗑️ ELIMINAR MARCA (DELETE)
              * ==========================================
-             * Seguridad: Se prohíbe el borrado si existen relojes cargados de esta marca.
+             * Seguridad: Solo Admin y CSRF Protegido.
+             * Integridad: Se prohíbe el borrado si existen relojes cargados de esta marca.
              */
+            requireRole('admin');
+            validateCsrfToken();
+
             $data = getJsonInput();
             if (!isset($data['id_marca'])) {
                 echo json_encode(['ok' => false, 'msg' => 'Se requiere el ID de la marca']);

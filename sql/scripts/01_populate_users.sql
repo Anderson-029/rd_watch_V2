@@ -6,7 +6,7 @@
 DELETE FROM tab_Usuarios;
 
 INSERT INTO tab_Usuarios (id_usuario, nom_usuario, correo_usuario, num_telefono_usuario, contra, rol, direccion_principal, activo, fec_insert, usr_insert)
-VALUES (1, 'Administrador RD Watch', 'admin@rdwatch.com', 3115460069, '$2y$10$ZqX3THGvnvHfAQZnDS/09eauzOrlWnTCX1orlw.lAyJmHF4dsI19u', 'admin', 'Calle 34 #18-40 local 107', TRUE, NOW(), 'system');
+VALUES (1, 'Administrador RD Watch', 'admin@rdwatch.com', 3115460069, '$2b$12$7piCEjqRgZvt0S9b.hrRC.u9IEZvceySXtJzlWtO6SweGlqQQuJu.', 'admin', 'Calle 34 #18-40 local 107', TRUE, NOW(), 'system');
 
 -- 2. Cliente por Defecto
 INSERT INTO tab_Usuarios (id_usuario, nom_usuario, correo_usuario, num_telefono_usuario, contra, rol, direccion_principal, activo, fec_insert, usr_insert)

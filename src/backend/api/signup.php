@@ -18,14 +18,22 @@ header('Content-Type: application/json');
 // Captura de datos JSON desde el flujo de entrada
 $input = json_decode(file_get_contents('php://input'), true);
 
-$nombre = $input['nombre'] ?? '';
-$email = $input['email'] ?? '';
-$telefono = $input['telefono'] ?? '';
-$pass = $input['password'] ?? '';
+// 🛡️ SANITIZACIÓN (PREVENCIÓN XSS)
+require_once '../utils/security_utils.php';
+            $nombre = sanitizeHtml(trim($input['nombre'] ?? ''));
+            $email = filter_var(trim($input['email'] ?? ''), FILTER_SANITIZE_EMAIL);
+            $telefono = preg_replace('/\D/', '', $input['telefono'] ?? ''); // Solo números
+$pass = $input['password'] ?? ''; // La contraseña no se sanitiza, se hashea
 
 // 1. REGLAS DE NEGOCIO: VALIDACIÓN DE CAMPOS
 if (empty($email) || empty($pass) || empty($nombre)) {
     echo json_encode(["ok" => false, "msg" => "Faltan datos obligatorios para completar el registro"]);
+    exit;
+}
+
+// Validación de formato de teléfono (10 dígitos)
+if (strlen((string) $telefono) !== 10 || !ctype_digit((string) $telefono)) {
+    echo json_encode(["ok" => false, "msg" => "El número de teléfono debe tener exactamente 10 dígitos numéricos"]);
     exit;
 }
 

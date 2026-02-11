@@ -13,6 +13,10 @@
 
 header('Content-Type: application/json');
 require_once '../config.php';
+require_once '../utils/security_utils.php';
+
+// 🛡️ BARRERA DE ACCESO ADMINISTRATIVO
+requireRole('admin');
 
 // Verificación de integridad operativa
 if (!isset($pdo)) {
@@ -52,8 +56,9 @@ try {
              * ==========================================
              * 🔄 ACTUALIZAR AJUSTES (WRITE)
              * ==========================================
-             * Simulación exitosa para validación de interfaz de usuario.
+             * 🛡️ PROTECCIÓN CSRF ACTIVADA
              */
+            validateCsrfToken();
             echo json_encode(['ok' => true, 'msg' => 'Configuración administrativa actualizada correctamente en caché (Simulado)']);
             break;
 

@@ -14,6 +14,7 @@
 
 header('Content-Type: application/json');
 require_once '../config.php';
+require_once '../utils/security_utils.php';
 
 // Verificación de salud de la conexión a la base de datos
 if (!isset($pdo)) {
@@ -29,7 +30,11 @@ $method = $_SERVER['REQUEST_METHOD'];
  */
 function getJsonInput()
 {
-    return json_decode(file_get_contents('php://input'), true);
+    // Usamos la versión cacheada en security_utils.php para evitar conflictos con validateCsrfToken
+    if (function_exists('getCachedJsonInput')) {
+        return getCachedJsonInput();
+    }
+    return json_decode(file_get_contents('php://input'), true) ?? [];
 }
 
 try {
@@ -53,8 +58,11 @@ try {
              * ==========================================
              * ➕ CREAR SERVICIO (POST)
              * ==========================================
-             * Seguridad: Valida que no exista otro servicio con el mismo nombre para evitar confusión en el taller.
+             * Seguridad: Solo accesible por administradores y protegido por CSRF.
              */
+            requireRole('admin');
+            validateCsrfToken();
+            
             $data = getJsonInput();
             if (!isset($data['id_servicio'], $data['nom_servicio'], $data['precio_servicio'])) {
                 echo json_encode(['ok' => false, 'msg' => 'Faltan campos obligatorios: ID, Nombre o Precio']);
@@ -88,7 +96,11 @@ try {
              * ==========================================
              * 🔄 ACTUALIZAR SERVICIO (PUT)
              * ==========================================
+             * Seguridad: Solo accesible por administradores y protegido por CSRF.
              */
+            requireRole('admin');
+            validateCsrfToken();
+
             $data = getJsonInput();
             if (!isset($data['id_servicio'])) {
                 echo json_encode(['ok' => false, 'msg' => 'Error: Se requiere el ID del servicio para actualizar']);
@@ -120,20 +132,42 @@ try {
              * ==========================================
              * 🗑️ ELIMINAR SERVICIO (DELETE)
              * ==========================================
-             * Nota: Se borra físicamente. En una versión futura se recomienda borrado lógico
-             * si el servicio ya tiene citas históricas vinculadas.
              */
+            requireRole('admin');
+            validateCsrfToken();
+
             $data = getJsonInput();
-            if (!isset($data['id_servicio'])) {
+            $sid = $data['id_servicio'] ?? null;
+
+            logDebug("DELETE SERVICE ATTEMPT: ID[" . ($sid ?? 'NULL') . "]");
+
+            if (!$sid) {
                 echo json_encode(['ok' => false, 'msg' => 'ID de servicio no proporcionado']);
                 exit;
             }
 
+            // 1. Verificar si existen citas (reservas) vinculadas a este servicio
+            $checkCitas = $pdo->prepare("SELECT COUNT(*) FROM tab_Reservas WHERE id_servicio = ?");
+            $checkCitas->execute([$sid]);
+            $count = $checkCitas->fetchColumn();
+            
+            if ($count > 0) {
+                logDebug("DELETE BLOCKED: Service $sid has $count linked reservations.");
+                echo json_encode([
+                    'ok' => false, 
+                    'msg' => 'Imposible borrar: Este servicio tiene ' . $count . ' citas técnicas vinculadas'
+                ]);
+                exit;
+            }
+
+            // 2. Ejecutar borrado físico
             $stmt = $pdo->prepare("DELETE FROM tab_Servicios WHERE id_servicio = ?");
-            if ($stmt->execute([$data['id_servicio']])) {
+            if ($stmt->execute([$sid])) {
+                logDebug("DELETE SUCCESS: Service $sid removed.");
                 echo json_encode(['ok' => true, 'msg' => 'Servicio eliminado permanentemente del catálogo']);
             } else {
-                echo json_encode(['ok' => false, 'msg' => 'Error de integridad al intentar borrar el registro']);
+                logDebug("DELETE FAILED: DB Execute returned false for ID $sid.");
+                echo json_encode(['ok' => false, 'msg' => 'Falla técnica al procesar la eliminación en la base de datos']);
             }
             break;
 

@@ -18,11 +18,14 @@
  */
 
 require_once '../config.php';
+require_once '../utils/security_utils.php';
 header('Content-Type: application/json');
 
-// Respuesta estática para compatibilidad de interfaz
+// Generación de token real vinculado a la sesión
+$token = generateCsrfToken();
+
 echo json_encode([
     "ok" => true,
-    "csrf_token" => "dummy_token_no_security_v1",
-    "info" => "Token de desarrollo activo"
+    "csrf_token" => $token,
+    "info" => "Token de seguridad activo"
 ]);

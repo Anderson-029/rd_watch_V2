@@ -18,6 +18,7 @@
 
 header('Content-Type: application/json');
 require_once '../config.php';
+require_once '../utils/security_utils.php';
 
 // Verificación de integridad de la conexión
 if (!isset($pdo)) {
@@ -34,7 +35,11 @@ $action = $_GET['action'] ?? '';
  */
 function getJsonInput()
 {
-    return json_decode(file_get_contents('php://input'), true);
+    // Usamos la versión cacheada en security_utils.php para evitar conflictos con validateCsrfToken
+    if (function_exists('getCachedJsonInput')) {
+        return getCachedJsonInput();
+    }
+    return json_decode(file_get_contents('php://input'), true) ?? [];
 }
 
 try {
@@ -69,7 +74,11 @@ try {
             case 'POST':
                 /**
                  * ➕ Crear Subcategoría: Valida que no exista el par Identificador-Padre.
+                 * Seguridad: Solo Admin y CSRF Protegido.
                  */
+                requireRole('admin');
+                validateCsrfToken();
+
                 $data = getJsonInput();
                 if (!isset($data['id_categoria'], $data['id_subcategoria'], $data['nom_subcategoria'])) {
                     echo json_encode(['ok' => false, 'msg' => 'Faltan datos obligatorios (ID Categoría, ID Sub o Nombre)']);
@@ -95,8 +104,12 @@ try {
 
             case 'PUT':
                 /**
-                 * 🔄 Actualizar Subcategoría: Solo permite cambiar el nombre (el ID es clave y no debe cambiar).
+                 * 🔄 Actualizar Subcategoría: Solo permite cambiar el nombre.
+                 * Seguridad: Solo Admin y CSRF Protegido.
                  */
+                requireRole('admin');
+                validateCsrfToken();
+
                 $data = getJsonInput();
                 if (!isset($data['id_categoria'], $data['id_subcategoria'], $data['nom_subcategoria'])) {
                     echo json_encode(['ok' => false, 'msg' => 'Datos insuficientes para la actualización']);
@@ -117,7 +130,11 @@ try {
             case 'DELETE':
                 /**
                  * 🗑️ Eliminar Subcategoría: Bloqueo si hay relojes asociados.
+                 * Seguridad: Solo Admin y CSRF Protegido.
                  */
+                requireRole('admin');
+                validateCsrfToken();
+
                 $data = getJsonInput();
                 if (!isset($data['id_categoria'], $data['id_subcategoria'])) {
                     echo json_encode(['ok' => false, 'msg' => 'ID de categoría y subcategoría requeridos']);
@@ -164,7 +181,11 @@ try {
             case 'POST':
                 /**
                  * ➕ Crear Categoría: Valida unicidad de ID.
+                 * Seguridad: Solo Admin y CSRF Protegido.
                  */
+                requireRole('admin');
+                validateCsrfToken();
+
                 $data = getJsonInput();
                 if (!isset($data['id_categoria'], $data['nom_categoria'])) {
                     echo json_encode(['ok' => false, 'msg' => 'ID y Nombre de categoría son obligatorios']);
@@ -195,7 +216,11 @@ try {
             case 'PUT':
                 /**
                  * 🔄 Actualizar Categoría: Permite editar nombre, descripción y estado.
+                 * Seguridad: Solo Admin y CSRF Protegido.
                  */
+                requireRole('admin');
+                validateCsrfToken();
+
                 $data = getJsonInput();
                 if (!isset($data['id_categoria'], $data['nom_categoria'])) {
                     echo json_encode(['ok' => false, 'msg' => 'Datos insuficientes para la modificación']);
@@ -220,8 +245,11 @@ try {
             case 'DELETE':
                 /**
                  * 🗑️ Eliminar Categoría: Veracidad de cascada manual.
-                 * Se protege la BD de huérfanos validando 1) Subcategorías y 2) Productos directos.
+                 * Seguridad: Solo Admin y CSRF Protegido.
                  */
+                requireRole('admin');
+                validateCsrfToken();
+
                 $data = getJsonInput();
                 if (!isset($data['id_categoria'])) {
                     echo json_encode(['ok' => false, 'msg' => 'Se requiere el ID de la categoría a eliminar']);
