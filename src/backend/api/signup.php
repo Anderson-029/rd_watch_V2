@@ -20,9 +20,9 @@ $input = json_decode(file_get_contents('php://input'), true);
 
 // 🛡️ SANITIZACIÓN (PREVENCIÓN XSS)
 require_once '../utils/security_utils.php';
-            $nombre = sanitizeHtml(trim($input['nombre'] ?? ''));
-            $email = filter_var(trim($input['email'] ?? ''), FILTER_SANITIZE_EMAIL);
-            $telefono = preg_replace('/\D/', '', $input['telefono'] ?? ''); // Solo números
+$nombre = sanitizeHtml(trim($input['nombre'] ?? ''));
+$email = filter_var(trim($input['email'] ?? ''), FILTER_SANITIZE_EMAIL);
+$telefono = preg_replace('/\D/', '', $input['telefono'] ?? ''); // Solo números
 $pass = $input['password'] ?? ''; // La contraseña no se sanitiza, se hashea
 
 // 1. REGLAS DE NEGOCIO: VALIDACIÓN DE CAMPOS
@@ -31,9 +31,44 @@ if (empty($email) || empty($pass) || empty($nombre)) {
     exit;
 }
 
+// Validación de nombre (solo letras, espacios y acentos)
+if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $nombre)) {
+    echo json_encode(["ok" => false, "msg" => "El nombre solo debe contener letras y espacios"]);
+    exit;
+}
+
+// Validación de formato de email
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    echo json_encode(["ok" => false, "msg" => "El formato del correo electrónico no es válido"]);
+    exit;
+}
+
 // Validación de formato de teléfono (10 dígitos)
 if (strlen((string) $telefono) !== 10 || !ctype_digit((string) $telefono)) {
     echo json_encode(["ok" => false, "msg" => "El número de teléfono debe tener exactamente 10 dígitos numéricos"]);
+    exit;
+}
+
+// Validación de complejidad de contraseña
+$passwordErrors = [];
+if (strlen($pass) < 8) {
+    $passwordErrors[] = "mínimo 8 caracteres";
+}
+if (!preg_match('/[A-Z]/', $pass)) {
+    $passwordErrors[] = "una letra mayúscula";
+}
+if (!preg_match('/[0-9]/', $pass)) {
+    $passwordErrors[] = "un número";
+}
+if (!preg_match('/[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/', $pass)) {
+    $passwordErrors[] = "un carácter especial";
+}
+
+if (!empty($passwordErrors)) {
+    echo json_encode([
+        "ok" => false,
+        "msg" => "La contraseña debe contener: " . implode(", ", $passwordErrors)
+    ]);
     exit;
 }
 

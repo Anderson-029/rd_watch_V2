@@ -35,19 +35,25 @@ if (!checkRateLimit($pdo, $clientIP, 'contact_form', 3, 60)) {
 logRateLimit($pdo, $clientIP, 'contact_form');
 
 try {
-    // Obtener datos JSON del body
-    $input = json_decode(file_get_contents('php://input'), true);
+    // Obtener datos desde FormData ($_POST)
+    // Cambiado de JSON a multipart/form-data para soportar archivos
 
     // 🛡️ SANITIZACIÓN DE ENTRADAS
-    $nombre = strip_tags(trim($input['nombre'] ?? ''));
-    $email = filter_var(trim($input['email'] ?? ''), FILTER_SANITIZE_EMAIL);
-    $telefono = preg_replace('/\D/', '', $input['telefono'] ?? '');
-    $servicio = strip_tags(trim($input['servicio'] ?? ''));
-    $mensaje = strip_tags(trim($input['mensaje'] ?? ''));
+    $nombre = strip_tags(trim($_POST['nombre'] ?? ''));
+    $email = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
+    $telefono = preg_replace('/\D/', '', $_POST['telefono'] ?? '');
+    $servicio = strip_tags(trim($_POST['servicio'] ?? ''));
+    $mensaje = strip_tags(trim($_POST['mensaje'] ?? ''));
 
     // Campos requeridos
     if (empty($nombre) || empty($email) || empty($servicio) || empty($mensaje)) {
         echo json_encode(['ok' => false, 'msg' => 'Faltan campos obligatorios']);
+        exit;
+    }
+
+    // Validar nombre (solo letras, espacios y acentos)
+    if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $nombre)) {
+        echo json_encode(['ok' => false, 'msg' => 'El nombre solo debe contener letras y espacios']);
         exit;
     }
 
@@ -56,6 +62,61 @@ try {
         echo json_encode(['ok' => false, 'msg' => 'Formato de email inválido']);
         exit;
     }
+
+    // Validar teléfono (solo si se proporciona, debe ser 10 dígitos)
+    if (!empty($telefono) && (strlen($telefono) !== 10 || !ctype_digit($telefono))) {
+        echo json_encode(['ok' => false, 'msg' => 'El teléfono debe tener exactamente 10 dígitos numéricos']);
+        exit;
+    }
+
+    // === VALIDACIÓN Y PROCESAMIENTO DE FOTO ADJUNTA ===
+    $foto_binario = null;
+    $foto_extension = null;
+
+    if (isset($_FILES['contact_file']) && $_FILES['contact_file']['error'] === UPLOAD_ERR_OK) {
+        $file = $_FILES['contact_file'];
+
+        // Validar tipo MIME
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+
+        if (!in_array($mimeType, $allowedMimeTypes)) {
+            echo json_encode(['ok' => false, 'msg' => 'Solo se permiten imágenes: JPG, PNG, SVG']);
+            exit;
+        }
+
+        // Validar extensión
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'svg'];
+        $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+        if (!in_array($fileExtension, $allowedExtensions)) {
+            echo json_encode(['ok' => false, 'msg' => 'Extensión de archivo no permitida']);
+            exit;
+        }
+
+        // Validar tamaño (máximo 5MB)
+        $maxSize = 5 * 1024 * 1024; // 5MB
+        if ($file['size'] > $maxSize) {
+            echo json_encode(['ok' => false, 'msg' => 'La imagen no debe superar los 5MB']);
+            exit;
+        }
+
+        // Leer archivo como binario para almacenamiento en BD (BYTEA)
+        $foto_binario = file_get_contents($file['tmp_name']);
+        $foto_extension = $fileExtension;
+
+        if (!$foto_binario) {
+            echo json_encode(['ok' => false, 'msg' => 'Error al procesar la imagen']);
+            exit;
+        }
+    } elseif (isset($_FILES['contact_file']) && $_FILES['contact_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+        // Hubo un error en la carga
+        echo json_encode(['ok' => false, 'msg' => 'Error al cargar el archivo']);
+        exit;
+    }
+
 
     // Buscar o crear usuario temporal para el contacto
     // Primero verificamos si el email ya existe
@@ -119,19 +180,22 @@ try {
     $stmtMaxReserva = $pdo->query("SELECT COALESCE(MAX(id_reserva), 0) + 1 as next_id FROM tab_Reservas");
     $id_reserva = $stmtMaxReserva->fetchColumn();
 
-    // Insertar en tab_Reservas
+    // Insertar en tab_Reservas (con foto adjunta si existe)
     $stmtReserva = $pdo->prepare("
         INSERT INTO tab_Reservas 
-        (id_reserva, id_usuario, id_servicio, fecha_reserva, notas_cliente, estado_reserva, usr_insert, fec_insert)
-        VALUES (?, ?, ?, NOW(), ?, 'pendiente', 'system', NOW())
+        (id_reserva, id_usuario, id_servicio, fecha_reserva, notas_cliente, estado_reserva, foto_adjunto, foto_extension, usr_insert, fec_insert)
+        VALUES (?, ?, ?, NOW(), ?, 'pendiente', ?, ?, 'system', NOW())
     ");
 
-    $stmtReserva->execute([
-        $id_reserva,
-        $id_usuario,
-        $id_servicio,
-        "Contacto desde landing page:\n\nNombre: $nombre\nEmail: $email\nTeléfono: $telefono\nServicio: $servicio\n\nMensaje:\n$mensaje"
-    ]);
+    $notas = "Contacto desde landing page:\n\nNombre: $nombre\nEmail: $email\nTeléfono: $telefono\nServicio: $servicio\n\nMensaje:\n$mensaje";
+
+    $stmtReserva->bindValue(1, $id_reserva, PDO::PARAM_INT);
+    $stmtReserva->bindValue(2, $id_usuario, PDO::PARAM_INT);
+    $stmtReserva->bindValue(3, $id_servicio, PDO::PARAM_INT);
+    $stmtReserva->bindValue(4, $notas, PDO::PARAM_STR);
+    $stmtReserva->bindValue(5, $foto_binario, PDO::PARAM_LOB); // BYTEA
+    $stmtReserva->bindValue(6, $foto_extension, PDO::PARAM_STR);
+    $stmtReserva->execute();
 
     echo json_encode([
         'ok' => true,

@@ -50,6 +50,59 @@ if (!isset($input['direccion'], $input['ciudad']) || !$file) {
     exit;
 }
 
+// Validar que dirección y ciudad no estén vacías
+if (empty(trim($input['direccion'])) || strlen(trim($input['direccion'])) < 5) {
+    echo json_encode(['ok' => false, 'msg' => 'La dirección debe tener al menos 5 caracteres']);
+    exit;
+}
+
+if (empty(trim($input['ciudad'])) || strlen(trim($input['ciudad'])) < 3) {
+    echo json_encode(['ok' => false, 'msg' => 'La ciudad debe tener al menos 3 caracteres']);
+    exit;
+}
+
+// === VALIDACIÓN EXHAUSTIVA DEL COMPROBANTE DE PAGO ===
+if ($file['error'] !== UPLOAD_ERR_OK) {
+    echo json_encode(['ok' => false, 'msg' => 'Error al cargar el comprobante de pago']);
+    exit;
+}
+
+// Validar tipo MIME usando finfo
+$allowedMimeTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
+$finfo = finfo_open(FILEINFO_MIME_TYPE);
+$mimeType = finfo_file($finfo, $file['tmp_name']);
+finfo_close($finfo);
+
+if (!in_array($mimeType, $allowedMimeTypes)) {
+    echo json_encode(['ok' => false, 'msg' => 'El comprobante debe ser una imagen (JPG, PNG o SVG)']);
+    exit;
+}
+
+// Validar extensión del archivo
+$allowedExtensions = ['jpg', 'jpeg', 'png', 'svg'];
+$fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+if (!in_array($fileExtension, $allowedExtensions)) {
+    echo json_encode(['ok' => false, 'msg' => 'Extensión de archivo no permitida. Use JPG, PNG o SVG']);
+    exit;
+}
+
+// Validar tamaño (máximo 5MB)
+$maxSize = 5 * 1024 * 1024; // 5MB
+if ($file['size'] > $maxSize) {
+    echo json_encode(['ok' => false, 'msg' => 'El comprobante no debe superar los 5MB']);
+    exit;
+}
+
+// Leer contenido binario del archivo
+$binaryData = file_get_contents($file['tmp_name']);
+if (!$binaryData) {
+    echo json_encode(['ok' => false, 'msg' => 'Error al procesar el archivo del comprobante']);
+    exit;
+}
+
+$fileExt = $fileExtension;
+
 try {
     /**
      * 2. INICIO DE TRANSACCIÓN
@@ -157,13 +210,7 @@ try {
                  VALUES (?, ?, ?, ?, 'pendiente', NOW(), NOW() + INTERVAL '3 days', 15000, NOW(), 'logistics_system')";
     $pdo->prepare($sqlEnvio)->execute([$idEnvio, $idOrden, $direccionId, 'Estándar Premium']);
 
-    // PASO 8: Procesamiento de Comprobante de Pago (Seguridad Binaria)
-    $fileExt = pathinfo($file['name'], PATHINFO_EXTENSION);
-    $binaryData = file_get_contents($file['tmp_name']);
-
-    if (!$binaryData) {
-        throw new Exception("Error Crítico: El archivo del comprobante no pudo ser procesado.");
-    }
+    // PASO 8: Archivo ya validado y procesado en la sección de validaciones
 
     // PASO 9: Registro del Pago
     $idPago = $idOrden + 2000;

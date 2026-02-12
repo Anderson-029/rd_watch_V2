@@ -641,12 +641,47 @@ if (paymentForm) {
     paymentForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const address = document.getElementById('shipping-address').value;
-        const city = document.getElementById('shipping-city').value;
+        const address = document.getElementById('shipping-address').value.trim();
+        const city = document.getElementById('shipping-city').value.trim();
         const proofFile = document.getElementById('payment-proof').files[0];
 
+        // === VALIDACIÓN DE DIRECCIÓN Y CIUDAD ===
+        if (!address || address.length < 5) {
+            showNotification('❌ Por favor ingresa una dirección válida (mínimo 5 caracteres)', true);
+            document.getElementById('shipping-address').focus();
+            return;
+        }
+
+        if (!city || city.length < 3) {
+            showNotification('❌ Por favor ingresa una ciudad válida (mínimo 3 caracteres)', true);
+            document.getElementById('shipping-city').focus();
+            return;
+        }
+
+        // === VALIDACIÓN DE COMPROBANTE DE PAGO ===
         if (!proofFile) {
             showNotification('❌ Por favor adjunta el comprobante de pago', true);
+            return;
+        }
+
+        // Validar tipo MIME y extensión
+        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
+        const allowedExtensions = ['.jpg', '.jpeg', '.png', '.svg'];
+
+        const fileName = proofFile.name.toLowerCase();
+        const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+
+        if (!allowedMimeTypes.includes(proofFile.type) || !allowedExtensions.includes(fileExtension)) {
+            showNotification('❌ El comprobante debe ser una imagen (JPG, PNG o SVG)', true);
+            document.getElementById('payment-proof').value = '';
+            return;
+        }
+
+        // Validar tamaño (máximo 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (proofFile.size > maxSize) {
+            showNotification('❌ El comprobante no debe superar los 5MB', true);
+            document.getElementById('payment-proof').value = '';
             return;
         }
 
@@ -1215,9 +1250,43 @@ document.addEventListener('DOMContentLoaded', () => {
             const passInput = document.getElementById('signup-password');
             const confirmInput = document.getElementById('signup-password-confirm');
 
+            // === VALIDACIONES FRONTEND ===
+
+            // Validar nombre
+            const name = nameInput.value.trim();
+            if (!validateName(name)) {
+                showNotification('❌ El nombre solo debe contener letras y espacios', true);
+                nameInput.focus();
+                return;
+            }
+
+            // Validar teléfono
+            const phone = phoneInput.value.trim();
+            if (!validatePhone(phone)) {
+                showNotification('❌ El teléfono debe tener 10 dígitos numéricos', true);
+                phoneInput.focus();
+                return;
+            }
+
+            // Validar contraseña
+            const password = passInput.value;
+            const passwordRequirements = validatePassword(password);
+            if (!passwordRequirements.isValid()) {
+                let missingReqs = [];
+                if (!passwordRequirements.length) missingReqs.push('8 caracteres');
+                if (!passwordRequirements.uppercase) missingReqs.push('una mayúscula');
+                if (!passwordRequirements.number) missingReqs.push('un número');
+                if (!passwordRequirements.special) missingReqs.push('un carácter especial');
+
+                showNotification('❌ La contraseña debe contener: ' + missingReqs.join(', '), true);
+                passInput.focus();
+                return;
+            }
+
             // Validar coincidencia de contraseñas
             if (passInput.value !== confirmInput.value) {
                 showNotification('❌ Las contraseñas no coinciden', true);
+                confirmInput.focus();
                 return;
             }
 
@@ -1302,28 +1371,146 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // C. MEDIDOR DE FUERZA DE CONTRASEÑA
+    // C. VALIDACIONES Y MEDIDOR DE FUERZA DE CONTRASEÑA
+
+    // === FUNCIONES DE VALIDACIÓN REUTILIZABLES ===
+
+    /**
+     * Valida que el nombre solo contenga letras, espacios y acentos
+     */
+    window.validateName = function (name) {
+        const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+        return nameRegex.test(name);
+    };
+
+    /**
+     * Valida que el teléfono solo contenga números y tenga 10 dígitos
+     */
+    window.validatePhone = function (phone) {
+        const phoneRegex = /^\d{10}$/;
+        return phoneRegex.test(phone);
+    };
+
+    /**
+     * Valida los requisitos de contraseña
+     * @returns {Object} - Objeto con los requisitos cumplidos
+     */
+    window.validatePassword = function (password) {
+        return {
+            length: password.length >= 8,
+            uppercase: /[A-Z]/.test(password),
+            number: /[0-9]/.test(password),
+            special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+            isValid: function () {
+                return this.length && this.uppercase && this.number && this.special;
+            }
+        };
+    };
+
+    // === VALIDACIÓN EN TIEMPO REAL PARA NOMBRE (SIGNUP) ===
+    const signupNameInput = document.getElementById('signup-name');
+    const signupNameError = document.getElementById('signup-name-error');
+
+    if (signupNameInput && signupNameError) {
+        signupNameInput.addEventListener('input', function () {
+            const value = this.value.trim();
+            if (value && !validateName(value)) {
+                signupNameError.textContent = 'Solo se permiten letras y espacios';
+                signupNameError.style.display = 'block';
+                signupNameError.style.color = '#e74c3c';
+                this.style.borderColor = '#e74c3c';
+            } else {
+                signupNameError.textContent = '';
+                signupNameError.style.display = 'none';
+                this.style.borderColor = '';
+            }
+        });
+    }
+
+    // === VALIDACIÓN EN TIEMPO REAL PARA TELÉFONO (SIGNUP) ===
+    const signupPhoneInput = document.getElementById('signup-phone');
+    const signupPhoneError = document.getElementById('signup-phone-error');
+
+    if (signupPhoneInput && signupPhoneError) {
+        // Bloquear caracteres no numéricos
+        signupPhoneInput.addEventListener('keypress', function (e) {
+            if (!/^\d$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                e.preventDefault();
+            }
+        });
+
+        signupPhoneInput.addEventListener('input', function () {
+            // Eliminar cualquier carácter no numérico
+            this.value = this.value.replace(/\D/g, '');
+
+            const value = this.value;
+            if (value && !validatePhone(value)) {
+                if (value.length < 10) {
+                    signupPhoneError.textContent = 'El teléfono debe tener 10 dígitos';
+                } else {
+                    signupPhoneError.textContent = 'Solo se permiten números';
+                }
+                signupPhoneError.style.display = 'block';
+                signupPhoneError.style.color = '#e74c3c';
+                this.style.borderColor = '#e74c3c';
+            } else {
+                signupPhoneError.textContent = '';
+                signupPhoneError.style.display = 'none';
+                this.style.borderColor = '';
+            }
+        });
+    }
+
+    // === MEDIDOR DE FUERZA Y REQUISITOS DE CONTRASEÑA ===
     const passInputSignup = document.getElementById('signup-password');
     const strengthText = document.getElementById('strength-text');
     const bars = document.querySelectorAll('.strength-bar');
 
+    // Elementos de requisitos
+    const reqLength = document.getElementById('req-length');
+    const reqUppercase = document.getElementById('req-uppercase');
+    const reqNumber = document.getElementById('req-number');
+    const reqSpecial = document.getElementById('req-special');
+
     if (passInputSignup && strengthText) {
         passInputSignup.addEventListener('input', function () {
             const val = this.value;
+            const requirements = validatePassword(val);
+
+            // Actualizar indicadores visuales de requisitos
+            const updateRequirement = (element, met) => {
+                if (!element) return;
+                const icon = element.querySelector('i');
+                if (met) {
+                    element.style.color = '#2ecc71';
+                    if (icon) {
+                        icon.className = 'fas fa-check-circle';
+                        icon.style.fontSize = '0.8rem';
+                    }
+                } else {
+                    element.style.color = 'var(--text-muted)';
+                    if (icon) {
+                        icon.className = 'fas fa-circle';
+                        icon.style.fontSize = '0.5rem';
+                    }
+                }
+            };
+
+            updateRequirement(reqLength, requirements.length);
+            updateRequirement(reqUppercase, requirements.uppercase);
+            updateRequirement(reqNumber, requirements.number);
+            updateRequirement(reqSpecial, requirements.special);
+
+            // Calcular score para el medidor
             let score = 0;
-
-            if (val.length >= 6) score++;         // Longitud mínima
-            if (val.length >= 10) score++;        // Longitud ideal
-            if (/[A-Z]/.test(val)) score++;       // Mayúsculas
-            if (/[0-9]/.test(val)) score++;       // Números
-            if (/[^A-Za-z0-9]/.test(val)) score++;// Símbolos
-
-            // Limitar a 4 niveles
-            if (score > 4) score = 4;
+            if (requirements.length) score++;
+            if (requirements.uppercase) score++;
+            if (requirements.number) score++;
+            if (requirements.special) score++;
 
             // Actualizar Texto
             const labels = ['Muy Débil', 'Débil', 'Media', 'Fuerte', 'Muy Segura'];
-            strengthText.textContent = labels[score];
+            strengthText.textContent = labels[score] || 'Muy Débil';
 
             // Colorear Barras
             bars.forEach((bar, idx) => {
@@ -1501,10 +1688,68 @@ async function handleContactForm(e) {
     const servicio = document.getElementById('contact-service').value;
     const mensaje = document.getElementById('contact-message').value.trim();
 
-    // Validation
+    // === VALIDACIONES ===
+
+    // Validación básica de campos obligatorios
     if (!nombre || !email || !servicio || !mensaje) {
         showNotification('❌ Por favor completa todos los campos obligatorios', true);
         return;
+    }
+
+    // Validar nombre (solo letras y espacios)
+    if (!validateName(nombre)) {
+        showNotification('❌ El nombre solo debe contener letras y espacios', true);
+        document.getElementById('contact-name').focus();
+        return;
+    }
+
+    // Validar teléfono (si se proporciona)
+    if (telefono && !validatePhone(telefono)) {
+        showNotification('❌ El teléfono debe tener 10 dígitos numéricos', true);
+        document.getElementById('contact-phone').focus();
+        return;
+    }
+
+    // === VALIDACIÓN DE ARCHIVO DE IMAGEN ===
+    const fileInput = document.getElementById('contact-file');
+    const fileError = document.querySelector('.file-error');
+
+    if (fileInput && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
+        const allowedExtensions = ['.jpg', '.jpeg', '.png', '.svg'];
+
+        // Obtener extensión del archivo
+        const fileName = file.name.toLowerCase();
+        const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+
+        // Validar tipo MIME y extensión
+        if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExtension)) {
+            showNotification('❌ Solo se permiten imágenes (JPG, PNG, SVG)', true);
+            if (fileError) {
+                fileError.textContent = 'Solo se permiten archivos: JPG, PNG, SVG';
+                fileError.style.display = 'block';
+            }
+            fileInput.value = ''; // Limpiar el input
+            return;
+        }
+
+        // Validar tamaño (máximo 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            showNotification('❌ La imagen no debe superar los 5MB', true);
+            if (fileError) {
+                fileError.textContent = 'La imagen no debe superar los 5MB';
+                fileError.style.display = 'block';
+            }
+            fileInput.value = '';
+            return;
+        }
+
+        // Limpiar mensaje de error si todo está bien
+        if (fileError) {
+            fileError.style.display = 'none';
+        }
     }
 
     // UI Loading
@@ -1513,17 +1758,23 @@ async function handleContactForm(e) {
     submitBtn.disabled = true;
 
     try {
+        // Crear FormData para soportar archivos
+        const formData = new FormData();
+        formData.append('nombre', nombre);
+        formData.append('email', email);
+        formData.append('telefono', telefono);
+        formData.append('servicio', servicio);
+        formData.append('mensaje', mensaje);
+
+        // Agregar archivo si existe
+        if (fileInput && fileInput.files.length > 0) {
+            formData.append('contact_file', fileInput.files[0]);
+        }
+
         const response = await fetch(`${API_BASE}/contacto.php`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({
-                nombre,
-                email,
-                telefono,
-                servicio,
-                mensaje
-            })
+            body: formData // No enviar Content-Type, el navegador lo configura automáticamente
         });
 
         const data = await response.json();
@@ -1545,6 +1796,87 @@ async function handleContactForm(e) {
     }
 }
 
+// =========================================================
+// 12. CARGAR SERVICIOS EN FORMULARIO DE CONTACTO
+// =========================================================
+
+/**
+ * Carga servicios dinámicamente en el select del formulario de contacto
+ */
+async function loadContactServices() {
+    const serviceSelect = document.getElementById('contact-service');
+    if (!serviceSelect) return;
+
+    try {
+        const response = await fetch(`${API_BASE_SHOP}/servicios.php`);
+        const data = await response.json();
+
+        if (data.ok && data.servicios && data.servicios.length > 0) {
+            // Limpiar opciones existentes excepto la primera (placeholder)
+            while (serviceSelect.options.length > 1) {
+                serviceSelect.remove(1);
+            }
+
+            // Agregar servicios dinámicamente
+            data.servicios.forEach(servicio => {
+                const option = document.createElement('option');
+                option.value = servicio.id_servicio;
+                option.textContent = servicio.nom_servicio;
+                option.style.color = '#333'; // Asegurar que el texto sea visible
+                serviceSelect.appendChild(option);
+            });
+        } else {
+            console.warn('No se pudieron cargar los servicios');
+        }
+    } catch (error) {
+        console.error('Error al cargar servicios:', error);
+    }
+}
+
+/**
+ * Validación en tiempo real del archivo seleccionado
+ */
+function setupFileValidation() {
+    const fileInput = document.getElementById('contact-file');
+    const fileError = document.querySelector('.file-error');
+
+    if (!fileInput || !fileError) return;
+
+    fileInput.addEventListener('change', function () {
+        if (this.files.length === 0) {
+            fileError.style.display = 'none';
+            return;
+        }
+
+        const file = this.files[0];
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
+        const allowedExtensions = ['.jpg', '.jpeg', '.png', '.svg'];
+
+        const fileName = file.name.toLowerCase();
+        const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+
+        // Validar tipo y extensión
+        if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExtension)) {
+            fileError.textContent = '⚠️ Solo se permiten archivos: JPG, PNG, SVG';
+            fileError.style.display = 'block';
+            this.value = '';
+            return;
+        }
+
+        // Validar tamaño (5MB)
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            fileError.textContent = '⚠️ La imagen no debe superar los 5MB';
+            fileError.style.display = 'block';
+            this.value = '';
+            return;
+        }
+
+        // Todo bien
+        fileError.style.display = 'none';
+    });
+}
+
 // Inicialización final
 document.addEventListener('DOMContentLoaded', () => {
     loadStats();
@@ -1554,4 +1886,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (contactForm) {
         contactForm.addEventListener('submit', handleContactForm);
     }
+
+    // Cargar servicios en el formulario de contacto
+    loadContactServices();
+
+    // Configurar validación de archivos
+    setupFileValidation();
 });

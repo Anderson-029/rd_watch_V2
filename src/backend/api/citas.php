@@ -58,7 +58,8 @@ try {
              * VISTA ADMIN: RequiereJOIN con la tabla de usuarios para ver quién solicitó la cita.
              */
             $sql = "SELECT r.id_reserva, r.id_usuario, u.nom_usuario as cliente, s.nom_servicio as nombre_servicio, 
-                           r.fecha_preferida, r.prioridad, r.estado_reserva as estado, r.notas_cliente as notas
+                           r.fecha_preferida, r.prioridad, r.estado_reserva as estado, r.notas_cliente as notas,
+                           (CASE WHEN r.foto_adjunto IS NOT NULL THEN 1 ELSE 0 END) as tiene_foto
                     FROM tab_Reservas r
                     LEFT JOIN tab_Servicios s ON r.id_servicio = s.id_servicio
                     LEFT JOIN tab_Usuarios u ON r.id_usuario = u.id_usuario

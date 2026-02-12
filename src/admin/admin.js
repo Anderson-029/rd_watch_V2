@@ -1326,7 +1326,7 @@ document.addEventListener("DOMContentLoaded", () => {
     tbody.innerHTML = '';
 
     if (!citas || citas.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No hay citas registradas.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No hay citas registradas.</td></tr>';
       return;
     }
 
@@ -1350,6 +1350,16 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>${cita.fecha_preferida}</td>
             <td><span class="badge ${cita.prioridad === 'alta' ? 'danger' : 'primary'}">${cita.prioridad}</span></td>
             <td><span class="badge ${badgeClass}">${cita.estado}</span></td>
+            <td>
+                ${cita.tiene_foto ? `
+                    <a href="../backend/api/get_foto_cita.php?id_reserva=${cita.id_reserva}" 
+                       target="_blank"
+                       style="color: var(--primary-color); text-decoration: none; display: inline-flex; align-items: center; gap: 5px;"
+                       title="Ver foto adjunta">
+                        <i class="fas fa-image"></i> Ver
+                    </a>
+                ` : '<span style="color: #999;">Sin foto</span>'}
+            </td>
             <td>
                 <div class="action-buttons">
                     ${est === 'pendiente' ? `

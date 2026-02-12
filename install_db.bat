@@ -35,7 +35,6 @@ if "%DB_PASS%"=="" ( echo [ERROR] DB_PASS no definido & pause & exit /b 1 )
 
 REM Configurar variables de entorno para psql
 set PGPASSWORD=%DB_PASS%
-set PGUSER=%DB_USER%
 set PGCLIENTENCODING=UTF8
 
 REM 2. Verificar conexión y recrear DB
@@ -55,16 +54,10 @@ echo [INFO] Recreando base de datos '%DB_NAME%'...
 psql -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -c "DROP DATABASE IF EXISTS \"%DB_NAME%\";" >> "%LOG_FILE%" 2>&1
 psql -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -c "CREATE DATABASE \"%DB_NAME%\";" >> "%LOG_FILE%" 2>&1
 
-REM 3. Esquema Base
+REM 3. Esquema
 echo.
-echo [INFO] --- Paso 1: Estructura Base (Schema) ---
+echo [INFO] --- Paso 1: Estructura (Schema) ---
 call :run_psql "%BASE_DIR%sql\schema\database_rdwatch_3_0.sql"
-
-REM 3.1. Tablas Adicionales (Corrección de Dependencias)
-if exist "%BASE_DIR%sql\scripts\create_reviews_table.sql" (
-    echo [INFO] Creando tablas adicionales...
-    call :run_psql "%BASE_DIR%sql\scripts\create_reviews_table.sql"
-)
 
 REM 4. Funciones
 echo.
@@ -88,43 +81,16 @@ echo [INFO] --- Paso 4: Carga de Datos ---
 REM 6.1. Datos referenciales
 if exist "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql" call :run_psql "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql"
 
-REM 6.2. Scripts de Población en Orden Numérico
-for %%i in (01 02) do (
-    for %%f in ("%BASE_DIR%sql\scripts\%%i_*.sql") do (
-        call :run_psql "%%f"
-    )
-)
-
-REM 6.3. Usuarios de Prueba (Seeders)
+REM 6.2. Usuarios de Prueba (Seeders)
 if exist "%BASE_DIR%sql\scripts\05_seeders.sql" (
     echo [INFO] Cargando usuarios de prueba...
     call :run_psql "%BASE_DIR%sql\scripts\05_seeders.sql"
 )
 
-REM 6.4. Actividad y Reseñas (Requieren usuarios existentes)
-if exist "%BASE_DIR%sql\scripts\03_populate_activity.sql" (
-    echo [INFO] Generando actividad simulada...
-    call :run_psql "%BASE_DIR%sql\scripts\03_populate_activity.sql"
-)
-if exist "%BASE_DIR%sql\scripts\04_populate_reviews.sql" (
-    echo [INFO] Generando reseñas...
-    call :run_psql "%BASE_DIR%sql\scripts\04_populate_reviews.sql"
-)
-
-REM 6.4. Otros scripts adicionales (excepto los ya procesados)
+REM 6.3. Scripts adicionales
 for %%f in ("%BASE_DIR%sql\scripts\*.sql") do (
     set "FNAME=%%~nxf"
-    set "SKIP="
-    if "!FNAME!"=="05_seeders.sql" set SKIP=1
-    if "!FNAME!"=="create_reviews_table.sql" set SKIP=1
-    if "!FNAME!"=="03_populate_activity.sql" set SKIP=1
-    if "!FNAME!"=="04_populate_reviews.sql" set SKIP=1
-    
-    REM Evitar doble ejecución de scripts numéricos
-    echo !FNAME! | findstr /R "^0[1-4]_" >NUL
-    if !ERRORLEVEL! EQU 0 set SKIP=1
-    
-    if not defined SKIP call :run_psql "%%f"
+    if not "!FNAME!"=="05_seeders.sql" call :run_psql "%%f"
 )
 
 echo.
