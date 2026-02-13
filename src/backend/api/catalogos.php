@@ -17,6 +17,8 @@
  */
 
 header('Content-Type: application/json');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 require_once '../config.php';
 
 // Verificación de integridad de la comunicación con BD
@@ -81,7 +83,8 @@ try {
             break;
     }
 
-} catch (PDOException $e) {
+}
+catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Falla técnica al recuperar datos del catálogo: ' . $e->getMessage()]);
 }

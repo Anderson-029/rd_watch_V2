@@ -58,7 +58,7 @@ try {
              * ==========================================
              * 🛡️ PROTECCIÓN CSRF ACTIVADA
              */
-            validateCsrfToken();
+            validateCsrfToken(null, true);
             echo json_encode(['ok' => true, 'msg' => 'Configuración administrativa actualizada correctamente en caché (Simulado)']);
             break;
 
@@ -67,7 +67,8 @@ try {
             echo json_encode(['ok' => false, 'msg' => 'Método no soportado para ajustes globales']);
             break;
     }
-} catch (PDOException $e) {
+}
+catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error crítico de comunicación: ' . $e->getMessage()]);
 }

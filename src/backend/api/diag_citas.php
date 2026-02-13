@@ -12,12 +12,12 @@
  */
 
 require_once '../config.php';
+require_once '../utils/security_utils.php';
 header('Content-Type: application/json');
 
-// Garantizar acceso al estado de la sesión
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
+// 🛡️ BARRERA DE DIAGNÓSTICO: Solo accesible por administradores autorizados
+requireRole('admin');
+
 
 /**
  * ==========================================
@@ -40,7 +40,7 @@ try {
      */
     $stmt = $pdo->query("SELECT COUNT(*) FROM tab_Reservas");
     $diag['estadisticas_reservas'] = [
-        'total_registros' => (int) $stmt->fetchColumn()
+        'total_registros' => (int)$stmt->fetchColumn()
     ];
 
     /**
@@ -61,7 +61,8 @@ try {
         'es_administrador_global' => (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin')
     ];
 
-} catch (PDOException $e) {
+}
+catch (PDOException $e) {
     /**
      * Captura de fallas en capa de datos.
      */

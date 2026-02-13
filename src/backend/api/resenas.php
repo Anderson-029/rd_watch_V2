@@ -12,6 +12,7 @@
 
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../utils/security_utils.php';
+require_once __DIR__ . '/../utils/Validation.php';
 header('Content-Type: application/json');
 
 // Log para debugging
@@ -66,85 +67,41 @@ try {
          * 2. Validación de rango de calificación (1 estrella a 5 estrellas).
          */
 
-        // 1. Verificación de Identidad
-        error_log("Verificando sesión...");
-        error_log("user_id en sesión: " . ($_SESSION['user_id'] ?? 'NO EXISTE'));
-        error_log("logged_in en sesión: " . ($_SESSION['logged_in'] ?? 'NO EXISTE'));
-        error_log("Todas las variables de sesión: " . print_r($_SESSION, true));
-
-        if (!isset($_SESSION['user_id']) && !isset($_SESSION['logged_in'])) {
-            error_log("❌ Sesión no existe - Rechazando petición");
-            http_response_code(401);
-            echo json_encode([
-                "ok" => false,
-                "msg" => "Sesión no detectada. Por favor inicia sesión nuevamente.",
-                "debug" => "No hay user_id ni logged_in en sesión"
-            ]);
-            exit;
-        }
-
         if (!isset($_SESSION['user_id'])) {
-            error_log("❌ user_id no encontrado en sesión - Rechazando petición");
             http_response_code(401);
-            echo json_encode([
-                "ok" => false,
-                "msg" => "Acceso restringido: Inicie sesión para compartir su experiencia",
-                "debug" => "Falta user_id en sesión"
-            ]);
+            echo json_encode(["ok" => false, "msg" => "Acceso restringido: Inicie sesión para compartir su experiencia"]);
             exit;
         }
 
         $id_usuario = $_SESSION['user_id'];
-        validateCsrfToken();
-        error_log("✅ Usuario autenticado: ID = " . $id_usuario);
+        validateCsrfToken(null, true);
 
-        // 2. Extracción de inputs JSON
-        $rawInput = file_get_contents('php://input');
-        error_log("📥 Raw input: " . $rawInput);
+        $input = getJsonInput();
 
-        $input = json_decode($rawInput, true);
+        // 🛡️ VALIDACIÓN ESTRICTA (ISO 830)
+        Validation::validateOrReject($input, [
+            'calificacion' => 'numeric',
+            'comentario' => 'address' // Usamos address para permitir texto con signos básicos
+        ]);
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            error_log("❌ Error decodificando JSON: " . json_last_error_msg());
-            http_response_code(400);
-            echo json_encode([
-                "ok" => false,
-                "msg" => "Formato de datos inválido",
-                "debug" => "JSON decode error: " . json_last_error_msg()
-            ]);
-            exit;
-        }
+        $calificacion = (int)$input['calificacion'];
+        $comentario = Validation::sanitizeString($input['comentario']);
 
-        error_log("📦 Input decodificado: " . print_r($input, true));
-
-        $calificacion = isset($input['calificacion']) ? (int) $input['calificacion'] : 0;
-        $comentario = isset($input['comentario']) ? sanitizeHtml(trim($input['comentario'])) : '';
-
-        error_log("Calificación recibida: " . $calificacion);
-        error_log("Comentario recibido: " . substr($comentario, 0, 50) . "...");
-
-        // 3. Validación de Reglas de Negocio
+        // 3. Validación de Reglas de Negocio (Rango)
         if ($calificacion < 1 || $calificacion > 5) {
-            error_log("❌ Calificación inválida: " . $calificacion);
             http_response_code(400);
-            echo json_encode([
-                "ok" => false,
-                "msg" => "Calificación inválida: El rango permitido es de 1 a 5 estrellas",
-                "debug" => "calificacion = " . $calificacion
-            ]);
+            echo json_encode(["ok" => false, "msg" => "Calificación inválida: El rango permitido es de 1 a 5 estrellas"]);
             exit;
         }
 
-        if (empty($comentario)) {
-            error_log("❌ Comentario vacío");
-            http_response_code(400);
-            echo json_encode([
-                "ok" => false,
-                "msg" => "Error: El cuerpo del comentario es obligatorio",
-                "debug" => "comentario está vacío"
-            ]);
+        // 🛡️ CONTROL DE REDUNDANCIA: Evitar que el mismo usuario publique el mismo comentario dos veces
+        $stmtRedundancy = $pdo->prepare("SELECT id_opinion FROM tab_Opiniones WHERE id_usuario = ? AND comentario = ?");
+        $stmtRedundancy->execute([$id_usuario, $comentario]);
+        if ($stmtRedundancy->fetch()) {
+            echo json_encode(['ok' => false, 'msg' => 'Inconsistencia: Ya has publicado este comentario anteriormente.']);
             exit;
         }
+
 
         /**
          * 4. PERSISTENCIA
@@ -180,7 +137,8 @@ try {
                 "msg" => "¡Gracias por tu aporte! Tu opinión ha sido publicada y ayudará a otros coleccionistas.",
                 "id_opinion" => $nextId
             ]);
-        } else {
+        }
+        else {
             error_log("❌ Error al insertar - execute() retornó false");
             http_response_code(500);
             echo json_encode([
@@ -196,7 +154,8 @@ try {
     http_response_code(405);
     echo json_encode(["ok" => false, "msg" => "Operación denegada en este endpoint de reseñas"]);
 
-} catch (PDOException $e) {
+}
+catch (PDOException $e) {
     http_response_code(500);
     // Logueamos el error técnico internamente
     error_log("❌ PDOException en resenas.php: " . $e->getMessage());
@@ -208,7 +167,8 @@ try {
         "debug" => $e->getMessage(),
         "code" => $e->getCode()
     ]);
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     http_response_code(500);
     error_log("❌ Exception en resenas.php: " . $e->getMessage());
 

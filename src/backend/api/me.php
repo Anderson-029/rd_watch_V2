@@ -17,6 +17,8 @@
 
 require_once '../config.php';
 header('Content-Type: application/json');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 // Comprobación de integridad de sesión
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
@@ -61,11 +63,13 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
             ]
         ]);
 
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(["ok" => false, "msg" => "Fallo técnico al recuperar identidad: " . $e->getMessage()]);
     }
-} else {
+}
+else {
     /**
      * ESTADO ANONIMO:
      * El usuario no está logueado. Devolvemos ok:false de forma controlada 

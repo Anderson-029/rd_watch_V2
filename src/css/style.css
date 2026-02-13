@@ -13,10 +13,12 @@
     --accent-color: #92000A;
     /* Rojo Carmesí (Detalles mecánicos) */
 
-    --text-color: #2D2D2D;
-    /* Gris funcional para lectura */
-    --text-light: #555555;
-    --text-lighter: #888888;
+    --text-color: #1A1A1A;
+    /* Casi negro para máximo contraste */
+    --text-light: #333333;
+    /* Gris oscuro legible */
+    --text-lighter: #555555;
+    /* Gris medio para metadata secundario */
 
     --bg-light: #FFFFFF;
     --bg-soft: #F9F9F9;
@@ -210,12 +212,12 @@ section {
 
 .button-outline {
     background-color: transparent;
-    color: var(--primary-color);
-    border: 1px solid var(--primary-color);
+    color: var(--primary-dark);
+    border: 2px solid var(--primary-dark);
 }
 
 .button-outline:hover {
-    background-color: var(--primary-color);
+    background-color: var(--primary-dark);
     color: var(--white);
     transform: scale(1.05);
 }

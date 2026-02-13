@@ -9,6 +9,7 @@
 
 header('Content-Type: application/json');
 require_once '../config.php';
+require_once '../utils/Validation.php';
 
 // Solo permitimos POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -34,40 +35,35 @@ if (!checkRateLimit($pdo, $clientIP, 'contact_form', 3, 60)) {
 }
 logRateLimit($pdo, $clientIP, 'contact_form');
 
+// 🛡️ SEGURIDAD: CSRF OBLIGATORIO
+validateCsrfToken($_POST['csrf_token'] ?? null, true);
+
 try {
-    // Obtener datos desde FormData ($_POST)
-    // Cambiado de JSON a multipart/form-data para soportar archivos
+    // 🛡️ VALIDACIÓN ESTRICTA (ISO 830)
+    Validation::validateOrReject($_POST, [
+        'nombre' => 'name',
+        'email' => 'email',
+        'servicio' => 'name',
+        'mensaje' => 'address' // Usamos address para permitir texto largo con signos básicos
+    ]);
 
-    // 🛡️ SANITIZACIÓN DE ENTRADAS
-    $nombre = strip_tags(trim($_POST['nombre'] ?? ''));
-    $email = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
-    $telefono = preg_replace('/\D/', '', $_POST['telefono'] ?? '');
-    $servicio = strip_tags(trim($_POST['servicio'] ?? ''));
-    $mensaje = strip_tags(trim($_POST['mensaje'] ?? ''));
+    $nombre = Validation::sanitizeString($_POST['nombre']);
+    $email = Validation::sanitizeString($_POST['email']);
+    $telefono = !empty($_POST['telefono']) ? preg_replace('/\D/', '', $_POST['telefono']) : null;
+    $servicio = Validation::sanitizeString($_POST['servicio']);
+    $mensaje = Validation::sanitizeString($_POST['mensaje']);
 
-    // Campos requeridos
-    if (empty($nombre) || empty($email) || empty($servicio) || empty($mensaje)) {
-        echo json_encode(['ok' => false, 'msg' => 'Faltan campos obligatorios']);
+    // 🛡️ CONTROL DE REDUNDANCIA: No permitir enviar el mismo mensaje dos veces seguidas
+    $stmtRedundancy = $pdo->prepare("
+        SELECT id_reserva FROM tab_Reservas 
+        WHERE notas_cliente LIKE ? AND fec_insert > (NOW() - INTERVAL '10 minutes')
+    ");
+    $stmtRedundancy->execute(['%Mensaje:\n' . $mensaje . '%']);
+    if ($stmtRedundancy->fetch()) {
+        echo json_encode(['ok' => false, 'msg' => 'Inconsistencia: Su mensaje ya ha sido enviado recientemente. Intente más tarde.']);
         exit;
     }
 
-    // Validar nombre (solo letras, espacios y acentos)
-    if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $nombre)) {
-        echo json_encode(['ok' => false, 'msg' => 'El nombre solo debe contener letras y espacios']);
-        exit;
-    }
-
-    // Validar formato de email
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo json_encode(['ok' => false, 'msg' => 'Formato de email inválido']);
-        exit;
-    }
-
-    // Validar teléfono (solo si se proporciona, debe ser 10 dígitos)
-    if (!empty($telefono) && (strlen($telefono) !== 10 || !ctype_digit($telefono))) {
-        echo json_encode(['ok' => false, 'msg' => 'El teléfono debe tener exactamente 10 dígitos numéricos']);
-        exit;
-    }
 
     // === VALIDACIÓN Y PROCESAMIENTO DE FOTO ADJUNTA ===
     $foto_binario = null;
@@ -111,7 +107,8 @@ try {
             echo json_encode(['ok' => false, 'msg' => 'Error al procesar la imagen']);
             exit;
         }
-    } elseif (isset($_FILES['contact_file']) && $_FILES['contact_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+    }
+    elseif (isset($_FILES['contact_file']) && $_FILES['contact_file']['error'] !== UPLOAD_ERR_NO_FILE) {
         // Hubo un error en la carga
         echo json_encode(['ok' => false, 'msg' => 'Error al cargar el archivo']);
         exit;
@@ -126,7 +123,8 @@ try {
 
     if ($usuario) {
         $id_usuario = $usuario['id_usuario'];
-    } else {
+    }
+    else {
         // Crear usuario temporal/básico para el contacto
         $stmtMaxId = $pdo->query("SELECT COALESCE(MAX(id_usuario), 0) + 1 as next_id FROM tab_Usuarios");
         $id_usuario = $stmtMaxId->fetchColumn();
@@ -203,7 +201,8 @@ try {
         'id_reserva' => $id_reserva
     ]);
 
-} catch (PDOException $e) {
+}
+catch (PDOException $e) {
     http_response_code(500);
     error_log("Error en contacto.php: " . $e->getMessage());
     echo json_encode(['ok' => false, 'msg' => 'Error al procesar la solicitud: ' . $e->getMessage()]);

@@ -13,6 +13,8 @@
  * Uso: Es la primera herramienta a consultar tras despliegues en nuevos entornos 
  * o cambios en las variables de entorno (.env).
  */
+require_once 'utils/security_utils.php';
+requireRole('admin');
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -124,49 +126,56 @@
 <body>
     <div class="card">
         <?php try {
-            require 'config.php';
+    require 'config.php';
 
-            /**
-             * VERIFICACIÓN ACTIVA:
-             * Solicitamos la versión del motor PostgreSQL para confirmar transacción exitosa.
-             */
-            $ver = $pdo->query("SELECT version()")->fetchColumn();
-            $verShort = explode(" ", $ver)[1] ?? 'Recuperada';
-            ?>
+    /**
+     * VERIFICACIÓN ACTIVA:
+     * Solicitamos la versión del motor PostgreSQL para confirmar transacción exitosa.
+     */
+    $ver = $pdo->query("SELECT version()")->fetchColumn();
+    $verShort = explode(" ", $ver)[1] ?? 'Recuperada';
+?>
 
-            <div class="status-badge success">
-                <span>●</span> Conectado al Servidor
-            </div>
+        <div class="status-badge success">
+            <span>●</span> Conectado al Servidor
+        </div>
 
-            <h1>Infraestructura Lista</h1>
-            <p style="color: #64748b">El núcleo de configuración y la base de datos operan correctamente.</p>
+        <h1>Infraestructura Lista</h1>
+        <p style="color: #64748b">El núcleo de configuración y la base de datos operan correctamente.</p>
 
-            <div class="details">
-                <p><strong>Motor:</strong> PostgreSQL <?php echo htmlspecialchars($verShort); ?></p>
-                <p><strong>Host:</strong> <?php echo htmlspecialchars($env['DB_HOST']); ?></p>
-                <p><strong>Estado:</strong> Transaccional / Operativo</p>
-                <p><strong>Sesión:</strong> Inicializada correctamente</p>
-            </div>
-
-        <?php } catch (Throwable $e) { ?>
-
-            <div class="status-badge error">
-                <span>●</span> Error Crítico
-            </div>
-
-            <h1>Falla de Infraestructura</h1>
-            <p style="color: #64748b">No se pudo establecer comunicación con el motor de base de datos.</p>
-
-            <div class="details">
-                <p><strong>Causa reportada por PDO:</strong></p>
-                <code><?php echo htmlspecialchars($e->getMessage()); ?></code>
-            </div>
-
-            <p style="font-size: 0.875rem; color: #94a3b8; margin-top: 1.5rem;">
-                Revise sus variables en <strong>backend/.env</strong>
+        <div class="details">
+            <p><strong>Motor:</strong> PostgreSQL
+                <?php echo htmlspecialchars($verShort); ?>
             </p>
+            <p><strong>Host:</strong>
+                <?php echo htmlspecialchars($env['DB_HOST']); ?>
+            </p>
+            <p><strong>Estado:</strong> Transaccional / Operativo</p>
+            <p><strong>Sesión:</strong> Inicializada correctamente</p>
+        </div>
 
-        <?php } ?>
+        <?php
+}
+catch (Throwable $e) { ?>
+
+        <div class="status-badge error">
+            <span>●</span> Error Crítico
+        </div>
+
+        <h1>Falla de Infraestructura</h1>
+        <p style="color: #64748b">No se pudo establecer comunicación con el motor de base de datos.</p>
+
+        <div class="details">
+            <p><strong>Causa reportada por PDO:</strong></p>
+            <code><?php echo htmlspecialchars($e->getMessage()); ?></code>
+        </div>
+
+        <p style="font-size: 0.875rem; color: #94a3b8; margin-top: 1.5rem;">
+            Revise sus variables en <strong>backend/.env</strong>
+        </p>
+
+        <?php
+}?>
     </div>
 </body>
 

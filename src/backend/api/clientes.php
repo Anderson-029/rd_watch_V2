@@ -12,6 +12,10 @@
 
 header('Content-Type: application/json');
 require_once '../config.php';
+require_once '../utils/security_utils.php';
+
+// 🛡️ BARRERA ADMINISTRATIVA: Solo el administrador puede auditar la base de clientes.
+requireRole('admin');
 
 // Verificación de integridad de la base de datos
 if (!isset($pdo)) {
@@ -47,15 +51,52 @@ try {
             'count' => count($clientes),
             'clientes' => $clientes
         ]);
-    } else {
-        /**
-         * Manejo de otros verbos HTTP:
-         * Reservado para futuras implementaciones de edición masiva o bloqueo de clientes.
-         */
+    }
+    /**
+     * ==========================================
+     * 🔄 ACTUALIZAR ESTADO DE CLIENTE (PUT)
+     * ==========================================
+     */
+    elseif ($method === 'PUT') {
+        validateCsrfToken(null, true);
+        $data = getCachedJsonInput();
+
+        if (!isset($data['id_usuario'], $data['activo'])) {
+            echo json_encode(['ok' => false, 'msg' => 'Datos incompletos para actualizar estado']);
+            exit;
+        }
+
+        $id = (int)$data['id_usuario'];
+        $nuevoEstado = $data['activo'] ? 'true' : 'false';
+
+        // 🛡️ BARRERA DE ROL: Solo permitimos modificar si el objetivo es un 'cliente'
+        $check = $pdo->prepare("SELECT rol FROM tab_Usuarios WHERE id_usuario = ?");
+        $check->execute([$id]);
+        $user = $check->fetch();
+
+        if (!$user || $user['rol'] !== 'cliente') {
+            echo json_encode(['ok' => false, 'msg' => 'Acción denegada: Solo se puede modificar el estado de cuentas de cliente']);
+            exit;
+        }
+
+        $sql = "UPDATE tab_Usuarios 
+                SET activo = $nuevoEstado, fec_update = NOW(), usr_update = 'admin_mgmt' 
+                WHERE id_usuario = ?";
+
+        $stmt = $pdo->prepare($sql);
+        if ($stmt->execute([$id])) {
+            echo json_encode(['ok' => true, 'msg' => 'Estado del cliente actualizado correctamente']);
+        }
+        else {
+            echo json_encode(['ok' => false, 'msg' => 'Fallo al actualizar el registro en la base de datos']);
+        }
+    }
+    else {
         http_response_code(405);
         echo json_encode(['ok' => false, 'msg' => 'Método HTTP denegado para la gestión de clientes']);
     }
-} catch (PDOException $e) {
+}
+catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Falla crítica de base de datos en clientes: ' . $e->getMessage()]);
 }

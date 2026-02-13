@@ -16,8 +16,8 @@
 require_once '../config.php';
 header('Content-Type: application/json');
 
-// Captura de datos JSON del cliente
-require_once '../utils/security_utils.php'; // Utilerías de seguridad
+require_once '../utils/security_utils.php';
+require_once '../utils/Validation.php';
 
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -29,13 +29,14 @@ if (!checkRateLimit($pdo, $clientIP, 'login_attempt', 5, 15)) {
     exit;
 }
 
-$email = $input['email'] ?? '';
+Validation::validateOrReject($input, [
+    'email' => 'email',
+    'password' => 'password' // Validamos presencia y longitud mínima
+]);
+
+$email = Validation::sanitizeString($input['email']);
 $pass = $input['password'] ?? ($input['contra'] ?? '');
 
-if (empty($email) || empty($pass)) {
-    echo json_encode(["ok" => false, "msg" => "Por favor, complete todos los campos de acceso"]);
-    exit;
-}
 
 try {
     /**
@@ -114,13 +115,15 @@ try {
                 "rol" => $user['rol']
             ]
         ]);
-    } else {
+    }
+    else {
         // 🛡️ Registrar el intento fallido
         logRateLimit($pdo, $clientIP, 'login_attempt');
         echo json_encode(["ok" => false, "msg" => "La contraseña ingresada es incorrecta"]);
     }
 
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     http_response_code(500);
     echo json_encode(["ok" => false, "msg" => "Fallo interno en el sistema de autenticación"]);
 }

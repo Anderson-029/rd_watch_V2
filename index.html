@@ -181,6 +181,33 @@
                             </button>
                         </form>
                     </div>
+
+                    <!-- NUEVO: Formulario de Recuperación (Oculto inicialmente) -->
+                    <div class="form-wrapper" id="forgot-password-wrapper" style="display: none;">
+                        <button type="button" class="switcher">
+                            RECUPERAR ACCESO
+                            <span class="underline"></span>
+                        </button>
+                        <form class="form" id="forgotPasswordForm">
+                            <p style="font-size: 0.9rem; margin-bottom: 20px; color: var(--text-light);">
+                                Ingresa tu correo electrónico y te enviaremos un código para restablecer tu contraseña.
+                            </p>
+                            <fieldset>
+                                <div class="input-block">
+                                    <label for="forgot-email">Correo electrónico</label>
+                                    <input id="forgot-email" type="email" placeholder="tucorreo@ejemplo.com" required>
+                                </div>
+                            </fieldset>
+                            <button type="submit" class="button button-primary" style="width: 100%; margin-top: 10px;">
+                                <span class="btn-text">ENVIAR ENLACE</span>
+                                <span class="btn-loader"></span>
+                            </button>
+                            <p style="text-align: center; margin-top: 15px;">
+                                <a href="#" id="back-to-login" style="font-size: 0.85rem;">Volver al inicio de
+                                    sesión</a>
+                            </p>
+                        </form>
+                    </div>
                 </div>
             </section>
         </div>

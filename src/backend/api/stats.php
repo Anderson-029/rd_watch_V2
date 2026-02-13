@@ -8,7 +8,14 @@
  */
 
 header('Content-Type: application/json');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 require_once '../config.php';
+require_once '../utils/security_utils.php';
+
+// 🛡️ PROTECCIÓN DE MÉTRICAS: Solo accesible por especialistas administrativos
+requireRole('admin');
+
 
 // Verificación de conexión a la base de datos
 if (!isset($pdo)) {
@@ -53,19 +60,19 @@ try {
     // Mapeo de resultados de DB a la estructura de la gráfica
     foreach ($chartDataRaw as $row) {
         if (isset($chartData[$row['estado_orden']])) {
-            $chartData[$row['estado_orden']] = (int) $row['total'];
+            $chartData[$row['estado_orden']] = (int)$row['total'];
         }
     }
 
     echo json_encode([
         'ok' => true,
         'stats' => [
-            'productos' => (int) $resProductos,
-            'pedidos' => (int) $resPedidos,
-            'clientes' => (int) $resClientes,
-            'servicios' => (int) $resServicios,
-            'ventas_monto' => (float) $resVentas['monto'],
-            'ventas_cant' => (int) $resVentas['cantidad']
+            'productos' => (int)$resProductos,
+            'pedidos' => (int)$resPedidos,
+            'clientes' => (int)$resClientes,
+            'servicios' => (int)$resServicios,
+            'ventas_monto' => (float)$resVentas['monto'],
+            'ventas_cant' => (int)$resVentas['cantidad']
         ],
         'chart_data' => $chartData,
         // Estadísticas públicas para landing page
@@ -76,7 +83,8 @@ try {
         ]
     ]);
 
-} catch (PDOException $e) {
+}
+catch (PDOException $e) {
     // Captura de errores de SQL para depuración segura
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error SQL: ' . $e->getMessage()]);
@@ -94,8 +102,9 @@ function getRepairedCount($pdo)
             FROM tab_Orden o
             INNER JOIN tab_Orden_Servicios os ON o.id_orden = os.id_orden
         ");
-        return (int) $stmt->fetchColumn();
-    } catch (PDOException $e) {
+        return (int)$stmt->fetchColumn();
+    }
+    catch (PDOException $e) {
         error_log("Error calculando relojes reparados: " . $e->getMessage());
         return 0;
     }
@@ -120,7 +129,8 @@ function getSatisfactionPercentage($pdo)
         }
 
         return round(($result['satisfied'] / $result['total']) * 100);
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         error_log("Error calculando satisfacción: " . $e->getMessage());
         return 98; // Valor por defecto en caso de error
     }

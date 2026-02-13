@@ -12,7 +12,8 @@
 /**
  * Registra un mensaje de depuración en un archivo local del proyecto.
  */
-function logDebug($message) {
+function logDebug($message)
+{
     $logFile = __DIR__ . '/../../../debug_rdwatch.log';
     $timestamp = date('Y-m-d H:i:s');
     file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND);
@@ -26,7 +27,8 @@ $GLOBALS['__CACHED_JSON_INPUT'] = null;
 /**
  * Obtiene el cuerpo de la petición JSON de forma segura, permitiendo múltiples lecturas.
  */
-function getCachedJsonInput() {
+function getCachedJsonInput()
+{
     if ($GLOBALS['__CACHED_JSON_INPUT'] === null) {
         $raw = file_get_contents('php://input');
         $GLOBALS['__CACHED_JSON_INPUT'] = json_decode($raw, true) ?? [];
@@ -63,7 +65,8 @@ function checkRateLimit($pdo, $ip, $action, $limit = 5, $windowMinutes = 15)
             return false; // Bloqueado
         }
         return true; // Permitido
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
         // En caso de error de BD, permitir por defecto para no bloquear servicio (Fail Open)
         // O bloquear (Fail Closed) dependiendo de la política. Por ahora Fail Open con log.
         error_log("Error en checkRateLimit: " . $e->getMessage());
@@ -85,7 +88,8 @@ function logRateLimit($pdo, $ip, $action)
                 VALUES (?, ?, NOW(), 'system')";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$ip, $action]);
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
         error_log("Error en logRateLimit: " . $e->getMessage());
     }
 }
@@ -108,7 +112,8 @@ function clearRateLimit($pdo, $ip, $action)
                 WHERE identificador = ? AND nom_accion = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$ip, $action]);
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
         error_log("Error en clearRateLimit: " . $e->getMessage());
     }
 }
@@ -120,9 +125,11 @@ function getClientIP()
 {
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
         return $_SERVER['HTTP_CLIENT_IP'];
-    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    }
+    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
         return $_SERVER['HTTP_X_FORWARDED_FOR'];
-    } else {
+    }
+    else {
         return $_SERVER['REMOTE_ADDR'];
     }
 }
@@ -163,8 +170,8 @@ function requireRole($role)
 /**
  * 🧹 SANITIZE HTML
  * Escapa caracteres especiales para prevenir XSS.
- * @param string $data Texto a sanitizar
- * @return string Texto escapado
+ * @param string|array $data Texto o array de textos a sanitizar
+ * @return string|array Texto o array sanitizado
  */
 function sanitizeHtml($data)
 {
@@ -184,12 +191,12 @@ function generateCsrfToken()
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-    
+
     // Solo generar si no existe para evitar rotaciones innecesarias en una misma carga
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
-    
+
     return $_SESSION['csrf_token'];
 }
 
@@ -197,8 +204,9 @@ function generateCsrfToken()
  * 🔍 VALIDATE CSRF TOKEN
  * Verifica que el token recibido coincida con el de la sesión.
  * Corta la ejecución si no coinciden.
+ * @param bool $required Si es true, fallará si el token no viene en la petición.
  */
-function validateCsrfToken($receivedToken = null)
+function validateCsrfToken($receivedToken = null, $required = true)
 {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -209,35 +217,41 @@ function validateCsrfToken($receivedToken = null)
     // 1. Intentar obtener de cabeceras HTTP (Estándar para AJAX)
     if (!$token) {
         $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
-        
+
         if (!$token && function_exists('getallheaders')) {
             $headers = getallheaders();
             $token = $headers['X-CSRF-Token'] ?? $headers['x-csrf-token'] ?? null;
         }
     }
-    
-    // 2. Intentar obtener del cuerpo JSON
+
+    // 2. Intentar obtener del cuerpo JSON o POST nativo
     if (!$token) {
         $input = getCachedJsonInput();
-        $token = $input['csrf_token'] ?? null;
+        $token = $input['csrf_token'] ?? $_POST['csrf_token'] ?? null;
     }
 
-    // DEBUG LOGS (Solo habilitar en diagnóstico)
-    $storedToken = $_SESSION['csrf_token'] ?? 'EMPTY_SESSION';
-    $finalToken = $token ?? 'MISSING_IN_REQUEST';
-    
-    if ($finalToken === 'MISSING_IN_REQUEST' || !hash_equals($storedToken, $finalToken)) {
-        logDebug("CSRF FAILED: Stored[$storedToken] vs Received[$finalToken] | User:" . ($_SESSION['user_id'] ?? 'NONE'));
-    }
 
-    if (!$token || empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token)) {
+    // Si es obligatorio y no está presente, rechazar inmediatamente
+    if ($required && !$token) {
         http_response_code(403);
         header('Content-Type: application/json');
         echo json_encode([
-            'ok' => false, 
+            'ok' => false,
+            'error_type' => 'CSRF_MISSING',
+            'msg' => 'Error de Seguridad: Token CSRF ausente en la petición.'
+        ]);
+        exit;
+    }
+
+    // Validar hash si existe
+    if ($token && (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token))) {
+        http_response_code(403);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'ok' => false,
             'error_type' => 'CSRF_INVALID',
-            'msg' => 'Error de Seguridad: Token CSRF inválido o ausente. Recargue la página e intente de nuevo.',
-            'debug' => ['received' => $finalToken, 'session_exists' => !empty($_SESSION['csrf_token'])]
+            'msg' => 'Error de Seguridad: Token CSRF inválido o expirado.',
+            'debug_hint' => 'Asegúrese de enviar el token en la cabecera X-CSRF-Token o campo csrf_token'
         ]);
         exit;
     }

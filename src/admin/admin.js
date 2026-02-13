@@ -140,6 +140,17 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(() => el.classList.add("show"));
     modalOverlay.classList.add("show");
   }
+
+  /**
+   * Muestra un modal de alerta profesional (Reemplaza alert estándar)
+   */
+  async function showAlert(msg, title = "Atención") {
+    const elTitle = document.getElementById("tituloAlerta");
+    const elMsg = document.getElementById("mensajeAlerta");
+    if (elTitle) elTitle.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${title}`;
+    if (elMsg) elMsg.textContent = msg;
+    openModal("#modalAlerta");
+  }
   function closeModal(id) {
     const el = document.querySelector(id);
     if (!el || !modalOverlay) return;
@@ -397,11 +408,11 @@ document.addEventListener("DOMContentLoaded", () => {
         await cargarProductos();
         renderDashboard();
       } else {
-        showNotification(data.msg || 'Error al eliminar producto');
+        showAlert(data.msg || 'Error al eliminar producto', 'Bloqueo de Seguridad');
       }
     } catch (err) {
       console.error(err);
-      showNotification('Error al eliminar producto');
+      showAlert('Error técnico al intentar eliminar producto: ' + err.message, 'Fallo Crítico');
     }
   }
 
@@ -471,38 +482,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }));
 
         drawPedidos();
-        renderDashboard(); // Actualizar contadores
+        renderDashboard();
       }
     } catch (err) {
       console.error('Error cargando pedidos:', err);
     }
   }
 
-  function drawPedidos() {
+  function drawPedidos(list = pedidos) {
     const tbodyPedidos = document.getElementById("tbodyPedidos");
     if (!tbodyPedidos) return;
 
-    if (pedidos.length === 0) {
-      tbodyPedidos.innerHTML = '<tr><td colspan="5" style="text-align:center">No hay pedidos registrados</td></tr>';
+    // Aplicar filtros manuales si los inputs existen
+    const statusFilter = document.getElementById("filtroEstadoPedido")?.value || "";
+    const searchFilter = document.getElementById("buscarPedido")?.value.toLowerCase() || "";
+
+    const filtered = list.filter(p => {
+      const matchStatus = !statusFilter || p.estado.toLowerCase() === statusFilter.toLowerCase();
+      const matchSearch = !searchFilter ||
+        p.cliente.toLowerCase().includes(searchFilter) ||
+        p.id.toString().includes(searchFilter);
+      return matchStatus && matchSearch;
+    });
+
+    if (filtered.length === 0) {
+      tbodyPedidos.innerHTML = '<tr><td colspan="6" style="text-align:center">No se encontraron pedidos con estos filtros</td></tr>';
       return;
     }
 
-    // Función auxiliar para color de badge
-    const getBadgeClass = (estado) => {
-      const est = estado.toLowerCase();
-      if (est.includes('cancelado')) return 'cancelado'; // Rojo
-      if (est.includes('enviado')) return 'enviado'; // Verde
-      if (est.includes('confirmado')) return 'confirmado'; // Azul
-      return 'pendiente'; // Amarillo por defecto
-    };
-
-    tbodyPedidos.innerHTML = pedidos
+    tbodyPedidos.innerHTML = filtered
       .map((p) => `
         <tr>
           <td>#${p.id}</td>
           <td>
-            ${p.cliente}<br>
-            <small style="color:#888">${p.email}</small>
+            <strong>${p.cliente}</strong><br>
+            <small style="color:#555">${p.email}</small>
           </td>
           <td>${p.fecha}</td>
           <td>
@@ -524,7 +538,11 @@ document.addEventListener("DOMContentLoaded", () => {
           <td style="font-weight:bold">$${p.total.toFixed(2)}</td>
         </tr>`)
       .join("");
-  };
+  }
+
+  // Listeners para Pedidos
+  document.getElementById("buscarPedido")?.addEventListener("input", () => drawPedidos());
+  document.getElementById("filtroEstadoPedido")?.addEventListener("change", () => drawPedidos());
 
   window.cambiarEstadoPedido = async function (id_orden, nuevo_estado) {
     if (!confirm(`¿Deseas cambiar el estado a ${nuevo_estado}?`)) return;
@@ -578,32 +596,90 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function drawClientes() {
+  function drawClientes(list = clientes) {
     const tbodyClientes = document.getElementById("tbodyClientes");
     if (!tbodyClientes) return;
 
-    if (clientes.length === 0) {
-      tbodyClientes.innerHTML = '<tr><td colspan="4" style="text-align:center">No hay clientes registrados</td></tr>';
+    const searchFilter = document.getElementById("buscarCliente")?.value.toLowerCase() || "";
+    const statusFilter = document.getElementById("filtroEstadoCliente")?.value || "";
+
+    const filtered = list.filter(c => {
+      const matchSearch = !searchFilter ||
+        c.nombre.toLowerCase().includes(searchFilter) ||
+        c.email.toLowerCase().includes(searchFilter);
+      const matchStatus = !statusFilter || c.activo.toString() === statusFilter;
+      return matchSearch && matchStatus;
+    });
+
+    if (filtered.length === 0) {
+      tbodyClientes.innerHTML = '<tr><td colspan="4" style="text-align:center">No se encontraron clientes con estos filtros</td></tr>';
       return;
     }
 
-    tbodyClientes.innerHTML = clientes
+    tbodyClientes.innerHTML = filtered
       .map((c) => `
         <tr>
           <td>
             <strong>${c.nombre}</strong><br>
-            <small style="color:#888">ID: ${c.id}</small>
+            <small style="color:#555">ID: ${c.id}</small>
           </td>
           <td>${c.email}</td>
           <td>${c.tel}</td>
           <td>
-            <span class="badge ${c.activo ? 'active' : 'inactive'}">
-                ${c.activo ? 'Activo' : 'Inactivo'}
+            <span class="badge ${c.activo ? 'active' : 'inactive'}" style="background: ${c.activo ? '#28a745' : '#6c757d'}; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold;">
+                ${c.activo ? 'ACTIVO' : 'INACTIVO'}
             </span>
+          </td>
+          <td>
+            <button class="button ${c.activo ? 'button-secondary' : 'button-primary'}" 
+                    style="padding: 4px 8px; font-size: 0.8em;"
+                    onclick="cambiarEstadoCliente(${c.id}, ${c.activo})">
+              <i class="fas ${c.activo ? 'fa-user-slash' : 'fa-user-check'}"></i> 
+              ${c.activo ? 'Desactivar' : 'Activar'}
+            </button>
           </td>
         </tr>`)
       .join("");
   }
+
+  // Listeners para Clientes
+  document.getElementById("buscarCliente")?.addEventListener("input", () => drawClientes());
+  document.getElementById("filtroEstadoCliente")?.addEventListener("change", () => drawClientes());
+
+  /**
+   * Cambia el estado (Activo/Inactivo) de un cliente.
+   */
+  async function cambiarEstadoCliente(id, estadoActual) {
+    const nuevoEstado = !estadoActual;
+    const accionText = nuevoEstado ? 'ACTIVAR' : 'DESACTIVAR';
+
+    if (!confirm(`¿Desea ${accionText} la cuenta de este cliente?`)) return;
+
+    try {
+      const res = await secureFetch(`${API_BASE}/clientes.php`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_usuario: id,
+          activo: nuevoEstado
+        })
+      });
+
+      const data = await res.json();
+      if (data.ok) {
+        showNotification(`✅ Cliente ${nuevoEstado ? 'activado' : 'desactivado'} con éxito`);
+        await cargarClientes(); // Recargar lista y redibujar
+      } else {
+        showAlert(data.msg || 'No se pudo cambiar el estado del cliente', 'Gestión de Clientes');
+      }
+    } catch (err) {
+      console.error('Error al cambiar estado de cliente:', err);
+      showNotification('❌ Error técnico al intentar procesar el cambio');
+    }
+  }
+
+  // Exponer a global para el onclick dinámico
+  window.cambiarEstadoCliente = cambiarEstadoCliente;
   /* =======================
    * SERVICIOS
    * ======================= */
@@ -728,7 +804,8 @@ document.addEventListener("DOMContentLoaded", () => {
         await cargarServicios();
         renderDashboard();
       } else {
-        showNotification(data.msg || 'Error al eliminar servicio');
+        // Alerta específica de integridad referencial solicitada por el administrador
+        showAlert(data.msg || 'Este servicio no puede ser eliminado actualmente.', 'Bloqueo de Seguridad');
       }
     } catch (err) {
       console.error(err);
@@ -827,10 +904,11 @@ document.addEventListener("DOMContentLoaded", () => {
         await cargarMarcas();
         await cargarCatalogosProducto();
       } else {
-        showNotification(data.msg || 'Error al eliminar marca');
+        showAlert(data.msg || 'No se pudo eliminar la marca', 'Bloqueo de Seguridad');
       }
     } catch (e) {
-      console.error(e); showNotification('Error al eliminar marca');
+      console.error(e);
+      showAlert('Error técnico al intentar eliminar marca: ' + e.message, 'Fallo Crítico');
     }
   }
 
@@ -1050,10 +1128,11 @@ document.addEventListener("DOMContentLoaded", () => {
         await cargarSubcategorias(getFiltroCat());
         await cargarCatalogosProducto();
       } else {
-        showNotification(data.msg || 'Error al eliminar categoría');
+        showAlert(data.msg || 'Error al eliminar categoría', 'Bloqueo de Seguridad');
       }
     } catch (e) {
-      console.error(e); showNotification('Error al eliminar categoría');
+      console.error(e);
+      showAlert('Error técnico al intentar eliminar categoría: ' + e.message, 'Fallo Crítico');
     }
   }
 
@@ -1223,11 +1302,11 @@ document.addEventListener("DOMContentLoaded", () => {
         await cargarSubcategorias();
         await cargarCatalogosProducto();
       } else {
-        showNotification(data.msg || 'Error al eliminar subcategoría');
+        showAlert(data.msg || 'Error al eliminar subcategoría', 'Bloqueo de Seguridad');
       }
     } catch (e) {
       console.error(e);
-      showNotification('Error al eliminar subcategoría: ' + e.message);
+      showAlert('Error técnico al intentar eliminar: ' + e.message, 'Fallo Crítico');
     }
   }
 
@@ -1319,18 +1398,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function renderCitas() {
+  function renderCitas(list = citas) {
     const tbody = document.getElementById('tbodyCitas');
     if (!tbody) return;
 
+    const searchFilter = document.getElementById("buscarCita")?.value.toLowerCase() || "";
+    const statusFilter = document.getElementById("filtroEstadoCita")?.value || "";
+
+    const filtered = (list || []).filter(cita => {
+      const matchSearch = !searchFilter || (cita.cliente || '').toLowerCase().includes(searchFilter);
+      const matchStatus = !statusFilter || (cita.estado || '').toLowerCase() === statusFilter.toLowerCase();
+      return matchSearch && matchStatus;
+    });
+
     tbody.innerHTML = '';
 
-    if (!citas || citas.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No hay citas registradas.</td></tr>';
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No se encontraron citas con estos filtros.</td></tr>';
       return;
     }
 
-    citas.forEach(cita => {
+    filtered.forEach(cita => {
       const tr = document.createElement('tr');
 
       let badgeClass = 'secondary';
@@ -1344,36 +1432,36 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>#${cita.id_reserva}</td>
             <td>
                 <strong>${cita.cliente || 'Usuario'}</strong><br>
-                <small>ID: ${cita.id_usuario}</small>
+                <small style="color:#555">ID: ${cita.id_usuario}</small>
             </td>
             <td>${cita.nombre_servicio || 'Servicio'}</td>
             <td>${cita.fecha_preferida}</td>
-            <td><span class="badge ${cita.prioridad === 'alta' ? 'danger' : 'primary'}">${cita.prioridad}</span></td>
-            <td><span class="badge ${badgeClass}">${cita.estado}</span></td>
+            <td><span class="badge ${cita.prioridad === 'alta' ? 'danger' : 'primary'}" style="padding: 4px 8px; border-radius: 4px; font-weight: bold; background: ${cita.prioridad === 'alta' ? '#dc3545' : '#007bff'}; color: #fff;">${cita.prioridad.toUpperCase()}</span></td>
+            <td><span class="badge ${badgeClass}" style="padding: 4px 8px; border-radius: 4px; font-weight: bold; background: ${badgeClass === 'success' ? '#28a745' : badgeClass === 'warning' ? '#ffc107' : badgeClass === 'danger' ? '#dc3545' : '#6c757d'}; color: ${badgeClass === 'warning' ? '#000' : '#fff'};">${est.toUpperCase()}</span></td>
             <td>
                 ${cita.tiene_foto ? `
                     <a href="../backend/api/get_foto_cita.php?id_reserva=${cita.id_reserva}" 
                        target="_blank"
-                       style="color: var(--primary-color); text-decoration: none; display: inline-flex; align-items: center; gap: 5px;"
+                       style="color: var(--primary-color); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-weight: 600;"
                        title="Ver foto adjunta">
-                        <i class="fas fa-image"></i> Ver
+                        <i class="fas fa-image"></i> Ver Foto
                     </a>
                 ` : '<span style="color: #999;">Sin foto</span>'}
             </td>
             <td>
-                <div class="action-buttons">
+                <div class="action-buttons" style="display: flex; gap: 8px;">
                     ${est === 'pendiente' ? `
-                        <button class="button button-icon" style="color:var(--success)" title="Confirmar" onclick="cambiarEstadoCita(${cita.id_reserva}, 'confirmada')">
+                        <button class="button button-icon" style="color:#28a745; background: none; border: 1px solid #28a745; padding: 5px 8px; border-radius: 4px; cursor: pointer;" title="Confirmar" onclick="cambiarEstadoCita(${cita.id_reserva}, 'confirmada')">
                             <i class="fas fa-check"></i>
                         </button>
                     ` : ''}
                     ${est !== 'completada' && est !== 'cancelada' ? `
-                         <button class="button button-icon" style="color:var(--primary)" title="Completar" onclick="cambiarEstadoCita(${cita.id_reserva}, 'completada')">
+                         <button class="button button-icon" style="color:#b8860b; background: none; border: 1px solid #b8860b; padding: 5px 8px; border-radius: 4px; cursor: pointer;" title="Completar" onclick="cambiarEstadoCita(${cita.id_reserva}, 'completada')">
                             <i class="fas fa-check-double"></i>
                         </button>
                     ` : ''}
                     ${est !== 'cancelada' ? `
-                        <button class="button button-icon" style="color:var(--danger)" title="Cancelar" onclick="cambiarEstadoCita(${cita.id_reserva}, 'cancelada')">
+                        <button class="button button-icon" style="color:#dc3545; background: none; border: 1px solid #dc3545; padding: 5px 8px; border-radius: 4px; cursor: pointer;" title="Cancelar" onclick="cambiarEstadoCita(${cita.id_reserva}, 'cancelada')">
                             <i class="fas fa-times"></i>
                         </button>
                     ` : ''}
@@ -1383,6 +1471,10 @@ document.addEventListener("DOMContentLoaded", () => {
       tbody.appendChild(tr);
     });
   }
+
+  // Listeners para Citas
+  document.getElementById("buscarCita")?.addEventListener("input", () => renderCitas());
+  document.getElementById("filtroEstadoCita")?.addEventListener("change", () => renderCitas());
 
   window.cambiarEstadoCita = async function (idReserva, nuevoEstado) {
     if (!confirm(`¿Estás seguro de marcar esta cita como "${nuevoEstado}"?`)) return;

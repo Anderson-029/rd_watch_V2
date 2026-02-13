@@ -6,6 +6,10 @@ set "BASE_DIR=%~dp0"
 set "ENV_FILE=%BASE_DIR%src\backend\.env"
 set "LOG_FILE=%BASE_DIR%install_db.log"
 
+REM Agregar ruta de PostgreSQL al PATH si no existe
+set "PG_PATH=C:\Program Files\PostgreSQL\18\bin"
+if exist "%PG_PATH%" set "PATH=%PATH%;%PG_PATH%"
+
 REM Limpiar log anterior
 echo. > "%LOG_FILE%"
 

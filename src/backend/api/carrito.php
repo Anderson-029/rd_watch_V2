@@ -17,6 +17,8 @@
 
 header('Content-Type: application/json');
 require_once '../config.php';
+require_once '../utils/Validation.php';
+require_once '../utils/security_utils.php';
 
 // Verificación de integridad de la conexión
 if (!isset($pdo)) {
@@ -68,7 +70,8 @@ try {
                 VALUES (?, ?, 'activo', NOW(), 'system_cart')";
         $pdo->prepare($sql)->execute([$id_carrito, $userId]);
         $carritoId = $id_carrito;
-    } else {
+    }
+    else {
         $carritoId = $carrito ? $carrito['id_carrito'] : null;
     }
 
@@ -100,14 +103,15 @@ try {
              * ACCIÓN: Agregar Ítem
              * Si el producto ya está en el carrito, se suma la cantidad nueva a la anterior.
              */
+            validateCsrfToken(null, true);
             $data = getJsonInput();
-            if (!isset($data['id_producto'], $data['cantidad'])) {
-                echo json_encode(['ok' => false, 'msg' => 'Parámetros id_producto y cantidad son obligatorios']);
+            $id_prod = Validation::validateNumeric($data['id_producto'] ?? '') ? (int)$data['id_producto'] : null;
+            $qty = Validation::validateNumeric($data['cantidad'] ?? '') ? (int)$data['cantidad'] : null;
+
+            if (!$id_prod || !$qty) {
+                echo json_encode(['ok' => false, 'msg' => 'Parámetros id_producto y cantidad son obligatorios y deben ser válidos']);
                 exit;
             }
-
-            $id_prod = $data['id_producto'];
-            $qty = (int) $data['cantidad'];
 
             // Comprobar existencia previa en el detalle del carrito
             $check = $pdo->prepare("SELECT cantidad FROM tab_Carrito_Detalle WHERE id_carrito = ? AND id_producto = ?");
@@ -119,7 +123,8 @@ try {
                 $newQty = $existing['cantidad'] + $qty;
                 $stmt = $pdo->prepare("UPDATE tab_Carrito_Detalle SET cantidad = ?, fec_update = NOW() WHERE id_carrito = ? AND id_producto = ?");
                 $stmt->execute([$newQty, $carritoId, $id_prod]);
-            } else {
+            }
+            else {
                 // Inserción de nuevo registro de detalle
                 $id_detalle = $carritoId . rand(100, 999); // Generador de ID basado en el carrito + aleatorio
                 $sql = "INSERT INTO tab_Carrito_Detalle (id_carrito_detalle, id_carrito, id_producto, cantidad, fec_insert, usr_insert) 
@@ -135,9 +140,13 @@ try {
              * ACCIÓN: Actualizar Cantidad
              * Reemplaza la cantidad actual por la enviada (usado en el selector de cantidad del UI).
              */
+            validateCsrfToken(null, true);
             $data = getJsonInput();
-            if (!isset($data['id_producto'], $data['cantidad'])) {
-                echo json_encode(['ok' => false, 'msg' => 'Datos insuficientes para actualizar']);
+            $id_prod = Validation::validateNumeric($data['id_producto'] ?? '') ? (int)$data['id_producto'] : null;
+            $qty = Validation::validateNumeric($data['cantidad'] ?? '') ? (int)$data['cantidad'] : null;
+
+            if (!$id_prod || !$qty) {
+                echo json_encode(['ok' => false, 'msg' => 'Datos insuficientes o inválidos para actualizar']);
                 exit;
             }
 
@@ -152,6 +161,7 @@ try {
              * ACCIÓN: Eliminar / Vaciar
              * Si se envía id_producto, solo elimina ese ítem. Si no, limpia todo el carrito.
              */
+            validateCsrfToken(null, true);
             $data = getJsonInput();
             $id_prod = $data['id_producto'] ?? null;
 
@@ -160,7 +170,8 @@ try {
                 $stmt = $pdo->prepare("DELETE FROM tab_Carrito_Detalle WHERE id_carrito = ? AND id_producto = ?");
                 $stmt->execute([$carritoId, $id_prod]);
                 echo json_encode(['ok' => true, 'msg' => 'Producto retirado del carrito']);
-            } else {
+            }
+            else {
                 // Limpieza total
                 $stmt = $pdo->prepare("DELETE FROM tab_Carrito_Detalle WHERE id_carrito = ?");
                 $stmt->execute([$carritoId]);
@@ -174,7 +185,8 @@ try {
             break;
     }
 
-} catch (PDOException $e) {
+}
+catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Falla técnica de base de datos: ' . $e->getMessage()]);
 }

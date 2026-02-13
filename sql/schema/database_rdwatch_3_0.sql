@@ -538,7 +538,7 @@ CREATE TABLE IF NOT EXISTS tab_Envios
 -- Almacena las calificaciones y reseñas de los usuarios sobre los productos.
 CREATE TABLE IF NOT EXISTS tab_Opiniones
 (
-    id_opinion              BIGINT NOT NULL, -- Identificador único de la opinión
+    id_opinion              SERIAL PRIMARY KEY, -- Identificador único de la opinión (SERIAL para autoincremento)
     id_usuario              BIGINT NOT NULL, -- Identificador del usuario que realizó la opinión
     id_producto             BIGINT  NULL, -- Identificador del producto sobre el que se realizó la opinión
     calificacion            SMALLINT NOT NULL, -- Calificación del producto (1 a 5 estrellas)
@@ -553,7 +553,7 @@ CREATE TABLE IF NOT EXISTS tab_Opiniones
     usr_delete VARCHAR(100),
     fec_delete TIMESTAMP,
 
-    PRIMARY KEY (id_opinion),
+    --PRIMARY KEY (id_opinion), -- Ya definida en la línea 541
     FOREIGN KEY (id_usuario) REFERENCES tab_Usuarios (id_usuario),
     FOREIGN KEY (id_producto) REFERENCES tab_Productos (id_producto),
     CHECK (calificacion BETWEEN 1 AND 5) -- Calificación del producto (1 a 5 estrellas)

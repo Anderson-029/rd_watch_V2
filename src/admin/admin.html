@@ -145,7 +145,7 @@
           <h3 class="modal-title" id="tituloModalProducto">Nuevo Producto</h3>
           <form id="formProducto" class="form-grid">
             <div class="grid-2">
-              <label>ID Producto<input type="number" id="pId" required></label>
+              <label>ID Producto<input type="number" id="pId" min="1" required></label>
               <label>Nombre<input type="text" id="pNombre" required></label>
             </div>
             <label>Descripción<textarea id="pDescripcion" rows="2" required></textarea></label>
@@ -347,6 +347,20 @@
         <h2 class="section-heading">Gestión de Pedidos</h2>
         <p class="section-subheading">Control y estados</p>
       </div>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input class="input" id="buscarPedido" placeholder="Buscar por ID o Cliente..." style="width: 250px;" />
+        </div>
+        <div class="toolbar-right">
+          <select class="input" id="filtroEstadoPedido">
+            <option value="">Todos los estados</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="confirmado">Confirmado</option>
+            <option value="enviado">Enviado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+      </div>
       <div class="table-wrapper">
         <table class="table">
           <thead>
@@ -368,6 +382,18 @@
         <h2 class="section-heading">Gestión de Clientes</h2>
         <p class="section-subheading">Listado y contacto</p>
       </div>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input class="input" id="buscarCliente" placeholder="Buscar por nombre o email..." style="width: 250px;" />
+        </div>
+        <div class="toolbar-right">
+          <select class="input" id="filtroEstadoCliente">
+            <option value="">Todos los estados</option>
+            <option value="1">Activos</option>
+            <option value="0">Inactivos</option>
+          </select>
+        </div>
+      </div>
       <div class="table-wrapper">
         <table class="table">
           <thead>
@@ -376,6 +402,7 @@
               <th>Email</th>
               <th>Teléfono</th>
               <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody id="tbodyClientes"></tbody>
@@ -442,6 +469,20 @@
         <h2 class="section-heading">Gestión de Citas</h2>
         <p class="section-subheading">Solicitudes de servicio técnico</p>
       </div>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input class="input" id="buscarCita" placeholder="Buscar por cliente..." style="width: 250px;" />
+        </div>
+        <div class="toolbar-right">
+          <select class="input" id="filtroEstadoCita">
+            <option value="">Todos los estados</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="confirmada">Confirmada</option>
+            <option value="completada">Completada</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </div>
+      </div>
       <div class="table-wrapper">
         <table class="table">
           <thead>
@@ -489,7 +530,8 @@
         <div class="card">
           <h3 class="card-title"><i class="fas fa-user-shield"></i> Cuenta admin</h3>
           <form id="formConfigAdmin" class="form-grid">
-            <label>Usuario<input id="adminUsuario" value="admin"></label>
+            <label>Usuario<input id="adminUsuario" value="admin" pattern="^[a-zA-Z0-9_]{4,20}$"
+                title="4-20 caracteres, letras, números y guion bajo"></label>
             <label>Contraseña Actual (Requerido)<input type="password" id="adminCurrentPass"
                 placeholder="Para confirmar cambios" required></label>
             <label>Nueva contraseña (Opcional)<input type="password" id="adminNewPass"
@@ -504,6 +546,19 @@
   </main>
 
   <div class="modal-overlay" id="modalOverlay"></div>
+
+  <!-- Modal Alerta (NUEVO: Para mensajes críticos y de error) -->
+  <div class="modal" id="modalAlerta">
+    <div class="modal-content" style="max-width:400px; text-align:center;">
+      <span class="close-modal" data-close="#modalAlerta">&times;</span>
+      <h3 class="modal-title" id="tituloAlerta" style="color:#d32f2f;"><i class="fas fa-exclamation-triangle"></i>
+        Atención</h3>
+      <p id="mensajeAlerta" style="margin:20px 0; line-height:1.5; color:var(--secondary-color); font-weight:500;"></p>
+      <div style="display:flex; justify-content:center;">
+        <button class="button button-primary" data-close="#modalAlerta" style="min-width:120px;">Entendido</button>
+      </div>
+    </div>
+  </div>
 
   <script src="../js/config.js"></script>
   <script src="../js/notifications.js"></script>

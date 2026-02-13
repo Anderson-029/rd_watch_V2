@@ -133,7 +133,8 @@
                 <form id="formPerfil" class="form-grid">
                     <div>
                         <label>Nombre Completo</label>
-                        <input type="text" id="inputNombre" value="Anderson Gomez" required>
+                        <input type="text" id="inputNombre" value="Anderson Gomez" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                            title="Solo letras y espacios" minlength="3" maxlength="100" required>
                     </div>
                     <div>
                         <label>Email</label>
@@ -141,7 +142,8 @@
                     </div>
                     <div>
                         <label>Teléfono</label>
-                        <input type="tel" id="inputTelefono" value="+57 300 111 2233" required>
+                        <input type="tel" id="inputTelefono" value="3001112233" pattern="[0-9]{10}"
+                            title="Debe contener exactamente 10 dígitos numéricos" maxlength="10" required>
                     </div>
                     <div class="form-actions">
                         <button type="button" class="button button-secondary btn-cancelar">
@@ -212,7 +214,9 @@
                 <form id="formDireccion" class="form-grid">
                     <div>
                         <label>Dirección Principal</label>
-                        <input type="text" id="inputDireccion" value="" placeholder="Ej: Calle 123 #45-67" required>
+                        <input type="text" id="inputDireccion" value="" placeholder="Ej: Calle 123 #45-67"
+                            pattern="^[a-zA-Z0-9\s#\-\.]+$" title="Solo letras, números, espacios, #, - y ."
+                            minlength="5" maxlength="150" required>
                     </div>
 
                     <div>
@@ -231,7 +235,8 @@
 
                     <div>
                         <label>Código Postal</label>
-                        <input type="text" id="inputPostal" value="" placeholder="Ej: 110111" required>
+                        <input type="text" id="inputPostal" value="" placeholder="Ej: 110111" pattern="[0-9]{5,6}"
+                            title="Debe tener 5 o 6 dígitos numéricos" maxlength="6" required>
                     </div>
                     <div class="form-actions">
                         <button type="button" class="button button-secondary btn-cancelar">

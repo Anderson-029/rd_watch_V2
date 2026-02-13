@@ -13,6 +13,7 @@
 header('Content-Type: application/json');
 require_once '../config.php';
 require_once '../utils/security_utils.php';
+require_once '../utils/Validation.php';
 
 // 🛡️ SEGURIDAD: Se requiere inicio de sesión para CUALQUIER acción
 requireLogin();
@@ -56,11 +57,13 @@ try {
 
             if ($user) {
                 echo json_encode(['ok' => true, 'data' => $user]);
-            } else {
+            }
+            else {
                 echo json_encode(['ok' => false, 'msg' => 'Usuario no encontrado']);
             }
 
-        } elseif ($action === 'pedidos') {
+        }
+        elseif ($action === 'pedidos') {
             /**
              * ACCIÓN: pedidos
              * Propósito: Retorna el historial de órdenes realizadas por el cliente, ordenadas por fecha reciente.
@@ -76,7 +79,8 @@ try {
 
             echo json_encode(['ok' => true, 'data' => $pedidos]);
 
-        } elseif ($action === 'resumen') {
+        }
+        elseif ($action === 'resumen') {
             /**
              * ACCIÓN: resumen
              * Propósito: Proporciona conteos rápidos para el dashboard del usuario.
@@ -88,7 +92,7 @@ try {
             $pedidosActivos = $stmtActivos->fetchColumn();
 
             // 2. Conteo de Pedidos Completados
-            $stmtCompletados = $pdo->prepare("SELECT COUNT(*) FROM tab_Orden WHERE id_usuario = ? AND estado_orden = 'entregado' "); 
+            $stmtCompletados = $pdo->prepare("SELECT COUNT(*) FROM tab_Orden WHERE id_usuario = ? AND estado_orden = 'entregado' ");
             $stmtCompletados->execute([$uid]);
             $pedidosCompletados = $stmtCompletados->fetchColumn();
 
@@ -100,17 +104,19 @@ try {
             echo json_encode([
                 'ok' => true,
                 'data' => [
-                    'pedidosActivos' => (int) $pedidosActivos,
-                    'pedidosCompletados' => (int) $pedidosCompletados,
-                    'citasPendientes' => (int) $citasPendientes
+                    'pedidosActivos' => (int)$pedidosActivos,
+                    'pedidosCompletados' => (int)$pedidosCompletados,
+                    'citasPendientes' => (int)$citasPendientes
                 ]
             ]);
 
-        } else {
+        }
+        else {
             echo json_encode(['ok' => false, 'msg' => 'Acción no especificada o inválida']);
         }
 
-    } elseif ($method === 'POST') {
+    }
+    elseif ($method === 'POST') {
         /**
          * ==========================================
          * 🔄 PROCESAMIENTO DE ACCIONES (POST)
@@ -118,17 +124,12 @@ try {
          * Espera JSON con { action, uid, ...datos }
          */
         $data = getJsonInput();
-        validateCsrfToken();
+        validateCsrfToken(null, true);
         $action = $data['action'] ?? '';
 
         // 🛡️ SEGURIDAD IDOR: El ID de usuario NUNCA debe venir del cliente para operaciones de escritura.
-        // Se debe usar estrictamente el ID de la sesión activa.
-        if (!isset($_SESSION['user_id'])) {
-            http_response_code(401);
-            echo json_encode(['ok' => false, 'msg' => 'Sesión expirada o no válida']);
-            exit;
-        }
         $uid = $_SESSION['user_id'];
+
 
         if ($action === 'update_profile' && $uid) {
             /**
@@ -136,14 +137,17 @@ try {
              * Propósito: Actualiza los datos de contacto.
              * Seguridad: Valida duplicidad de correo electrónico antes de guardar.
              */
-            $nombre = sanitizeHtml(trim($data['nombre'] ?? ''));
-            $email = filter_var(trim($data['email'] ?? ''), FILTER_SANITIZE_EMAIL);
-            $telefono = preg_replace('/\D/', '', $data['telefono'] ?? ''); // Solo números
+            // 🛡️ VALIDACIÓN ESTRICTA (ISO 830)
+            Validation::validateOrReject($data, [
+                'nombre' => 'name',
+                'email' => 'email',
+                'telefono' => 'phone'
+            ]);
 
-            if (empty($nombre) || empty($email)) {
-                echo json_encode(['ok' => false, 'msg' => 'El nombre y el correo son obligatorios']);
-                exit;
-            }
+            $nombre = Validation::sanitizeString($data['nombre']);
+            $email = Validation::sanitizeString($data['email']);
+            $telefono = $data['telefono'];
+
 
             // Validar que el nuevo correo no lo tenga otra cuenta
             $checkEmail = $pdo->prepare("SELECT id_usuario FROM tab_Usuarios WHERE correo_usuario = ? AND id_usuario <> ?");
@@ -156,24 +160,37 @@ try {
             $stmt = $pdo->prepare("UPDATE tab_Usuarios SET nom_usuario = ?, correo_usuario = ?, num_telefono_usuario = ?, fec_update = NOW(), usr_update = 'self' WHERE id_usuario = ?");
             if ($stmt->execute([$nombre, $email, $telefono, $uid])) {
                 echo json_encode(['ok' => true, 'msg' => 'Perfil actualizado correctamente']);
-            } else {
+            }
+            else {
                 echo json_encode(['ok' => false, 'msg' => 'Error al actualizar el perfil']);
             }
 
-        } elseif ($action === 'update_address' && $uid) {
+        }
+        elseif ($action === 'update_address' && $uid) {
             /**
              * ACCIÓN: update_address
              * Propósito: Sincroniza la dirección principal en Usuarios y el detalle en Direcciones_Envio.
              * Lógica: Usa transacciones SQL para asegurar atomicidad (o se guardan ambos o nada).
              */
-            $direccion = $data['direccion'] ?? '';
-            $ciudad_id = $data['ciudad_id'] ?? null;
-            $postal = $data['postal'] ?? '';
+            // 🛡️ VALIDACIÓN ESTRICTA (ISO 830)
+            Validation::validateOrReject($data, [
+                'direccion' => 'address',
+                'ciudad_id' => 'id',
+                'postal' => 'zip'
+            ]);
 
-            if (empty($direccion) || !$ciudad_id) {
-                echo json_encode(['ok' => false, 'msg' => 'Dirección y ciudad son obligatorios']);
+            $direccion = Validation::sanitizeString($data['direccion']);
+            $ciudad_id = $data['ciudad_id'];
+            $postal = $data['postal'];
+
+            // 🛡️ CONTROL DE REDUNDANCIA: No permitir registrar la misma dirección dos veces para el mismo usuario
+            $stmtRedundancy = $pdo->prepare("SELECT id_direccion FROM tab_Direcciones_Envio WHERE id_usuario = ? AND direccion_completa = ? AND id_ciudad = ?");
+            $stmtRedundancy->execute([$uid, $direccion, $ciudad_id]);
+            if ($stmtRedundancy->fetch()) {
+                echo json_encode(['ok' => false, 'msg' => 'Inconsistencia: Esta dirección ya se encuentra registrada en su agenda.']);
                 exit;
             }
+
 
             $pdo->beginTransaction();
             try {
@@ -191,7 +208,8 @@ try {
                     $sqlDir = "UPDATE tab_Direcciones_Envio SET direccion_completa = ?, id_ciudad = ?, codigo_postal = ?, fec_update = NOW(), usr_update = 'self' WHERE id_direccion = ?";
                     $stmtDir = $pdo->prepare($sqlDir);
                     $stmtDir->execute([$direccion, $ciudad_id, $postal, $dirExistente['id_direccion']]);
-                } else {
+                }
+                else {
                     // Insertar nueva si no tiene
                     $maxId = $pdo->query("SELECT COALESCE(MAX(id_direccion), 0) + 1 FROM tab_Direcciones_Envio")->fetchColumn();
                     $sqlDir = "INSERT INTO tab_Direcciones_Envio (id_direccion, id_usuario, direccion_completa, id_ciudad, codigo_postal, es_predeterminada, fec_insert, usr_insert) 
@@ -202,18 +220,22 @@ try {
 
                 $pdo->commit();
                 echo json_encode(['ok' => true, 'msg' => 'Dirección actualizada correctamente']);
-            } catch (Exception $e) {
+            }
+            catch (Exception $e) {
                 $pdo->rollBack();
                 echo json_encode(['ok' => false, 'msg' => 'Error al procesar dirección: ' . $e->getMessage()]);
             }
-        } else {
+        }
+        else {
             echo json_encode(['ok' => false, 'msg' => 'Acción POST no reconocida o datos incompletos']);
         }
-    } else {
+    }
+    else {
         http_response_code(405);
         echo json_encode(['ok' => false, 'msg' => 'Método HTTP no permitido']);
     }
-} catch (PDOException $e) {
+}
+catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error crítico de base de datos: ' . $e->getMessage()]);
 }

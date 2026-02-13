@@ -29,11 +29,13 @@ ini_set('session.use_only_cookies', 1);
 ini_set('session.cookie_secure', 0); // 0 = Permitir HTTP
 ini_set('session.cookie_samesite', 'Lax');
 
-// 🛡️ CABECERAS DE SEGURIDAD HTTP
 header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");
 header("X-XSS-Protection: 1; mode=block");
 header("Referrer-Policy: strict-origin-when-cross-origin");
+header("Cache-Control: no-cache, no-store, must-revalidate"); // 🛡️ ISO 830: Prevenir persistencia de datos sensibles
+header("Pragma: no-cache");
+header("Expires: 0");
 // CSP Básico (Permitir scripts propios y de fuentes confiables usadas en el proyecto)
 // CSP Básico (Nivel Desarrollo): Permite scripts propios y conexiones HTTP/HTTPS para evitar bloqueos en red local
 header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' http: https:; frame-src 'self' https://js.stripe.com;");

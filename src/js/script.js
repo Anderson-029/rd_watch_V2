@@ -937,11 +937,14 @@ async function loadTestimonials() {
             sliderContainer.innerHTML = '';
 
             data.resenas.forEach(review => {
-                // Generar estrellas HTML
+                const rating = parseFloat(review.calificacion);
+                // Generar estrellas HTML (ISO 830: Precisión visual)
                 let starsHtml = '';
-                for (let i = 0; i < 5; i++) {
-                    if (i < review.calificacion) {
+                for (let i = 1; i <= 5; i++) {
+                    if (rating >= i) {
                         starsHtml += '<i class="fas fa-star"></i>'; // Llena
+                    } else if (rating >= i - 0.5) {
+                        starsHtml += '<i class="fas fa-star-half-alt"></i>'; // Media
                     } else {
                         starsHtml += '<i class="far fa-star"></i>'; // Vacía
                     }
@@ -1609,6 +1612,69 @@ if (authModal) {
             setTimeout(() => authModal.style.display = 'none', 300);
         }
     });
+
+    // --- LÓGICA DE RECUPERACIÓN DE CONTRASEÑA ---
+    const forgotLink = document.querySelector('.forgot-password');
+    const backToLoginLink = document.getElementById('back-to-login');
+    const forgotWrapper = document.getElementById('forgot-password-wrapper');
+    const loginWrapper = document.querySelector('.form-wrapper.is-active'); // El que esté activo
+
+    if (forgotLink && forgotWrapper) {
+        forgotLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Ocultar todos los wrappers y mostrar el de recuperación
+            document.querySelectorAll('.form-wrapper').forEach(w => w.style.display = 'none');
+            forgotWrapper.style.display = 'block';
+        });
+    }
+
+    if (backToLoginLink) {
+        backToLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            forgotWrapper.style.display = 'none';
+            // Restaurar vista de login
+            document.querySelectorAll('.form-wrapper').forEach(w => w.style.display = 'none');
+            const loginFormWrapper = document.querySelector('.switcher-login').parentElement;
+            loginFormWrapper.style.display = 'block';
+            loginFormWrapper.classList.add('is-active');
+        });
+    }
+
+    const forgotForm = document.getElementById('forgotPasswordForm');
+    if (forgotForm) {
+        forgotForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value;
+            const submitBtn = forgotForm.querySelector('button[type="submit"]');
+
+            submitBtn.disabled = true;
+            showNotification('Enviando solicitud...', false);
+
+            try {
+                const res = await fetch(`${API_BASE}/forgot_password.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+
+                if (data.ok) {
+                    showNotification('✅ ' + data.msg);
+                    if (data.debug_link) {
+                        console.log("DEBUG: Link de recuperación: " + data.debug_link);
+                        // En desarrollo, podríamos incluso abrirlo o mostrarlo
+                    }
+                    forgotForm.reset();
+                } else {
+                    showNotification('❌ ' + data.msg, true);
+                }
+            } catch (err) {
+                showNotification('Error de conexión.', true);
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    }
 }
 // 10. STATS ANIMATION & LOADING (LANDING PAGE)
 // =========================================================

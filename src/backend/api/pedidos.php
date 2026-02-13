@@ -12,6 +12,12 @@
 
 header('Content-Type: application/json');
 require_once '../config.php';
+require_once '../utils/security_utils.php';
+require_once '../utils/Validation.php';
+
+// 🛡️ BARRERA ADMINISTRATIVA
+requireRole('admin');
+
 
 // Verificación de la conexión a la base de datos
 if (!isset($pdo)) {
@@ -28,10 +34,35 @@ try {
          * ==========================================
          * 🔍 LISTAR TODOS LOS PEDIDOS (GET)
          * ==========================================
-         * Lógica: Une la tabla de órdenes (tab_Orden) con la de usuarios (tab_Usuarios)
-         * y pagos (tab_Pagos) para ofrecer una vista completa al administrador.
-         * Se incluye un flag 'tiene_comprobante' basado en la presencia de datos binarios en la DB.
+         * Lógica: Soporta filtros por estado y cliente.
          */
+        $where = ["1=1"];
+        $params = [];
+
+        if (!empty($_GET['estado'])) {
+            $where[] = "o.estado_orden = ?";
+            $params[] = $_GET['estado'];
+        }
+
+        if (!empty($_GET['busqueda'])) {
+            $where[] = "(u.nom_usuario ILIKE ? OR u.correo_usuario ILIKE ?)";
+            $params[] = "%" . $_GET['busqueda'] . "%";
+            $params[] = "%" . $_GET['busqueda'] . "%";
+        }
+
+        if (!empty($_GET['date_from'])) {
+            $where[] = "o.fecha_orden >= ?";
+            $params[] = $_GET['date_from'];
+        }
+
+        if (!empty($_GET['date_to'])) {
+            $where[] = "o.fecha_orden <= ?";
+            $params[] = $_GET['date_to'];
+        }
+
+
+        $whereSql = implode(" AND ", $where);
+
         $sql = "SELECT o.id_orden, 
                        u.nom_usuario as cliente, 
                        u.correo_usuario as email_cliente, 
@@ -43,24 +74,34 @@ try {
                 FROM tab_Orden o
                 JOIN tab_Usuarios u ON o.id_usuario = u.id_usuario
                 LEFT JOIN tab_Pagos p ON o.id_orden = p.id_orden
+                WHERE $whereSql
                 ORDER BY o.id_orden DESC";
+
         $stmt = $pdo->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($params);
         $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         echo json_encode(['ok' => true, 'pedidos' => $pedidos]);
 
-    } elseif ($method === 'PUT') {
+    }
+    elseif ($method === 'PUT') {
         /**
          * ==========================================
          * 🔄 ACTUALIZAR ESTADO DE PEDIDO (PUT)
          * ==========================================
-         * Propósito: Cambiar el estado de la orden (ej: de 'pendiente' a 'confirmado').
-         * Seguridad: Valida que el estado enviado pertenezca a la lista oficial.
          */
+        validateCsrfToken(null, true);
         $input = json_decode(file_get_contents('php://input'), true);
-        $id_orden = $input['id_orden'] ?? null;
-        $nuevo_estado = $input['estado'] ?? null;
+
+        // 🛡️ VALIDACIÓN ESTRICTA (ISO 830)
+        Validation::validateOrReject($input, [
+            'id_orden' => 'id',
+            'estado' => 'name'
+        ]);
+
+        $id_orden = $input['id_orden'];
+        $nuevo_estado = $input['estado'];
+
 
         if (!$id_orden || !$nuevo_estado) {
             http_response_code(400);
@@ -82,15 +123,18 @@ try {
 
         if ($stmt->execute([$nuevo_estado, $id_orden])) {
             echo json_encode(['ok' => true, 'msg' => 'El pedido ha sido actualizado al estado: ' . $nuevo_estado]);
-        } else {
+        }
+        else {
             echo json_encode(['ok' => false, 'msg' => 'Fallo técnico al actualizar el registro en la base de datos']);
         }
 
-    } else {
+    }
+    else {
         http_response_code(405);
         echo json_encode(['ok' => false, 'msg' => 'Método no soportado por esta API']);
     }
-} catch (PDOException $e) {
+}
+catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error crítico en base de datos: ' . $e->getMessage()]);
 }

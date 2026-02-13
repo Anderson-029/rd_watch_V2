@@ -18,6 +18,7 @@
 
 header('Content-Type: application/json');
 require_once '../config.php';
+require_once '../utils/Validation.php';
 
 // Verificación de integridad de la base de datos
 if (!isset($pdo)) {
@@ -40,26 +41,28 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// 🛡️ SEGURIDAD: CSRF OBLIGATORIO
+require_once '../utils/security_utils.php';
+validateCsrfToken($_POST['csrf_token'] ?? null, true);
+
 $userId = $_SESSION['user_id'];
 $input = $_POST;
 $file = $_FILES['payment_proof'] ?? null;
 
-// Validación de campos mínimos obligatorios
-if (!isset($input['direccion'], $input['ciudad']) || !$file) {
-    echo json_encode(['ok' => false, 'msg' => 'Faltan datos requeridos: Dirección, Ciudad o Comprobante de Pago']);
+// 🛡️ VALIDACIÓN ESTRICTA (ISO 830)
+Validation::validateOrReject($input, [
+    'direccion' => 'address',
+    'ciudad' => 'name'
+]);
+
+if (!$file) {
+    echo json_encode(['ok' => false, 'msg' => 'Falta el comprobante de pago']);
     exit;
 }
 
-// Validar que dirección y ciudad no estén vacías
-if (empty(trim($input['direccion'])) || strlen(trim($input['direccion'])) < 5) {
-    echo json_encode(['ok' => false, 'msg' => 'La dirección debe tener al menos 5 caracteres']);
-    exit;
-}
+$direccion = Validation::sanitizeString($input['direccion']);
+$ciudad = Validation::sanitizeString($input['ciudad']);
 
-if (empty(trim($input['ciudad'])) || strlen(trim($input['ciudad'])) < 3) {
-    echo json_encode(['ok' => false, 'msg' => 'La ciudad debe tener al menos 3 caracteres']);
-    exit;
-}
 
 // === VALIDACIÓN EXHAUSTIVA DEL COMPROBANTE DE PAGO ===
 if ($file['error'] !== UPLOAD_ERR_OK) {
@@ -150,8 +153,8 @@ try {
                  VALUES (?, ?, NOW(), 'pendiente', ?, ?, NOW(), 'checkout_system')";
     $stmtOrden = $pdo->prepare($sqlOrden);
 
-    $metodoDesc = isset($input['metodo']) ? $input['metodo'] : 'Consignación Bancaria';
-    $concepto = "Compra RD-Watch: " . $input['direccion'] . " (" . $metodoDesc . ")";
+    $metodoDesc = Validation::sanitizeString($input['metodo'] ?? 'Consignación Bancaria');
+    $concepto = "Compra RD-Watch: " . $direccion . " (" . $metodoDesc . ")";
     if (strlen($concepto) > 100)
         $concepto = substr($concepto, 0, 97) . "...";
 
@@ -191,17 +194,18 @@ try {
 
     if ($existingAddr) {
         $direccionId = $existingAddr['id_direccion'];
-    } else {
+    }
+    else {
         // Si es una dirección nueva, se registra automáticamente
         $direccionId = time() + rand(1, 999);
         $stmtCity = $pdo->prepare("SELECT id_ciudad FROM tab_Ciudades WHERE nombre_ciudad ILIKE ? LIMIT 1");
-        $stmtCity->execute(["%" . $input['ciudad'] . "%"]);
+        $stmtCity->execute(["%" . $ciudad . "%"]);
         $cityRow = $stmtCity->fetch();
         $idCiudad = $cityRow ? $cityRow['id_ciudad'] : 1;
 
         $sqlNewAddr = "INSERT INTO tab_Direcciones_Envio (id_direccion, id_usuario, direccion_completa, id_ciudad, codigo_postal, es_predeterminada, fec_insert, usr_insert) 
                        VALUES (?, ?, ?, ?, '000000', FALSE, NOW(), 'checkout_process')";
-        $pdo->prepare($sqlNewAddr)->execute([$direccionId, $userId, $input['direccion'], $idCiudad]);
+        $pdo->prepare($sqlNewAddr)->execute([$direccionId, $userId, $direccion, $idCiudad]);
     }
 
     // PASO 7: Registro del Envío (Logística)
@@ -241,7 +245,8 @@ try {
         'order_id' => $idOrden
     ]);
 
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     /**
      * GESTIÓN DE FALLOS: ROLLBACK
      * Si cualquier paso falla, se deshacen todos los INSERTs y UPDATEs realizados desde el beginTransaction.

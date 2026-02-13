@@ -14,6 +14,10 @@
 
 header('Content-Type: application/json');
 require_once '../config.php';
+require_once '../utils/security_utils.php';
+
+// 🛡️ BARRERA DE SEGURIDAD: Solo usuarios autenticados pueden ver datos para transferencia.
+requireLogin();
 
 // Verificación de integridad de la base de datos (aunque los datos sean estáticos, config.php es necesario)
 if (!isset($pdo)) {

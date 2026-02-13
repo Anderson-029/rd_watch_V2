@@ -18,36 +18,23 @@ header('Content-Type: application/json');
 // Captura de datos JSON desde el flujo de entrada
 $input = json_decode(file_get_contents('php://input'), true);
 
-// 🛡️ SANITIZACIÓN (PREVENCIÓN XSS)
+// 🛡️ SANITIZACIÓN e Integridad (ISO 830)
 require_once '../utils/security_utils.php';
-$nombre = sanitizeHtml(trim($input['nombre'] ?? ''));
-$email = filter_var(trim($input['email'] ?? ''), FILTER_SANITIZE_EMAIL);
-$telefono = preg_replace('/\D/', '', $input['telefono'] ?? ''); // Solo números
-$pass = $input['password'] ?? ''; // La contraseña no se sanitiza, se hashea
+require_once '../utils/Validation.php';
 
-// 1. REGLAS DE NEGOCIO: VALIDACIÓN DE CAMPOS
-if (empty($email) || empty($pass) || empty($nombre)) {
-    echo json_encode(["ok" => false, "msg" => "Faltan datos obligatorios para completar el registro"]);
-    exit;
-}
+// 🛡️ VALIDACIÓN ESTRICTA (ISO 830)
+Validation::validateOrReject($input, [
+    'nombre' => 'name',
+    'email' => 'email',
+    'telefono' => 'phone',
+    'password' => 'password' // Validación de formato básico ISO 830
+]);
 
-// Validación de nombre (solo letras, espacios y acentos)
-if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $nombre)) {
-    echo json_encode(["ok" => false, "msg" => "El nombre solo debe contener letras y espacios"]);
-    exit;
-}
+$nombre = Validation::sanitizeString($input['nombre']);
+$email = Validation::sanitizeString($input['email']);
+$telefono = $input['telefono'];
+$pass = $input['password'];
 
-// Validación de formato de email
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    echo json_encode(["ok" => false, "msg" => "El formato del correo electrónico no es válido"]);
-    exit;
-}
-
-// Validación de formato de teléfono (10 dígitos)
-if (strlen((string) $telefono) !== 10 || !ctype_digit((string) $telefono)) {
-    echo json_encode(["ok" => false, "msg" => "El número de teléfono debe tener exactamente 10 dígitos numéricos"]);
-    exit;
-}
 
 // Validación de complejidad de contraseña
 $passwordErrors = [];
@@ -85,6 +72,14 @@ try {
         exit;
     }
 
+    // 🛡️ CONTROL DE REDUNDANCIA: Evitar múltiples cuentas con el mismo nombre y teléfono
+    $stmtRedundancy = $pdo->prepare("SELECT id_usuario FROM tab_Usuarios WHERE nom_usuario = ? AND num_telefono_usuario = ?");
+    $stmtRedundancy->execute([$nombre, $telefono]);
+    if ($stmtRedundancy->fetch()) {
+        echo json_encode(["ok" => false, "msg" => "Inconsistencia: Ya existe un registro con esta combinación de nombre y teléfono."]);
+        exit;
+    }
+
     /**
      * ==========================================
      * 🔐 PROTECCIÓN DE CREDENCIALES
@@ -114,11 +109,13 @@ try {
             "ok" => true,
             "msg" => "¡Bienvenido a RD-Watch, " . $nombre . "! Tu cuenta ha sido creada exitosamente. Ya puedes iniciar sesión."
         ]);
-    } else {
+    }
+    else {
         throw new Exception("Error interno al ejecutar la sentencia de inserción");
     }
 
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     http_response_code(500);
     echo json_encode(["ok" => false, "msg" => "Fallo técnico en el sistema de registro: " . $e->getMessage()]);
 }
