@@ -12,7 +12,7 @@ let card = null;
  */
 async function initStripe() {
     try {
-        const res = await fetch(`${API_BASE}/stripe_config.php`);
+        const res = await secureFetch(`${API_BASE}/stripe_config.php`);
         const data = await res.json();
 
         if (data.ok && data.publicKey) {

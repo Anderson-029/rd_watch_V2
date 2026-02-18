@@ -9,18 +9,20 @@ const API_CONFIG = {
         const path = window.location.pathname;
         let projectRoot = '';
 
-        // Si la ruta contiene '/src/', la raíz está antes de eso
+        // Buscar el segmento /src/ en la URL para determinar la raíz
         const srcIndex = path.indexOf('/src/');
 
         if (srcIndex !== -1) {
             projectRoot = path.substring(0, srcIndex);
         } else {
-            // Si no (ej. estamos en index.html en la raíz), quitamos el nombre del archivo
+            // Fallback: Si no hay /src/, asumimos que estamos en el directorio actual
             projectRoot = path.substring(0, path.lastIndexOf('/'));
         }
 
+        // Limpieza de barras
         if (projectRoot === '/') projectRoot = '';
 
+        // Construcción dinámica basada en el host actual (IP, Dominio o Localhost)
         return window.location.origin + projectRoot + '/src/backend/api';
     },
 

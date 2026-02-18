@@ -30,10 +30,8 @@ $method = $_SERVER['REQUEST_METHOD'];
  * Función auxiliar para capturar datos enviados en formato JSON (Peticiones POST).
  * @return array|null Datos decodificados del cuerpo de la petición.
  */
-function getJsonInput()
-{
-    return json_decode(file_get_contents('php://input'), true);
-}
+// La función getJsonInput() ahora se provee globalmente por security_utils.php de forma segura (con caché).
+
 
 try {
     if ($method === 'GET') {
@@ -123,8 +121,9 @@ try {
          * ==========================================
          * Espera JSON con { action, uid, ...datos }
          */
-        $data = getJsonInput();
         validateCsrfToken(null, true);
+        $data = getJsonInput();
+
         $action = $data['action'] ?? '';
 
         // 🛡️ SEGURIDAD IDOR: El ID de usuario NUNCA debe venir del cliente para operaciones de escritura.

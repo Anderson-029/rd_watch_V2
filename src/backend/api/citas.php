@@ -38,10 +38,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 /**
  * Captura datos de entrada en formato JSON (Cuerpo de la petición).
  */
-function getJsonInput()
-{
-    return json_decode(file_get_contents('php://input'), true);
-}
+// La función getJsonInput() ahora se provee globalmente por security_utils.php de forma segura (con caché).
+
 
 // Determinación del nivel de acceso según el rol guardado en la sesión
 $rol = $_SESSION['user_role'] ?? 'cliente';
@@ -91,8 +89,9 @@ try {
          * ➕ SOLICITAR O ACTUALIZAR CITA (POST)
          * ==========================================
          */
-        $data = getJsonInput();
         validateCsrfToken(null, true);
+        $data = getJsonInput();
+
 
         /**
          * SUB-ACCIÓN: update_status

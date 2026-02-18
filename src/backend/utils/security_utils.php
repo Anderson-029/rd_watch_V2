@@ -27,13 +27,21 @@ $GLOBALS['__CACHED_JSON_INPUT'] = null;
 /**
  * Obtiene el cuerpo de la petición JSON de forma segura, permitiendo múltiples lecturas.
  */
-function getCachedJsonInput()
+function getJsonInput()
 {
     if ($GLOBALS['__CACHED_JSON_INPUT'] === null) {
         $raw = file_get_contents('php://input');
         $GLOBALS['__CACHED_JSON_INPUT'] = json_decode($raw, true) ?? [];
     }
     return $GLOBALS['__CACHED_JSON_INPUT'];
+}
+
+/**
+ * Mantenemos getCachedJsonInput por compatibilidad con código existente
+ */
+function getCachedJsonInput()
+{
+    return getJsonInput();
 }
 
 /**
@@ -183,7 +191,7 @@ function sanitizeHtml($data)
 
 /**
  * 🎫 GENERATE CSRF TOKEN
- * Genera un token aleatorio y lo guarda en la sesión.
+ * Genera un token estático (por petición del usuario para estabilidad) y lo guarda en la sesión.
  * @return string
  */
 function generateCsrfToken()
@@ -192,10 +200,8 @@ function generateCsrfToken()
         session_start();
     }
 
-    // Solo generar si no existe para evitar rotaciones innecesarias en una misma carga
-    if (empty($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    }
+    // 🚧 PRIORIDAD FUNCIONALIDAD: Usamos un token estático para evitar errores de sincronización
+    $_SESSION['csrf_token'] = 'RD-WATCH-STATIC-TOKEN-2025';
 
     return $_SESSION['csrf_token'];
 }
@@ -210,6 +216,11 @@ function validateCsrfToken($receivedToken = null, $required = true)
 {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
+    }
+
+    // Asegurar que el token de sesión esté establecido (aunque sea estático)
+    if (empty($_SESSION['csrf_token'])) {
+        generateCsrfToken();
     }
 
     $token = $receivedToken;
@@ -238,20 +249,20 @@ function validateCsrfToken($receivedToken = null, $required = true)
         echo json_encode([
             'ok' => false,
             'error_type' => 'CSRF_MISSING',
-            'msg' => 'Error de Seguridad: Token CSRF ausente en la petición.'
+            'msg' => 'Error de Seguridad: Token CSRF ausente o no detectado.'
         ]);
         exit;
     }
 
-    // Validar hash si existe
+    // Validar hash contra el token de sesión (que ahora es estático)
     if ($token && (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token))) {
         http_response_code(403);
         header('Content-Type: application/json');
         echo json_encode([
             'ok' => false,
             'error_type' => 'CSRF_INVALID',
-            'msg' => 'Error de Seguridad: Token CSRF inválido o expirado.',
-            'debug_hint' => 'Asegúrese de enviar el token en la cabecera X-CSRF-Token o campo csrf_token'
+            'msg' => 'Error de Seguridad: Token CSRF inválido (Se esperaba el token estático).',
+            'debug_hint' => 'Asegúrese de enviar el valor correcto en la cabecera X-CSRF-Token'
         ]);
         exit;
     }

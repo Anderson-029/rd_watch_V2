@@ -31,17 +31,8 @@ if (!isset($pdo)) {
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-/**
- * Captura datos de cuerpo JSON.
- */
-function getJsonInput()
-{
-    // Usamos la versión cacheada en security_utils.php para evitar conflictos con validateCsrfToken
-    if (function_exists('getCachedJsonInput')) {
-        return getCachedJsonInput();
-    }
-    return json_decode(file_get_contents('php://input'), true) ?? [];
-}
+// La función getJsonInput() ahora se provee globalmente por security_utils.php de forma segura (con caché).
+
 
 try {
     switch ($method) {

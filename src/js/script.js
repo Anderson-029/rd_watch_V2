@@ -4,68 +4,7 @@
  * SECURITY: Includes CSRF protection and input validation
  */
 
-// =========================================================
-// 0. SECURITY - CSRF TOKEN MANAGEMENT
-// =========================================================
-let csrfToken = null;
-
-/**
- * Obtener token CSRF del servidor
- */
-async function fetchCsrfToken() {
-    try {
-        const response = await fetch(`${API_BASE}/get_csrf_token.php`, {
-            credentials: 'include'
-        });
-        const data = await response.json();
-        if (data.ok && data.csrf_token) {
-            csrfToken = data.csrf_token;
-            sessionStorage.setItem('csrf_token', csrfToken);
-        }
-    } catch (error) {
-        console.error('Error fetching CSRF token:', error);
-        csrfToken = sessionStorage.getItem('csrf_token');
-    }
-}
-
-/**
- * Secure Fetch Wrapper con CSRF token automático
- */
-async function secureFetch(url, options = {}) {
-    if (!csrfToken) {
-        await fetchCsrfToken();
-    }
-
-    // Agregar CSRF token a peticiones que modifican estado
-    if (options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method.toUpperCase())) {
-        options.headers = options.headers || {};
-        options.headers['X-CSRF-Token'] = csrfToken;
-    }
-
-    options.credentials = 'include';
-
-    try {
-        const response = await fetch(url, options);
-
-        // Actualizar token si viene uno nuevo
-        if (response.ok) {
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const clone = response.clone();
-                const data = await clone.json();
-                if (data.csrf_token) {
-                    csrfToken = data.csrf_token;
-                    sessionStorage.setItem('csrf_token', csrfToken);
-                }
-            }
-        }
-
-        return response;
-    } catch (error) {
-        console.error('Secure fetch error:', error);
-        throw error;
-    }
-}
+// La seguridad (csrfToken, secureFetch) ahora se gestiona en security.js
 
 // =========================================================
 // 1. CONFIGURACIÓN Y ESTADO GLOBAL
@@ -121,10 +60,9 @@ window.toggleCart = function (forceOpen = false) {
 window.removeFromCart = async function (productId) {
     if (!confirm('¿Eliminar producto?')) return;
     try {
-        await fetch(`${API_BASE_SHOP}/carrito.php`, {
+        await secureFetch(`${API_BASE_SHOP}/carrito.php`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify({ id_producto: productId })
         });
         loadCart();
@@ -137,10 +75,9 @@ window.removeFromCart = async function (productId) {
 window.updateCartQuantity = async function (productId, newQuantity) {
     if (newQuantity < 1) return;
     try {
-        const res = await fetch(`${API_BASE_SHOP}/carrito.php`, {
+        const res = await secureFetch(`${API_BASE_SHOP}/carrito.php`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify({ id_producto: productId, cantidad: newQuantity })
         });
         if (res.ok) loadCart();
@@ -204,10 +141,9 @@ async function addToCart(productId, quantity) {
     }
 
     try {
-        const res = await fetch(`${API_BASE_SHOP}/carrito.php`, {
+        const res = await secureFetch(`${API_BASE_SHOP}/carrito.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify({ id_producto: productId, cantidad: quantity })
         });
 
@@ -238,9 +174,8 @@ async function addToCart(productId, quantity) {
 
 async function loadCart() {
     try {
-        const res = await fetch(`${API_BASE_SHOP}/carrito.php`, {
-            method: 'GET',
-            credentials: 'include'
+        const res = await secureFetch(`${API_BASE_SHOP}/carrito.php`, {
+            method: 'GET'
         });
         const data = await res.json();
 
@@ -272,10 +207,9 @@ window.updateCartQuantity = async function (productId, newQty) {
     }
 
     try {
-        const res = await fetch(`${API_BASE_SHOP}/carrito.php`, {
+        const res = await secureFetch(`${API_BASE}/carrito.php`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify({ id_producto: productId, cantidad: newQty })
         });
         const data = await res.json();
@@ -298,10 +232,9 @@ window.removeFromCart = async function (productId) {
 
     try {
         // Optimismo UI: Ocultar el elemento visualmente de inmediato
-        const res = await fetch(`${API_BASE_SHOP}/carrito.php`, {
+        const res = await secureFetch(`${API_BASE}/carrito.php`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify({ id_producto: productId })
         });
         const data = await res.json();
@@ -411,8 +344,8 @@ async function loadProducts() {
         productList.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px">Cargando...</div>';
 
         const [resProd, resCat] = await Promise.all([
-            fetch(`${API_BASE_SHOP}/productos.php`),
-            fetch(`${API_BASE_SHOP}/catalogos.php?tipo=categorias`)
+            secureFetch(`${API_BASE}/productos.php`),
+            secureFetch(`${API_BASE}/catalogos.php?tipo=categorias`)
         ]);
 
         const dataProd = await resProd.json();
@@ -703,9 +636,8 @@ if (paymentForm) {
         formData.append('payment_proof', proofFile);
 
         try {
-            const res = await fetch(`${API_BASE_SHOP}/checkout.php`, {
+            const res = await secureFetch(`${API_BASE_SHOP}/checkout.php`, {
                 method: 'POST',
-                credentials: 'include',
                 body: formData // No enviamos headers de Content-Type, el navegador lo pone con el boundary
             });
 
@@ -819,6 +751,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewBtn) { e.preventDefault(); openProductModal(parseInt(viewBtn.dataset.id)); }
     });
 
+    /* =========================================================
+       0. INICIO DE SESIÓN SOCIAL (GOOGLE Y FACEBOOK)
+       ========================================================= */
+    const socialButtons = [
+        { id: 'googleLogin', name: 'Google' },
+        { id: 'facebookLogin', name: 'Facebook' },
+        { id: 'googleSignup', name: 'Google' },
+        { id: 'facebookSignup', name: 'Facebook' }
+    ];
+
+    socialButtons.forEach(btn => {
+        const element = document.getElementById(btn.id);
+        if (element) {
+            element.addEventListener('click', () => {
+                showNotification(`⌛ Iniciando sesión con ${btn.name}... (Simulación de OAuth)`);
+                setTimeout(() => {
+                    showNotification(`ℹ️ Para activar ${btn.name} real, se requiere API Key y HTTPS.`);
+                }, 1500);
+            });
+        }
+    });
+
+    /* =========================================================
+       1. MANEJO DEL LOGIN
+       ========================================================= */
     // =========================================================
     // MOBILE MENU LOGIC
     // =========================================================
@@ -867,7 +824,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function checkSession() {
     try {
-        const res = await fetch(`${API_BASE_SHOP}/me.php`, { credentials: 'include' });
+        const res = await secureFetch(`${API_BASE_SHOP}/me.php`);
         const data = await res.json();
 
         if (data.ok && data.user) {
@@ -929,7 +886,7 @@ async function loadTestimonials() {
     if (!sliderContainer) return;
 
     try {
-        const res = await fetch(`${API_BASE}/resenas.php`);
+        const res = await secureFetch(`${API_BASE}/resenas.php`);
         const data = await res.json();
 
         if (data.ok && data.resenas.length > 0) {
@@ -986,7 +943,7 @@ async function loadServices() {
     if (!servicesContainer) return;
 
     try {
-        const res = await fetch(`${API_BASE_SHOP}/servicios.php`);
+        const res = await secureFetch(`${API_BASE_SHOP}/servicios.php`);
         const data = await res.json();
 
         if (data.ok && data.servicios.length > 0) {
@@ -1186,10 +1143,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // Ajusta esta ruta si tu carpeta backend está en otro lugar
-                const response = await fetch(`${API_CONFIG.baseUrl}/login.php`, {
+                const response = await secureFetch(`${API_CONFIG.baseUrl}/login.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include', // Importante para mantener la sesión PHP
                     body: JSON.stringify({
                         email: emailInput.value,
                         password: passwordInput.value
@@ -1651,7 +1607,7 @@ if (authModal) {
             showNotification('Enviando solicitud...', false);
 
             try {
-                const res = await fetch(`${API_BASE}/forgot_password.php`, {
+                const res = await secureFetch(`${API_BASE}/forgot_password.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
@@ -1680,7 +1636,7 @@ if (authModal) {
 // =========================================================
 async function loadStats() {
     try {
-        const res = await fetch(`${API_BASE}/stats.php`);
+        const res = await secureFetch(`${API_BASE}/stats.php`);
         const data = await res.json();
 
         if (data.ok && data.public) {
@@ -1747,6 +1703,25 @@ async function handleContactForm(e) {
     const btnText = submitBtn.querySelector('.btn-text');
     const btnLoader = submitBtn.querySelector('.btn-loader');
 
+    // === RECONOCIMIENTO INTELIGENTE (COHERENCIA Y SEGURIDAD) ===
+    const currentUser = JSON.parse(sessionStorage.getItem('user'));
+    if (!currentUser) {
+        // El usuario no está logueado -> Mostrar alerta modal obligatoria
+        if (window.showAlert) {
+            showAlert('Para garantizar la seguridad y el seguimiento de su cita, debe estar registrado e iniciar sesión en nuestro sistema.', 'Módulo de Reservas');
+        } else {
+            alert('Debe iniciar sesión para agendar una cita.');
+        }
+
+        // Proyectar el modal de login automáticamente después de la alerta
+        const authModal = document.getElementById('auth-modal');
+        if (authModal) {
+            authModal.style.display = 'flex';
+            setTimeout(() => authModal.classList.add('show'), 500);
+        }
+        return;
+    }
+
     // Get form data
     const nombre = document.getElementById('contact-name').value.trim();
     const email = document.getElementById('contact-email').value.trim();
@@ -1776,71 +1751,25 @@ async function handleContactForm(e) {
         return;
     }
 
-    // === VALIDACIÓN DE ARCHIVO DE IMAGEN ===
-    const fileInput = document.getElementById('contact-file');
-    const fileError = document.querySelector('.file-error');
-
-    if (fileInput && fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
-        const allowedExtensions = ['.jpg', '.jpeg', '.png', '.svg'];
-
-        // Obtener extensión del archivo
-        const fileName = file.name.toLowerCase();
-        const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
-
-        // Validar tipo MIME y extensión
-        if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExtension)) {
-            showNotification('❌ Solo se permiten imágenes (JPG, PNG, SVG)', true);
-            if (fileError) {
-                fileError.textContent = 'Solo se permiten archivos: JPG, PNG, SVG';
-                fileError.style.display = 'block';
-            }
-            fileInput.value = ''; // Limpiar el input
-            return;
-        }
-
-        // Validar tamaño (máximo 5MB)
-        const maxSize = 5 * 1024 * 1024; // 5MB
-        if (file.size > maxSize) {
-            showNotification('❌ La imagen no debe superar los 5MB', true);
-            if (fileError) {
-                fileError.textContent = 'La imagen no debe superar los 5MB';
-                fileError.style.display = 'block';
-            }
-            fileInput.value = '';
-            return;
-        }
-
-        // Limpiar mensaje de error si todo está bien
-        if (fileError) {
-            fileError.style.display = 'none';
-        }
-    }
-
     // UI Loading
     if (btnText) btnText.style.display = 'none';
     if (btnLoader) btnLoader.style.display = 'inline-block';
     submitBtn.disabled = true;
 
     try {
-        // Crear FormData para soportar archivos
-        const formData = new FormData();
-        formData.append('nombre', nombre);
-        formData.append('email', email);
-        formData.append('telefono', telefono);
-        formData.append('servicio', servicio);
-        formData.append('mensaje', mensaje);
+        // Crear payload JSON (más coherente con nuestras APIs de seguridad)
+        const payload = {
+            nombre,
+            email,
+            telefono,
+            servicio,
+            mensaje
+        };
 
-        // Agregar archivo si existe
-        if (fileInput && fileInput.files.length > 0) {
-            formData.append('contact_file', fileInput.files[0]);
-        }
-
-        const response = await fetch(`${API_BASE}/contacto.php`, {
+        const response = await secureFetch(`${API_BASE}/contacto.php`, {
             method: 'POST',
-            credentials: 'include',
-            body: formData // No enviar Content-Type, el navegador lo configura automáticamente
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
 
         const data = await response.json();
@@ -1874,7 +1803,7 @@ async function loadContactServices() {
     if (!serviceSelect) return;
 
     try {
-        const response = await fetch(`${API_BASE_SHOP}/servicios.php`);
+        const response = await secureFetch(`${API_BASE_SHOP}/servicios.php`);
         const data = await response.json();
 
         if (data.ok && data.servicios && data.servicios.length > 0) {
@@ -1900,46 +1829,22 @@ async function loadContactServices() {
 }
 
 /**
- * Validación en tiempo real del archivo seleccionado
+ * Validación en tiempo real del teléfono de contacto
  */
-function setupFileValidation() {
-    const fileInput = document.getElementById('contact-file');
-    const fileError = document.querySelector('.file-error');
+function setupContactValidation() {
+    const phoneInput = document.getElementById('contact-phone');
+    if (!phoneInput) return;
 
-    if (!fileInput || !fileError) return;
-
-    fileInput.addEventListener('change', function () {
-        if (this.files.length === 0) {
-            fileError.style.display = 'none';
-            return;
+    phoneInput.addEventListener('keypress', function (e) {
+        if (!/^\d$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+            e.preventDefault();
         }
+    });
 
-        const file = this.files[0];
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
-        const allowedExtensions = ['.jpg', '.jpeg', '.png', '.svg'];
-
-        const fileName = file.name.toLowerCase();
-        const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
-
-        // Validar tipo y extensión
-        if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExtension)) {
-            fileError.textContent = '⚠️ Solo se permiten archivos: JPG, PNG, SVG';
-            fileError.style.display = 'block';
-            this.value = '';
-            return;
+    phoneInput.addEventListener('input', function () {
+        if (this.value.length > 10) {
+            this.value = this.value.slice(0, 10);
         }
-
-        // Validar tamaño (5MB)
-        const maxSize = 5 * 1024 * 1024;
-        if (file.size > maxSize) {
-            fileError.textContent = '⚠️ La imagen no debe superar los 5MB';
-            fileError.style.display = 'block';
-            this.value = '';
-            return;
-        }
-
-        // Todo bien
-        fileError.style.display = 'none';
     });
 }
 
@@ -1956,6 +1861,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cargar servicios en el formulario de contacto
     loadContactServices();
 
-    // Configurar validación de archivos
-    setupFileValidation();
+    // Configurar validación de contacto
+    setupContactValidation();
 });

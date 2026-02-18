@@ -12,13 +12,12 @@
  * 4. Invalida la cookie PHPSESSID en el cliente configurando su tiempo en el pasado.
  */
 
-require_once '../config.php';
-header('Content-Type: application/json');
-
-// Garantizar que tenemos acceso a la sesión antes de destruirla
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+require_once '../utils/security_utils.php';
+validateCsrfToken(); // 🛡️ Bloqueo CSRF
 
 // 1. Limpieza de datos en memoria del servidor
 $_SESSION = array();

@@ -262,10 +262,15 @@
                                 </button>
                                 <div class="social-login">
                                     <p>O inicia sesión con:</p>
-                                    <button type="button" class="social-btn google"><i
-                                            class="fab fa-google"></i></button>
-                                    <button type="button" class="social-btn facebook"><i
-                                            class="fab fa-facebook-f"></i></button>
+                                    <div class="social-btns">
+                                        <button type="button" class="social-btn google" title="Google" id="googleLogin">
+                                            <i class="fab fa-google"></i>
+                                        </button>
+                                        <button type="button" class="social-btn facebook" title="Facebook"
+                                            id="facebookLogin">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -325,6 +330,19 @@
                                     <span class="btn-text">Registrarse</span>
                                     <div class="btn-loader" style="display: none;"></div>
                                 </button>
+                                <div class="social-login">
+                                    <p>O regístrate con:</p>
+                                    <div class="social-btns">
+                                        <button type="button" class="social-btn google" title="Google"
+                                            id="googleSignup">
+                                            <i class="fab fa-google"></i>
+                                        </button>
+                                        <button type="button" class="social-btn facebook" title="Facebook"
+                                            id="facebookSignup">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -413,6 +431,8 @@
     </button>
 
     <script src="js/config.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/security.js"></script>
     <script src="js/script.js"></script>
 </body>
 

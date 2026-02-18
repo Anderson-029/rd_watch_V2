@@ -48,7 +48,7 @@
     --spacing-sm: 16px;
     --spacing-md: 32px;
     --spacing-lg: 64px;
-    --spacing-xl: 128px;
+    --spacing-xl: 10px;
 
     /* Transiciones */
     --transition-premium: cubic-bezier(0.4, 0, 0.2, 1);
@@ -1872,7 +1872,8 @@ section {
 /* Forms Section Styling */
 .forms-section {
     display: flex;
-    min-height: 550px;
+    min-height: auto;
+    align-items: stretch;
 }
 
 .brand-logo {
@@ -1883,7 +1884,7 @@ section {
     justify-content: center;
     align-items: center;
     color: var(--white);
-    padding: var(--spacing-lg);
+    padding: 0 30px;
     text-align: center;
 }
 
@@ -1902,9 +1903,89 @@ section {
 
 .forms {
     flex-basis: 60%;
-    padding: var(--spacing-lg) var(--spacing-xl);
+    padding: 0 40px;
     display: flex;
     flex-direction: column;
+}
+
+.social-login {
+    text-align: center;
+    margin-top: 30px;
+    width: 100%;
+    clear: both;
+    padding-bottom: 5px;
+}
+
+.social-login p {
+    display: flex;
+    align-items: center;
+    color: var(--text-lighter);
+    margin-bottom: 10px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    min-height: 20px;
+}
+
+.social-login p::before,
+.social-login p::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.social-login p::before {
+    margin-right: 15px;
+}
+
+.social-login p::after {
+    margin-left: 15px;
+}
+
+.social-btns {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 0;
+}
+
+.social-btn {
+    background: #fff;
+    border: 1px solid #eee;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all var(--time-fast) var(--transition-premium);
+    box-shadow: var(--shadow-sm);
+    margin: 0;
+}
+
+.social-btn.google {
+    color: #db4437;
+}
+
+.social-btn.facebook {
+    color: #4267b2;
+}
+
+.social-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-light);
+}
+
+.social-btn.google:hover {
+    background-color: rgba(219, 68, 55, 0.05);
+}
+
+.social-btn.facebook:hover {
+    background-color: rgba(66, 103, 178, 0.05);
 }
 
 .form-wrapper {
@@ -1917,17 +1998,18 @@ section {
     background: none;
     border: none;
     cursor: pointer;
-    padding: var(--spacing-md) 0;
+    padding: 0;
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--text-lighter);
-    margin-bottom: var(--spacing-md);
+    margin-bottom: 20px;
     position: relative;
     transition: color var(--transition-fast);
 }
 
 .switcher-login {
-    margin-right: var(--spacing-lg);
+    margin-right: 0;
+    text-align: center;
 }
 
 .switcher-login,
@@ -1953,17 +2035,22 @@ section {
     width: 100%;
 }
 
+.form-wrapper.is-active .form {
+    display: flex;
+    flex-direction: column;
+}
+
 .form {
     flex-grow: 1;
     display: none;
-}
-
-.form-wrapper.is-active .form {
-    display: block;
+    margin: 0;
+    padding: 0;
 }
 
 .form fieldset {
     border: none;
+    margin: 0;
+    padding: 0;
 }
 
 .input-block {

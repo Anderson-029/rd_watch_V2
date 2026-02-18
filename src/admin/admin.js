@@ -631,7 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </span>
           </td>
           <td>
-            <button class="button ${c.activo ? 'button-secondary' : 'button-primary'}" 
+            <button class="button ${c.activo ? 'button-danger' : 'button-primary'}" 
                     style="padding: 4px 8px; font-size: 0.8em;"
                     onclick="cambiarEstadoCliente(${c.id}, ${c.activo})">
               <i class="fas ${c.activo ? 'fa-user-slash' : 'fa-user-check'}"></i> 
@@ -1439,14 +1439,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td><span class="badge ${cita.prioridad === 'alta' ? 'danger' : 'primary'}" style="padding: 4px 8px; border-radius: 4px; font-weight: bold; background: ${cita.prioridad === 'alta' ? '#dc3545' : '#007bff'}; color: #fff;">${cita.prioridad.toUpperCase()}</span></td>
             <td><span class="badge ${badgeClass}" style="padding: 4px 8px; border-radius: 4px; font-weight: bold; background: ${badgeClass === 'success' ? '#28a745' : badgeClass === 'warning' ? '#ffc107' : badgeClass === 'danger' ? '#dc3545' : '#6c757d'}; color: ${badgeClass === 'warning' ? '#000' : '#fff'};">${est.toUpperCase()}</span></td>
             <td>
-                ${cita.tiene_foto ? `
-                    <a href="../backend/api/get_foto_cita.php?id_reserva=${cita.id_reserva}" 
-                       target="_blank"
-                       style="color: var(--primary-color); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-weight: 600;"
-                       title="Ver foto adjunta">
-                        <i class="fas fa-image"></i> Ver Foto
-                    </a>
-                ` : '<span style="color: #999;">Sin foto</span>'}
+                <span style="color: #999;">- Sin adjuntos -</span>
             </td>
             <td>
                 <div class="action-buttons" style="display: flex; gap: 8px;">

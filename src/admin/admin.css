@@ -3,6 +3,7 @@
 /* Layout del admin inspirado en tu web pública */
 :root {
   --sidebar-w: 260px;
+  --header-h: 70px;
 }
 
 /* reset menor para inputs del admin */
@@ -26,7 +27,7 @@ textarea:focus {
 /* Sidebar */
 .admin-sidebar {
   position: fixed;
-  top: 70px;
+  top: var(--header-h);
   /* coincide con header fijo */
   left: 0;
   bottom: 0;
@@ -82,8 +83,8 @@ textarea:focus {
 
 /* Main */
 .admin-main {
-  margin-top: 90px;
-  /* por el header fijo */
+  margin-top: calc(var(--header-h) + 20px);
+  /* espacio tras el header fijo */
   margin-left: calc(var(--sidebar-w) + var(--spacing-md));
   padding-bottom: 80px;
 }

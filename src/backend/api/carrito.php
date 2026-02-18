@@ -45,13 +45,8 @@ if (!isset($_SESSION['user_id'])) {
 $userId = $_SESSION['user_id'];
 $method = $_SERVER['REQUEST_METHOD'];
 
-/**
- * Función para decodificar el cuerpo de peticiones (POST/PUT/DELETE).
- */
-function getJsonInput()
-{
-    return json_decode(file_get_contents('php://input'), true);
-}
+// La función getJsonInput() ahora se provee globalmente por security_utils.php de forma segura (con caché).
+
 
 try {
     /**
@@ -105,6 +100,7 @@ try {
              */
             validateCsrfToken(null, true);
             $data = getJsonInput();
+
             $id_prod = Validation::validateNumeric($data['id_producto'] ?? '') ? (int)$data['id_producto'] : null;
             $qty = Validation::validateNumeric($data['cantidad'] ?? '') ? (int)$data['cantidad'] : null;
 

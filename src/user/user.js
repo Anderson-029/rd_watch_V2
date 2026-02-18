@@ -1,54 +1,7 @@
 // 🔒 CONSTANTE BASE URL
 const API_BASE_URL = API_CONFIG.baseUrl;
 
-// ===================================
-// CSRF Token Management
-// ===================================
-let csrfToken = null;
-
-async function fetchCsrfToken() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/get_csrf_token.php`, { credentials: 'include' });
-        const data = await response.json();
-        if (data.ok && data.csrf_token) {
-            csrfToken = data.csrf_token;
-            sessionStorage.setItem('csrf_token', csrfToken);
-        }
-    } catch (error) {
-        console.error('Error fetching CSRF token:', error);
-        csrfToken = sessionStorage.getItem('csrf_token');
-    }
-}
-
-async function secureFetch(url, options = {}) {
-    if (!csrfToken) await fetchCsrfToken();
-
-    if (options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method.toUpperCase())) {
-        options.headers = options.headers || {};
-        options.headers['X-CSRF-Token'] = csrfToken;
-    }
-
-    options.credentials = 'include';
-
-    try {
-        const response = await fetch(url, options);
-        if (response.ok) {
-            // Clonar para leer JSON sin consumir el body principal si se necesita después (aunque aquí leemos JSON para token)
-            const clone = response.clone();
-            try {
-                const data = await clone.json();
-                if (data.csrf_token) {
-                    csrfToken = data.csrf_token;
-                    sessionStorage.setItem('csrf_token', csrfToken);
-                }
-            } catch (e) { } // Ignorar si no es JSON
-        }
-        return response;
-    } catch (error) {
-        console.error('Secure fetch error:', error);
-        throw error;
-    }
-}
+// La seguridad ahora se gestiona globalmente mediante security.js
 
 // 🔒 OBTENER USUARIO DE LA SESIÓN
 function getUser() {
@@ -73,7 +26,7 @@ function getUser() {
         return;
     }
 
-    fetchCsrfToken();
+    fetchCsrfToken(); // 🛡️ Restaurado con token estático para estabilidad
 
     try {
         const userNameEl = document.getElementById('userName');
@@ -111,9 +64,8 @@ function getUser() {
 // 🔄 CARGAR DATOS DEL PERFIL DESDE EL BACKEND
 async function cargarDatosPerfil(userId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/user_actions.php?action=perfil&uid=${userId}`, {
-            method: 'GET',
-            credentials: 'include'
+        const response = await secureFetch(`${API_BASE_URL}/user_actions.php?action=perfil&uid=${userId}`, {
+            method: 'GET'
         });
         const result = await response.json();
         if (result.ok && result.data) {
@@ -139,9 +91,8 @@ async function cargarDatosPerfil(userId) {
 // 🔄 CARGAR PEDIDOS DEL USUARIO
 async function cargarPedidos(userId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/user_actions.php?action=pedidos&uid=${userId}`, {
-            method: 'GET',
-            credentials: 'include'
+        const response = await secureFetch(`${API_BASE_URL}/user_actions.php?action=pedidos&uid=${userId}`, {
+            method: 'GET'
         });
         const result = await response.json();
         if (result.ok && result.data) {
@@ -185,9 +136,8 @@ async function cargarPedidos(userId) {
 // 🔄 CARGAR CITAS DEL USUARIO
 async function cargarCitas(userId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/citas.php`, {
-            method: 'GET',
-            credentials: 'include'
+        const response = await secureFetch(`${API_BASE_URL}/citas.php`, {
+            method: 'GET'
         });
         const result = await response.json();
         if (result.ok && result.citas) {
@@ -258,7 +208,7 @@ function capitalizeFirst(str) {
 // 🌆 CARGAR DEPARTAMENTOS Y CIUDADES
 async function cargarDepartamentos() {
     try {
-        const response = await fetch(`${API_BASE_URL}/ciudades.php?action=departamentos`);
+        const response = await secureFetch(`${API_BASE_URL}/ciudades.php?action=departamentos`);
         const result = await response.json();
         if (result.ok) {
             const selectDepto = document.getElementById('inputDepartamento');
@@ -274,7 +224,7 @@ async function cargarDepartamentos() {
 
 async function cargarCiudadesPorDepto(idDepartamento) {
     try {
-        const response = await fetch(`${API_BASE_URL}/ciudades.php?action=ciudades&id_departamento=${idDepartamento}`);
+        const response = await secureFetch(`${API_BASE_URL}/ciudades.php?action=ciudades&id_departamento=${idDepartamento}`);
         const result = await response.json();
         if (result.ok) {
             const selectCiudad = document.getElementById('inputCiudad');
@@ -292,29 +242,18 @@ async function cargarCiudadesPorDepto(idDepartamento) {
 // 🚪 CERRAR SESIÓN
 function cerrarSesion() {
     if (!confirm('¿Deseas cerrar sesión?')) return;
-    fetch(`${API_BASE_URL}/logout.php`, {
-        method: 'POST',
-        credentials: 'include'
+    secureFetch(`${API_BASE_URL}/logout.php`, {
+        method: 'POST'
     })
         .then(res => res.json())
         .then(data => {
             sessionStorage.removeItem('user');
             showNotification('Sesión cerrada correctamente');
-            window.location.href = `${API_BASE_URL.replace('/src/backend/api', '')}/index.html`;
+            window.location.href = `${API_CONFIG.appUrl}/index.html`;
         });
 }
 
-// 🔔 MOSTRAR NOTIFICACIÓN
-function showNotification(message, isError = false) {
-    const notification = document.getElementById('notification');
-    if (!notification) return;
-    notification.textContent = message;
-    notification.className = 'notification';
-    if (isError) notification.classList.add('error');
-    else notification.classList.add('success');
-    notification.classList.add('show');
-    setTimeout(() => notification.classList.remove('show'), 5000);
-}
+// La función showNotification ahora se carga globalmente desde notifications.js
 
 // 📄 MOSTRAR SECCIÓN
 function showSection(sectionId) {
@@ -658,7 +597,7 @@ async function cargarServiciosPanel() {
     const servicesGrid = document.getElementById('user-services-grid');
     if (!servicesGrid) return;
     try {
-        const res = await fetch(`${API_BASE_URL}/servicios.php`, { credentials: 'include' });
+        const res = await secureFetch(`${API_BASE_URL}/servicios.php`);
         const data = await res.json();
         if (data.ok) {
             servicesGrid.innerHTML = data.servicios.map(s => `

@@ -56,10 +56,8 @@ async function cargarFactura() {
 
         // Cargar datos de factura y banco en paralelo
         const [resFactura, resBanco] = await Promise.all([
-            fetch(`${API_BASE_FACTURA}/get_factura.php?id_orden=${idOrden}`, {
-                credentials: 'include'
-            }),
-            fetch(`${API_BASE_FACTURA}/get_config_banco.php`)
+            secureFetch(`${API_BASE_FACTURA}/get_factura.php?id_orden=${idOrden}`),
+            secureFetch(`${API_BASE_FACTURA}/get_config_banco.php`)
         ]);
 
         const dataFactura = await resFactura.json();

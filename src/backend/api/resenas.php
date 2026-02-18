@@ -75,8 +75,8 @@ try {
 
         $id_usuario = $_SESSION['user_id'];
         validateCsrfToken(null, true);
-
         $input = getJsonInput();
+
 
         // 🛡️ VALIDACIÓN ESTRICTA (ISO 830)
         Validation::validateOrReject($input, [
