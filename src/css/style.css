@@ -12,6 +12,10 @@
     /* Gris Oscuro Superficial */
     --accent-color: #92000A;
     /* Rojo Carmesí (Detalles mecánicos) */
+    --success-color: #155724;
+    /* Verde Bosque Premium */
+    --error-color: #92000A;
+    /* Alias de accent para errores */
 
     --text-color: #1A1A1A;
     /* Casi negro para máximo contraste */
@@ -2514,7 +2518,7 @@ section {
 }
 
 .notification.error {
-    background-color: var(--accent-color);
+    background-color: var(--error-color);
 }
 
 /* --- Política de Cookies AGREGADA --- */
