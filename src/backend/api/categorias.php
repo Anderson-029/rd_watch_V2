@@ -111,14 +111,13 @@ try {
                 }
 
                 // 🛡️ BARRERA DE INTEGRIDAD: Validar productos vinculados
-                $check = $pdo->prepare("SELECT COUNT(*) FROM tab_Productos WHERE id_categoria = ? AND id_subcategoria = ?");
+                $check = $pdo->prepare("SELECT 1 FROM tab_Productos WHERE id_categoria = ? AND id_subcategoria = ? LIMIT 1");
                 $check->execute([$idCat, $idSub]);
-                $count = $check->fetchColumn();
-
-                if ($count > 0) {
+                
+                if ($check->fetch()) {
                     echo json_encode([
                         'ok' => false,
-                        'msg' => "ACCIÓN BLOQUEADA: Existen $count productos vinculados a esta subcategoría. Debe eliminar o reasignar los productos antes de borrar la familia."
+                        'msg' => "ACCIÓN BLOQUEADA: Existen productos vinculados a esta subcategoría. Debe eliminar o reasignar los productos antes de borrar la familia."
                     ]);
                     exit;
                 }
@@ -206,21 +205,19 @@ try {
                     exit;
                 }
 
-                // Verificación de Subcategorías
-                $check = $pdo->prepare("SELECT COUNT(*) FROM tab_Subcategorias WHERE id_categoria = ?");
+                // Verificación de Subcategorías (Existencia)
+                $check = $pdo->prepare("SELECT 1 FROM tab_Subcategorias WHERE id_categoria = ? LIMIT 1");
                 $check->execute([$idCat]);
-                $countSubs = $check->fetchColumn();
-                if ($countSubs > 0) {
-                    echo json_encode(['ok' => false, 'msg' => "BLOQUEO: Esta categoría aún tiene $countSubs subcategorías activas."]);
+                if ($check->fetch()) {
+                    echo json_encode(['ok' => false, 'msg' => "BLOQUEO: Esta categoría aún tiene subcategorías activas vinculadas."]);
                     exit;
                 }
 
-                // Verificación de Productos
-                $checkProd = $pdo->prepare("SELECT COUNT(*) FROM tab_Productos WHERE id_categoria = ?");
+                // Verificación de Productos (Existencia)
+                $checkProd = $pdo->prepare("SELECT 1 FROM tab_Productos WHERE id_categoria = ? LIMIT 1");
                 $checkProd->execute([$idCat]);
-                $countProds = $checkProd->fetchColumn();
-                if ($countProds > 0) {
-                    echo json_encode(['ok' => false, 'msg' => "BLOQUEO: Existen $countProds productos vinculados a esta categoría."]);
+                if ($checkProd->fetch()) {
+                    echo json_encode(['ok' => false, 'msg' => "BLOQUEO: Existen productos vinculados a esta categoría."]);
                     exit;
                 }
 

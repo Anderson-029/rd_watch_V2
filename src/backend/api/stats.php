@@ -25,44 +25,34 @@ if (!isset($pdo)) {
 }
 
 try {
-    // 1. Conteo de Productos: Total de ítems registrados en el inventario.
-    $stmtProd = $pdo->query("SELECT COUNT(*) FROM tab_Productos");
-    $resProductos = $stmtProd->fetchColumn();
+    // 🔍 OPTIMIZACIÓN MAESTRA: Lectura de métricas persistentes (O(1))
+    $stmtMetrics = $pdo->query("SELECT metric_key, metric_value FROM tab_sistema_metricas");
+    $metrics = $stmtMetrics->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    // 2. Conteo de Pedidos: Total histórico de órdenes realizadas.
-    $stmtPed = $pdo->query("SELECT COUNT(*) FROM tab_Orden");
-    $resPedidos = $stmtPed->fetchColumn();
+    $resProductos = $metrics['total_productos'] ?? 0;
+    $resPedidos = $metrics['total_pedidos'] ?? 0;
+    $resClientes = $metrics['total_clientes'] ?? 0;
+    $resServicios = $metrics['total_servicios'] ?? 0;
 
-    // 3. Conteo de Clientes: Usuarios registrados con rol de cliente.
-    $stmtCli = $pdo->query("SELECT COUNT(*) FROM tab_Usuarios WHERE rol = 'cliente'");
-    $resClientes = $stmtCli->fetchColumn();
+    // 5. Ventas Totales: Lectura optimizada del contador de enviados
+    $resVentasMonto = $pdo->query("SELECT COALESCE(SUM(total_orden), 0) FROM tab_Orden WHERE estado_orden = 'enviado'")->fetchColumn();
+    $resVentasCant = $metrics['pedidos_enviado'] ?? 0;
 
-    // 4. Conteo de Servicios: Tipos de servicios técnicos ofrecidos.
-    $stmtServ = $pdo->query("SELECT COUNT(*) FROM tab_Servicios");
-    $resServicios = $stmtServ->fetchColumn();
-
-    // 5. Ventas Totales: Sumatoria y conteo de pedidos que ya han sido enviados (transacción completada).
-    $stmtVentas = $pdo->query("SELECT COALESCE(SUM(total_orden), 0) as monto, COUNT(*) as cantidad FROM tab_Orden WHERE estado_orden = 'enviado'");
-    $resVentas = $stmtVentas->fetch(PDO::FETCH_ASSOC);
-
-    // 6. Datos para la gráfica: Agrupación de pedidos por estado (pendiente, confirmado, enviado, cancelado).
-    $stmtChart = $pdo->query("SELECT estado_orden, COUNT(*) as total FROM tab_Orden GROUP BY estado_orden");
-    $chartDataRaw = $stmtChart->fetchAll(PDO::FETCH_ASSOC);
-
-    // Inicialización de estructura de gráfica con valores en cero para asegurar consistencia
+    // 6. Datos para la gráfica: Estructura de carga cero
     $chartData = [
-        'pendiente' => 0,
-        'confirmado' => 0,
-        'enviado' => 0,
-        'cancelado' => 0
+        'pendiente' => (int)($metrics['pedidos_pendiente'] ?? 0),
+        'confirmado' => (int)($metrics['pedidos_confirmado'] ?? 0),
+        'enviado' => (int)($metrics['pedidos_enviado'] ?? 0),
+        'cancelado' => (int)($metrics['pedidos_cancelado'] ?? 0)
     ];
 
-    // Mapeo de resultados de DB a la estructura de la gráfica
-    foreach ($chartDataRaw as $row) {
-        if (isset($chartData[$row['estado_orden']])) {
-            $chartData[$row['estado_orden']] = (int)$row['total'];
-        }
-    }
+        ]
+    ]);
+
+    // 7. Satisfacción del Cliente: Carga cero
+    $totalOpiniones = (int)($metrics['total_opiniones'] ?? 0);
+    $satisfechas = (int)($metrics['total_opiniones_satisfechas'] ?? 0);
+    $resSatisfaccion = ($totalOpiniones > 0) ? round(($satisfechas / $totalOpiniones) * 100) : 100;
 
     echo json_encode([
         'ok' => true,
@@ -71,15 +61,17 @@ try {
             'pedidos' => (int)$resPedidos,
             'clientes' => (int)$resClientes,
             'servicios' => (int)$resServicios,
-            'ventas_monto' => (float)$resVentas['monto'],
-            'ventas_cant' => (int)$resVentas['cantidad']
+            'ventas_monto' => (float)$resVentasMonto,
+            'ventas_cant' => (int)$resVentasCant,
+            'satisfaccion' => $resSatisfaccion
         ],
         'chart_data' => $chartData,
-        // Estadísticas públicas para landing page
-        'public' => [
-            'years' => date('Y') - 1972, // Años de experiencia desde 1972
-            'repaired' => getRepairedCount($pdo),
-            'satisfaction' => getSatisfactionPercentage($pdo)
+        'public_stats' => [
+            'total_products' => (int)$resProductos,
+            'orders_completed' => (int)($metrics['pedidos_entregado'] ?? 0),
+            'repaired' => (int)($metrics['total_servicios_realizados'] ?? 0),
+            'active_clients' => (int)$resClientes,
+            'satisfaction' => $resSatisfaccion
         ]
     ]);
 
@@ -88,50 +80,4 @@ catch (PDOException $e) {
     // Captura de errores de SQL para depuración segura
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error SQL: ' . $e->getMessage()]);
-}
-
-/**
- * Cuenta relojes reparados (órdenes de servicio/reparación)
- */
-function getRepairedCount($pdo)
-{
-    try {
-        // Contar órdenes que tienen servicios asociados
-        $stmt = $pdo->query("
-            SELECT COUNT(DISTINCT o.id_orden) 
-            FROM tab_Orden o
-            INNER JOIN tab_Orden_Servicios os ON o.id_orden = os.id_orden
-        ");
-        return (int)$stmt->fetchColumn();
-    }
-    catch (PDOException $e) {
-        error_log("Error calculando relojes reparados: " . $e->getMessage());
-        return 0;
-    }
-}
-
-/**
- * Calcula porcentaje de satisfacción basado en reseñas de 3+ estrellas
- */
-function getSatisfactionPercentage($pdo)
-{
-    try {
-        $stmt = $pdo->query("
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN calificacion >= 3 THEN 1 ELSE 0 END) as satisfied
-            FROM tab_Opiniones
-        ");
-        $result = $stmt->fetch();
-
-        if ($result['total'] == 0) {
-            return 98; // Valor por defecto si no hay reseñas
-        }
-
-        return round(($result['satisfied'] / $result['total']) * 100);
-    }
-    catch (PDOException $e) {
-        error_log("Error calculando satisfacción: " . $e->getMessage());
-        return 98; // Valor por defecto en caso de error
-    }
 }

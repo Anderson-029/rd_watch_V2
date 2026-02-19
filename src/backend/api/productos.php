@@ -207,18 +207,18 @@ try {
                 exit;
             }
 
-            // 1. Verificar registros en historial de órdenes
-            $check = $pdo->prepare("SELECT COUNT(*) FROM tab_Detalle_Orden WHERE id_producto = ?");
+            // 1. Verificar registros en historial de órdenes (Existencia)
+            $check = $pdo->prepare("SELECT 1 FROM tab_Detalle_Orden WHERE id_producto = ? LIMIT 1");
             $check->execute([$pid]);
-            if ($check->fetchColumn() > 0) {
+            if ($check->fetch()) {
                 echo json_encode(['ok' => false, 'msg' => 'Imposible borrar: Este reloj posee historial de ventas vinculado']);
                 exit;
             }
 
-            // 2. Verificar si hay usuarios con este producto en su carrito
-            $checkCart = $pdo->prepare("SELECT COUNT(*) FROM tab_Carrito_Detalle WHERE id_producto = ?");
+            // 2. Verificar si hay usuarios con este producto en su carrito (Existencia)
+            $checkCart = $pdo->prepare("SELECT 1 FROM tab_Carrito_Detalle WHERE id_producto = ? LIMIT 1");
             $checkCart->execute([$pid]);
-            if ($checkCart->fetchColumn() > 0) {
+            if ($checkCart->fetch()) {
                 echo json_encode(['ok' => false, 'msg' => 'Imposible borrar: El producto está siendo procesado en carritos activos']);
                 exit;
             }

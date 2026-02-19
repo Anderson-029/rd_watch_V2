@@ -38,9 +38,13 @@ try {
      * 2. ANALÍTICA DE VOLUMEN (BD)
      * Verifica que la tabla tab_Reservas sea accesible y retorna el conteo total.
      */
-    $stmt = $pdo->query("SELECT COUNT(*) FROM tab_Reservas");
+    // 🔍 OPTIMIZACIÓN: Lectura de métrica persistente
+    $stmtMetric = $pdo->query("SELECT metric_value FROM tab_sistema_metricas WHERE metric_key = 'total_reservas'");
+    $resp = $stmtMetric->fetch(PDO::FETCH_ASSOC);
+    $totalReservas = $resp['metric_value'] ?? 0;
+
     $diag['estadisticas_reservas'] = [
-        'total_registros' => (int)$stmt->fetchColumn()
+        'total_registros' => (int)$totalReservas
     ];
 
     /**

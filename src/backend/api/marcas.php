@@ -119,14 +119,13 @@ try {
             }
 
             // 🛡️ BARRERA DE INTEGRIDAD: Validar productos vinculados
-            $check = $pdo->prepare("SELECT COUNT(*) FROM tab_Productos WHERE id_marca = ?");
+            $check = $pdo->prepare("SELECT 1 FROM tab_Productos WHERE id_marca = ? LIMIT 1");
             $check->execute([$idMarca]);
-            $count = $check->fetchColumn();
-
-            if ($count > 0) {
+            
+            if ($check->fetch()) {
                 echo json_encode([
                     'ok' => false,
-                    'msg' => "ACCIÓN BLOQUEADA: Existen $count productos vinculados a esta marca en el catálogo. Debe eliminar o reasignar los productos antes de borrar la marca."
+                    'msg' => "ACCIÓN BLOQUEADA: Existen productos vinculados a esta marca en el catálogo. Debe eliminar o reasignar los productos antes de borrar la marca."
                 ]);
                 exit;
             }
