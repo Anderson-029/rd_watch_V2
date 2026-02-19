@@ -59,7 +59,7 @@ function checkRateLimit($pdo, $ip, $action, $limit = 5, $windowMinutes = 15)
 {
     try {
         $windowMinutes = (int)$windowMinutes; // 🛡️ Cast a int para prevenir inyección en el Interval
-        $sql = "SELECT COUNT(*) as intentos 
+        $sql = "SELECT COUNT(id_limit) as intentos 
                 FROM tab_Rate_Limits 
                 WHERE identificador = ? 
                 AND nom_accion = ? 

@@ -111,13 +111,14 @@ try {
                 }
 
                 // 🛡️ BARRERA DE INTEGRIDAD: Validar productos vinculados
-                $check = $pdo->prepare("SELECT 1 FROM tab_Productos WHERE id_categoria = ? AND id_subcategoria = ? LIMIT 1");
+                $check = $pdo->prepare("SELECT COUNT(id_producto) FROM tab_Productos WHERE id_categoria = ? AND id_subcategoria = ?");
                 $check->execute([$idCat, $idSub]);
-                
-                if ($check->fetch()) {
+                $count = $check->fetchColumn();
+
+                if ($count > 0) {
                     echo json_encode([
                         'ok' => false,
-                        'msg' => "ACCIÓN BLOQUEADA: Existen productos vinculados a esta subcategoría. Debe eliminar o reasignar los productos antes de borrar la familia."
+                        'msg' => "ACCIÓN BLOQUEADA: Existen $count productos vinculados a esta subcategoría. Debe eliminar o reasignar los productos antes de borrar la familia."
                     ]);
                     exit;
                 }
@@ -205,15 +206,15 @@ try {
                     exit;
                 }
 
-                // Verificación de Subcategorías (Existencia)
+                // Verificación de Subcategorías
                 $check = $pdo->prepare("SELECT 1 FROM tab_Subcategorias WHERE id_categoria = ? LIMIT 1");
                 $check->execute([$idCat]);
                 if ($check->fetch()) {
-                    echo json_encode(['ok' => false, 'msg' => "BLOQUEO: Esta categoría aún tiene subcategorías activas vinculadas."]);
+                    echo json_encode(['ok' => false, 'msg' => "BLOQUEO: Esta categoría aún tiene subcategorías activas."]);
                     exit;
                 }
 
-                // Verificación de Productos (Existencia)
+                // Verificación de Productos
                 $checkProd = $pdo->prepare("SELECT 1 FROM tab_Productos WHERE id_categoria = ? LIMIT 1");
                 $checkProd->execute([$idCat]);
                 if ($checkProd->fetch()) {

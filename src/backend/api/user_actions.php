@@ -85,17 +85,17 @@ try {
              */
 
             // 1. Conteo de Pedidos Activos
-            $stmtActivos = $pdo->prepare("SELECT COUNT(*) FROM tab_Orden WHERE id_usuario = ? AND estado_orden IN ('pendiente', 'confirmado', 'enviado')");
+            $stmtActivos = $pdo->prepare("SELECT COUNT(id_orden) FROM tab_Orden WHERE id_usuario = ? AND estado_orden IN ('pendiente', 'confirmado', 'enviado')");
             $stmtActivos->execute([$uid]);
             $pedidosActivos = $stmtActivos->fetchColumn();
 
             // 2. Conteo de Pedidos Completados
-            $stmtCompletados = $pdo->prepare("SELECT COUNT(*) FROM tab_Orden WHERE id_usuario = ? AND estado_orden = 'entregado' ");
+            $stmtCompletados = $pdo->prepare("SELECT COUNT(id_orden) FROM tab_Orden WHERE id_usuario = ? AND estado_orden = 'entregado' ");
             $stmtCompletados->execute([$uid]);
             $pedidosCompletados = $stmtCompletados->fetchColumn();
 
             // 3. Conteo de Citas Pendientes
-            $stmtCitas = $pdo->prepare("SELECT COUNT(*) FROM tab_Reservas WHERE id_usuario = ? AND estado_reserva = 'pendiente'");
+            $stmtCitas = $pdo->prepare("SELECT COUNT(id_reserva) FROM tab_Reservas WHERE id_usuario = ? AND estado_reserva = 'pendiente'");
             $stmtCitas->execute([$uid]);
             $citasPendientes = $stmtCitas->fetchColumn();
 

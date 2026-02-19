@@ -144,15 +144,16 @@ try {
                 exit;
             }
 
-            // 1. Verificar si existen citas (reservas) vinculadas a este servicio (Existencia)
-            $checkCitas = $pdo->prepare("SELECT 1 FROM tab_Reservas WHERE id_servicio = ? LIMIT 1");
+            // 1. Verificar si existen citas (reservas) vinculadas a este servicio
+            $checkCitas = $pdo->prepare("SELECT COUNT(id_reserva) FROM tab_Reservas WHERE id_servicio = ?");
             $checkCitas->execute([$sid]);
-            
-            if ($checkCitas->fetch()) {
-                logDebug("DELETE BLOCKED: Service $sid has linked reservations.");
+            $count = $checkCitas->fetchColumn();
+
+            if ($count > 0) {
+                logDebug("DELETE BLOCKED: Service $sid has $count linked reservations.");
                 echo json_encode([
                     'ok' => false,
-                    'msg' => 'Imposible borrar: Este servicio tiene citas técnicas vinculadas'
+                    'msg' => 'Imposible borrar: Este servicio tiene ' . $count . ' citas técnicas vinculadas'
                 ]);
                 exit;
             }

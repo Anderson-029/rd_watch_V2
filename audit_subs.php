@@ -5,10 +5,12 @@ echo "AUDITORÍA DE INTEGRIDAD: SUB-CATEGORÍAS\n";
 echo "--------------------------------------\n";
 
 try {
-    // 1. Listar subcategorías y conteo de productos reales
+    // 1. Listar subcategorías y conteo de productos reales (Optimización: JOIN en lugar de subconsulta)
     $sql = "SELECT s.id_categoria, s.id_subcategoria, s.nom_subcategoria, 
-                   (SELECT COUNT(*) FROM tab_Productos p WHERE p.id_categoria = s.id_categoria AND p.id_subcategoria = s.id_subcategoria) as total_productos
+                   COUNT(p.id_producto) as total_productos
             FROM tab_Subcategorias s
+            LEFT JOIN tab_Productos p ON s.id_categoria = p.id_categoria AND s.id_subcategoria = p.id_subcategoria
+            GROUP BY s.id_categoria, s.id_subcategoria, s.nom_subcategoria
             ORDER BY s.id_categoria, s.id_subcategoria";
 
     $stmt = $pdo->query($sql);
