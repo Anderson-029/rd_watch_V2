@@ -1,20 +1,24 @@
 <?php
 /**
- * API: OBTENCIÓN DE TOKEN CSRF
- * ---------------------------------------------------------
- * Propósito: Mitigar ataques de Cross-Site Request Forgery (CSRF).
- * El token CSRF garantiza que las peticiones de modificación de datos (POST, PUT, DELETE) 
- * provengan legítimamente de nuestra propia interfaz de usuario.
- * 
- * Estado de Implementación:
- * Actualmente opera en modo 'DUMMY' (Simulado). Devuelve un token estático para 
- * mantener la compatibilidad con el frontend sin introducir bloqueos durante 
- * el desarrollo de las funcionalidades de negocio.
- * 
- * RECOMENDACIÓN DE SEGURIDAD: 
- * En producción, este archivo debe generar un hash aleatorio criptográficamente 
- * seguro (ej: bin2hex(random_bytes(32))), almacenarlo en $_SESSION y validarlo 
- * en cada petición de escritura.
+ * ============================================================
+ * API: GENERADOR DE TOKEN CSRF (get_csrf_token.php)
+ * ============================================================
+ * ENDPOINT: GET /api/get_csrf_token.php
+ *
+ * PROPÓSITO:
+ * Genera un token CSRF criptográficamente seguro vinculado a
+ * la sesión del usuario. El frontend debe incluir este token
+ * en todas las peticiones de escritura (POST, PUT, DELETE).
+ *
+ * SEGURIDAD:
+ * - generateCsrfToken() usa bin2hex(random_bytes(32))
+ * - Token almacenado en $_SESSION para validación posterior
+ * - Cada generación invalida el token anterior
+ *
+ * NOTA: Este archivo NO toca la BD directamente.
+ * No requiere migración a PostgreSQL, pero se documenta
+ * como parte del cierre del blindaje.
+ * ============================================================
  */
 
 require_once '../config.php';

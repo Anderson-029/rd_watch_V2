@@ -1,12 +1,43 @@
 <?php
 /**
- * API: GESTIÓN DE CATEGORÍAS Y SUBCATEGORÍAS
- * ---------------------------------------------------------
- * Propósito: Administra la estructura jerárquica del catálogo de la tienda.
- * 
- * Seguridad:
- * - Protección Perimetral: requireRole('admin') y validateCsrfToken().
- * - Integridad Referencial: Bloqueo de borrado si existen dependencias.
+ * ============================================================
+ * API: GESTIÓN DE CATEGORÍAS Y SUBCATEGORÍAS (categorias.php)
+ * ============================================================
+ * ENDPOINTS:
+ *   # CATEGORÍAS (sin ?action=subcategoria):
+ *   GET    /api/categorias.php → Listar categorías
+ *   POST   /api/categorias.php → Crear categoría
+ *   PUT    /api/categorias.php → Actualizar categoría
+ *   DELETE /api/categorias.php → Eliminar categoría (doble protección)
+ *
+ *   # SUBCATEGORÍAS (con ?action=subcategoria):
+ *   GET    /api/categorias.php?action=subcategoria → Listar subcategorías
+ *   POST   /api/categorias.php?action=subcategoria → Crear subcategoría
+ *   PUT    /api/categorias.php?action=subcategoria → Actualizar subcategoría
+ *   DELETE /api/categorias.php?action=subcategoria → Eliminar subcategoría
+ *
+ * PROPÓSITO:
+ * Este archivo maneja DOS entidades relacionadas:
+ * - Categorías: primer nivel (ej: "Relojes de Lujo", "Deportivos")
+ * - Subcategorías: segundo nivel dentro de una categoría (ej: "Automáticos")
+ *
+ * NOTA IMPORTANTE SOBRE SUBCATEGORÍAS:
+ * Las subcategorías usan PK COMPUESTA (id_categoria, id_subcategoria).
+ * Esto significa que la subcategoría ID 1 bajo categoría 1 es DIFERENTE
+ * de la subcategoría ID 1 bajo categoría 2.
+ *
+ * FUNCIONES POSTGRESQL QUE USA:
+ * Categorías:
+ * - fn_cat_get_categorias()                              → JSON array
+ * - fn_cat_create_categoria(id, nom, desc, estado)       → JSON {ok, msg}
+ * - fn_cat_update_categoria(id, nom, desc, estado)       → JSON {ok, msg}
+ * - fn_cat_delete_categoria(id)                          → JSON con doble protección
+ * Subcategorías:
+ * - fn_cat_get_subcategorias()                            → JSON array con JOIN
+ * - fn_cat_create_subcategoria(id_cat, id_sub, nombre)    → JSON {ok, msg}
+ * - fn_cat_update_subcategoria(id_cat, id_sub, nombre)    → JSON {ok, msg}
+ * - fn_cat_delete_subcategoria(id_cat, id_sub)            → JSON con protección
+ * ============================================================
  */
 
 header('Content-Type: application/json');
@@ -14,7 +45,6 @@ require_once '../config.php';
 require_once '../utils/security_utils.php';
 require_once '../utils/Validation.php';
 
-// Verificación de infraestructura
 if (!isset($pdo)) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error de Infraestructura: Motor de datos no disponible']);
@@ -22,86 +52,67 @@ if (!isset($pdo)) {
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
+
+// ──────────────────────────────────────────────
+// ENRUTAMIENTO POR QUERY PARAMETER
+// ──────────────────────────────────────────────
+// Si la URL tiene ?action=subcategoria → maneja subcategorías
+// Si no tiene ?action → maneja categorías
+// Esto permite que UN solo archivo PHP sirva para ambas entidades
 $action = $_GET['action'] ?? '';
 
 try {
+    // ██████████████████████████████████████████
+    // ██  BLOQUE A: SUBCATEGORÍAS              ██
+    // ██████████████████████████████████████████
     if ($action === 'subcategoria') {
-        /**
-         * ==========================================
-         * 📂 MÓDULO: SUBCATEGORÍAS
-         * ==========================================
-         */
         switch ($method) {
+            // LISTAR SUBCATEGORÍAS
+            // fn_cat_get_subcategorias hace JOIN interno con tab_Categorias
+            // para incluir el nombre de la categoría padre
             case 'GET':
-                $sql = "SELECT s.id_categoria, s.id_subcategoria, s.nom_subcategoria, s.estado, c.nom_categoria 
-                        FROM tab_Subcategorias s
-                        JOIN tab_Categorias c ON s.id_categoria = c.id_categoria
-                        ORDER BY s.id_categoria, s.id_subcategoria ASC";
-                $stmt = $pdo->prepare($sql);
+                $stmt = $pdo->prepare("SELECT fn_cat_get_subcategorias()");
                 $stmt->execute();
-                $subs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                foreach ($subs as &$sub) {
-                    $sub['estado'] = $sub['estado'] ? true : false;
-                }
-
+                $subs = json_decode($stmt->fetchColumn(), true);
                 echo json_encode(['ok' => true, 'subcategorias' => $subs]);
                 break;
 
+            // CREAR SUBCATEGORÍA
+            // Requiere: id_categoria (padre), id_subcategoria, nom_subcategoria
             case 'POST':
                 requireRole('admin');
                 validateCsrfToken(null, true);
 
                 $data = getCachedJsonInput();
                 Validation::validateOrReject($data, [
-                    'id_categoria' => 'id',
-                    'id_subcategoria' => 'id',
-                    'nom_subcategoria' => 'name'
+                    'id_categoria' => 'id', // ID de la categoría padre
+                    'id_subcategoria' => 'id', // ID de la nueva subcategoría
+                    'nom_subcategoria' => 'name' // Nombre de la subcategoría
                 ]);
 
-                $check = $pdo->prepare("SELECT id_subcategoria FROM tab_Subcategorias WHERE id_categoria = ? AND id_subcategoria = ?");
-                $check->execute([$data['id_categoria'], $data['id_subcategoria']]);
-                if ($check->fetch()) {
-                    echo json_encode(['ok' => false, 'msg' => 'Conflicto: El ID de subcategoría ya está en uso para esta categoría.']);
-                    exit;
-                }
-
-                $sql = "INSERT INTO tab_Subcategorias (id_categoria, id_subcategoria, nom_subcategoria, estado, fec_insert, usr_insert) 
-                        VALUES (?, ?, ?, true, NOW(), 'admin_cat')";
-                $stmt = $pdo->prepare($sql);
-                if ($stmt->execute([$data['id_categoria'], $data['id_subcategoria'], $data['nom_subcategoria']])) {
-                    echo json_encode(['ok' => true, 'msg' => 'Subcategoría creada con éxito']);
-                }
-                else {
-                    echo json_encode(['ok' => false, 'msg' => 'Error al registrar la subcategoría']);
-                }
+                $stmt = $pdo->prepare("SELECT fn_cat_create_subcategoria(?, ?, ?)");
+                $stmt->execute([$data['id_categoria'], $data['id_subcategoria'], $data['nom_subcategoria']]);
+                echo json_encode(json_decode($stmt->fetchColumn(), true));
                 break;
 
+            // ACTUALIZAR SUBCATEGORÍA
             case 'PUT':
                 requireRole('admin');
                 validateCsrfToken(null, true);
-
                 $data = getCachedJsonInput();
-                $sql = "UPDATE tab_Subcategorias SET nom_subcategoria = ?, fec_update = NOW(), usr_update = 'admin_editor'
-                        WHERE id_categoria = ? AND id_subcategoria = ?";
-                $stmt = $pdo->prepare($sql);
-                if ($stmt->execute([$data['nom_subcategoria'], $data['id_categoria'], $data['id_subcategoria']])) {
-                    echo json_encode(['ok' => true, 'msg' => 'Modificación guardada']);
-                }
-                else {
-                    echo json_encode(['ok' => false, 'msg' => 'No se pudo actualizar la subcategoría']);
-                }
+
+                $stmt = $pdo->prepare("SELECT fn_cat_update_subcategoria(?, ?, ?)");
+                $stmt->execute([$data['id_categoria'], $data['id_subcategoria'], $data['nom_subcategoria']]);
+                echo json_encode(json_decode($stmt->fetchColumn(), true));
                 break;
 
+            // ELIMINAR SUBCATEGORÍA (con protección de productos)
+            // Necesita AMBOS IDs porque es PK compuesta
             case 'DELETE':
-                /**
-                 * 🗑️ ELIMINACIÓN SEGURA DE SUBCATEGORÍA
-                 * Impide el borrado si existen productos vinculados.
-                 */
                 requireRole('admin');
                 validateCsrfToken();
-
                 $data = getCachedJsonInput();
+
                 $idCat = $data['id_categoria'] ?? null;
                 $idSub = $data['id_subcategoria'] ?? null;
 
@@ -110,125 +121,84 @@ try {
                     exit;
                 }
 
-                // 🛡️ BARRERA DE INTEGRIDAD: Validar productos vinculados
-                $check = $pdo->prepare("SELECT COUNT(id_producto) FROM tab_Productos WHERE id_categoria = ? AND id_subcategoria = ?");
-                $check->execute([$idCat, $idSub]);
-                $count = $check->fetchColumn();
-
-                if ($count > 0) {
-                    echo json_encode([
-                        'ok' => false,
-                        'msg' => "ACCIÓN BLOQUEADA: Existen $count productos vinculados a esta subcategoría. Debe eliminar o reasignar los productos antes de borrar la familia."
-                    ]);
-                    exit;
-                }
-
-                // Ejecutar borrado físico
-                $stmt = $pdo->prepare("DELETE FROM tab_Subcategorias WHERE id_categoria = ? AND id_subcategoria = ?");
-                if ($stmt->execute([$idCat, $idSub])) {
-                    echo json_encode(['ok' => true, 'msg' => 'Subcategoría eliminada del catálogo']);
-                }
-                else {
-                    $error = $stmt->errorInfo();
-                    echo json_encode(['ok' => false, 'msg' => 'Error crítico de base de datos: ' . ($error[2] ?? 'Fallo de integridad')]);
-                }
+                $stmt = $pdo->prepare("SELECT fn_cat_delete_subcategoria(?, ?)");
+                $stmt->execute([$idCat, $idSub]);
+                echo json_encode(json_decode($stmt->fetchColumn(), true));
                 break;
         }
     }
+    // ██████████████████████████████████████████
+    // ██  BLOQUE B: CATEGORÍAS                 ██
+    // ██████████████████████████████████████████
     else {
-        /**
-         * ==========================================
-         * 🏷️ MÓDULO: CATEGORÍAS PRINCIPALES
-         * ==========================================
-         */
         switch ($method) {
+            // LISTAR CATEGORÍAS
             case 'GET':
-                $stmt = $pdo->prepare("SELECT id_categoria, nom_categoria, descripcion_categoria, estado FROM tab_Categorias ORDER BY id_categoria ASC");
+                $stmt = $pdo->prepare("SELECT fn_cat_get_categorias()");
                 $stmt->execute();
-                $cats = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                foreach ($cats as &$c) {
-                    $c['estado'] = $c['estado'] ? true : false;
-                }
-
+                $cats = json_decode($stmt->fetchColumn(), true);
                 echo json_encode(['ok' => true, 'categorias' => $cats]);
                 break;
 
+            // CREAR CATEGORÍA
             case 'POST':
                 requireRole('admin');
                 validateCsrfToken(null, true);
-
                 $data = getCachedJsonInput();
+
                 Validation::validateOrReject($data, [
                     'id_categoria' => 'id',
                     'nom_categoria' => 'name'
                 ]);
 
-                $sql = "INSERT INTO tab_Categorias (id_categoria, nom_categoria, descripcion_categoria, estado, fec_insert, usr_insert) 
-                        VALUES (?, ?, ?, ?, NOW(), 'admin_root')";
+                $estado = isset($data['estado']) ? ($data['estado'] ? true : false) : true;
 
-                $estado = isset($data['estado']) ? ($data['estado'] ? 'true' : 'false') : 'true';
-                $stmt = $pdo->prepare($sql);
-                if ($stmt->execute([$data['id_categoria'], $data['nom_categoria'], $data['descripcion_categoria'] ?? '', $estado])) {
-                    echo json_encode(['ok' => true, 'msg' => 'Categoría principal creada']);
-                }
-                else {
-                    echo json_encode(['ok' => false, 'msg' => 'Error al guardar la categoría']);
-                }
+                $stmt = $pdo->prepare("SELECT fn_cat_create_categoria(?, ?, ?, ?)");
+                $stmt->execute([
+                    $data['id_categoria'],
+                    $data['nom_categoria'],
+                    $data['descripcion_categoria'] ?? '',
+                    $estado ? 'true' : 'false'
+                ]);
+                echo json_encode(json_decode($stmt->fetchColumn(), true));
                 break;
 
+            // ACTUALIZAR CATEGORÍA
             case 'PUT':
                 requireRole('admin');
                 validateCsrfToken(null, true);
-
                 $data = getCachedJsonInput();
-                $sql = "UPDATE tab_Categorias SET nom_categoria = ?, descripcion_categoria = ?, estado = ?, fec_update = NOW(), usr_update = 'admin_editor'
-                        WHERE id_categoria = ?";
-                $stmt = $pdo->prepare($sql);
-                $estado = isset($data['estado']) ? ($data['estado'] ? 'true' : 'false') : 'true';
-                if ($stmt->execute([$data['nom_categoria'], $data['descripcion_categoria'] ?? '', $estado, $data['id_categoria']])) {
-                    echo json_encode(['ok' => true, 'msg' => 'Categoría actualizada']);
-                }
-                else {
-                    echo json_encode(['ok' => false, 'msg' => 'Fallo al actualizar registro']);
-                }
+
+                $estado = isset($data['estado']) ? ($data['estado'] ? true : false) : true;
+
+                $stmt = $pdo->prepare("SELECT fn_cat_update_categoria(?, ?, ?, ?)");
+                $stmt->execute([
+                    $data['id_categoria'],
+                    $data['nom_categoria'],
+                    $data['descripcion_categoria'] ?? '',
+                    $estado ? 'true' : 'false'
+                ]);
+                echo json_encode(json_decode($stmt->fetchColumn(), true));
                 break;
 
+            // ELIMINAR CATEGORÍA (DOBLE PROTECCIÓN)
+            // fn_cat_delete_categoria verifica:
+            //   1. ¿Tiene subcategorías hijas? → BLOQUEA
+            //   2. ¿Tiene productos vinculados? → BLOQUEA
             case 'DELETE':
                 requireRole('admin');
                 validateCsrfToken();
-
                 $data = getCachedJsonInput();
-                $idCat = $data['id_categoria'] ?? null;
 
+                $idCat = $data['id_categoria'] ?? null;
                 if ($idCat === null) {
                     echo json_encode(['ok' => false, 'msg' => 'ID de categoría faltante']);
                     exit;
                 }
 
-                // Verificación de Subcategorías
-                $check = $pdo->prepare("SELECT 1 FROM tab_Subcategorias WHERE id_categoria = ? LIMIT 1");
-                $check->execute([$idCat]);
-                if ($check->fetch()) {
-                    echo json_encode(['ok' => false, 'msg' => "BLOQUEO: Esta categoría aún tiene subcategorías activas."]);
-                    exit;
-                }
-
-                // Verificación de Productos
-                $checkProd = $pdo->prepare("SELECT 1 FROM tab_Productos WHERE id_categoria = ? LIMIT 1");
-                $checkProd->execute([$idCat]);
-                if ($checkProd->fetch()) {
-                    echo json_encode(['ok' => false, 'msg' => "BLOQUEO: Existen productos vinculados a esta categoría."]);
-                    exit;
-                }
-
-                $stmt = $pdo->prepare("DELETE FROM tab_Categorias WHERE id_categoria = ?");
-                if ($stmt->execute([$idCat])) {
-                    echo json_encode(['ok' => true, 'msg' => 'Categoría eliminada permanentemente']);
-                }
-                else {
-                    echo json_encode(['ok' => false, 'msg' => 'Error de integridad al borrar']);
-                }
+                $stmt = $pdo->prepare("SELECT fn_cat_delete_categoria(?)");
+                $stmt->execute([$idCat]);
+                echo json_encode(json_decode($stmt->fetchColumn(), true));
                 break;
 
             default:
@@ -240,8 +210,5 @@ try {
 }
 catch (Throwable $e) {
     http_response_code(500);
-    echo json_encode([
-        'ok' => false,
-        'msg' => 'Error de seguridad o datos: ' . $e->getMessage()
-    ]);
+    echo json_encode(['ok' => false, 'msg' => 'Error crítico en servicio de categorías: ' . $e->getMessage()]);
 }

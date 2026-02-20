@@ -1,9 +1,29 @@
 <?php
 /**
- * API: GESTIÓN DE MARCAS
- * ---------------------------------------------------------
- * Propósito: Administrar el catálogo de marcas comerciales.
- * Protege la integridad referencial impidiendo el borrado de marcas con productos activos.
+ * ============================================================
+ * API: GESTIÓN DE MARCAS (marcas.php)
+ * ============================================================
+ * ENDPOINTS:
+ *   GET    /api/marcas.php → Listar todas las marcas
+ *   POST   /api/marcas.php → Crear nueva marca
+ *   PUT    /api/marcas.php → Actualizar marca existente
+ *   DELETE /api/marcas.php → Eliminar marca (con protección)
+ *
+ * PROPÓSITO:
+ * CRUD de marcas de relojes (ej: Rolex, Casio, Seiko...).
+ * Cada producto tiene exactamente UNA marca. Por eso el DELETE
+ * verifica si hay productos vinculados antes de borrar.
+ *
+ * PERMISOS:
+ * - GET: público
+ * - POST/PUT/DELETE: solo admin
+ *
+ * FUNCIONES POSTGRESQL QUE USA:
+ * - fn_cat_get_marcas()             → JSON array de marcas
+ * - fn_cat_create_marca(id,nom,est) → JSON {ok, msg}
+ * - fn_cat_update_marca(id,nom,est) → JSON {ok, msg}
+ * - fn_cat_delete_marca(id)         → JSON con protección de productos
+ * ============================================================
  */
 
 header('Content-Type: application/json');
@@ -11,7 +31,7 @@ require_once '../config.php';
 require_once '../utils/security_utils.php';
 require_once '../utils/Validation.php';
 
-// Verificación de infraestructura
+// Verificar conexión
 if (!isset($pdo)) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error de Infraestructura: Motor de datos no disponible']);
@@ -22,63 +42,48 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 try {
     switch ($method) {
+        // ══════════════════════════════════════
+        // GET: LISTAR TODAS LAS MARCAS
+        // ══════════════════════════════════════
+        // fn_cat_get_marcas() retorna JSON array con id, nombre, estado
+        // Si no hay marcas, retorna [] (array vacío)
         case 'GET':
-            /**
-             * 🔍 LISTAR MARCAS (GET)
-             */
-            $stmt = $pdo->prepare("SELECT id_marca, nom_marca, estado_marca FROM tab_Marcas ORDER BY id_marca ASC");
+            $stmt = $pdo->prepare("SELECT fn_cat_get_marcas()");
             $stmt->execute();
-            $marcas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            // Normalización para JS
-            foreach ($marcas as &$m) {
-                $m['estado_marca'] = $m['estado_marca'] ? true : false;
-            }
-
+            $marcas = json_decode($stmt->fetchColumn(), true);
             echo json_encode(['ok' => true, 'marcas' => $marcas]);
             break;
 
+        // ══════════════════════════════════════
+        // POST: CREAR NUEVA MARCA
+        // ══════════════════════════════════════
+        // fn_cat_create_marca verifica internamente:
+        // - Que no exista otra marca con el mismo nombre
+        // - Que no exista otra marca con el mismo ID
         case 'POST':
-            /**
-             * ➕ CREAR MARCA (POST)
-             */
             requireRole('admin');
             validateCsrfToken(null, true);
 
             $data = getCachedJsonInput();
-
-            // 🛡️ VALIDACIÓN ESTRICTA
             Validation::validateOrReject($data, [
-                'id_marca' => 'id',
-                'nom_marca' => 'name'
+                'id_marca' => 'id', // Numérico
+                'nom_marca' => 'name' // Texto no vacío
             ]);
 
-            // Unicidad
-            $check = $pdo->prepare("SELECT id_marca FROM tab_Marcas WHERE nom_marca = ? OR id_marca = ?");
-            $check->execute([$data['nom_marca'], $data['id_marca']]);
-            if ($check->fetch()) {
-                echo json_encode(['ok' => false, 'msg' => 'Conflicto: La marca o el ID ya existen en el registro']);
-                exit;
-            }
+            // estado_marca: controla si la marca aparece en dropdowns
+            // TRUE=activa (aparece), FALSE=desactivada (oculta)
+            $estado = isset($data['estado_marca']) ? ($data['estado_marca'] ? true : false) : true;
 
-            $sql = "INSERT INTO tab_Marcas (id_marca, nom_marca, estado_marca, fec_insert, usr_insert) 
-                    VALUES (?, ?, ?, NOW(), 'admin_root')";
-            $stmt = $pdo->prepare($sql);
-
-            $estado = isset($data['estado_marca']) ? ($data['estado_marca'] ? 'true' : 'false') : 'true';
-
-            if ($stmt->execute([$data['id_marca'], $data['nom_marca'], $estado])) {
-                echo json_encode(['ok' => true, 'msg' => 'Marca registrada exitosamente']);
-            }
-            else {
-                echo json_encode(['ok' => false, 'msg' => 'Error técnico al guardar la marca']);
-            }
+            // El booleano se pasa como 'true'/'false' string para PostgreSQL
+            $stmt = $pdo->prepare("SELECT fn_cat_create_marca(?, ?, ?)");
+            $stmt->execute([$data['id_marca'], $data['nom_marca'], $estado ? 'true' : 'false']);
+            echo json_encode(json_decode($stmt->fetchColumn(), true));
             break;
 
+        // ══════════════════════════════════════
+        // PUT: ACTUALIZAR MARCA
+        // ══════════════════════════════════════
         case 'PUT':
-            /**
-             * 🔄 ACTUALIZAR MARCA (PUT)
-             */
             requireRole('admin');
             validateCsrfToken(null, true);
 
@@ -88,25 +93,20 @@ try {
                 exit;
             }
 
-            $sql = "UPDATE tab_Marcas SET nom_marca = ?, estado_marca = ?, fec_update = NOW(), usr_update = 'admin_editor'
-                    WHERE id_marca = ?";
-            $stmt = $pdo->prepare($sql);
+            $estado = isset($data['estado_marca']) ? ($data['estado_marca'] ? true : false) : true;
 
-            $estado = isset($data['estado_marca']) ? ($data['estado_marca'] ? 'true' : 'false') : 'true';
-
-            if ($stmt->execute([$data['nom_marca'], $estado, $data['id_marca']])) {
-                echo json_encode(['ok' => true, 'msg' => 'Marca actualizada correctamente']);
-            }
-            else {
-                echo json_encode(['ok' => false, 'msg' => 'Fallo al actualizar el registro']);
-            }
+            $stmt = $pdo->prepare("SELECT fn_cat_update_marca(?, ?, ?)");
+            $stmt->execute([$data['id_marca'], $data['nom_marca'], $estado ? 'true' : 'false']);
+            echo json_encode(json_decode($stmt->fetchColumn(), true));
             break;
 
+        // ══════════════════════════════════════
+        // DELETE: ELIMINAR MARCA (CON PROTECCIÓN)
+        // ══════════════════════════════════════
+        // fn_cat_delete_marca cuenta productos vinculados:
+        // - Si hay 0 → borra la marca
+        // - Si hay N → retorna: "Existen N productos vinculados..."
         case 'DELETE':
-            /**
-             * 🗑️ ELIMINAR MARCA (DELETE)
-             * Integridad: Bloqueo si hay relojes vinculados.
-             */
             requireRole('admin');
             validateCsrfToken(null, true);
 
@@ -118,27 +118,9 @@ try {
                 exit;
             }
 
-            // 🛡️ BARRERA DE INTEGRIDAD: Validar productos vinculados
-            $check = $pdo->prepare("SELECT COUNT(id_producto) FROM tab_Productos WHERE id_marca = ?");
-            $check->execute([$idMarca]);
-            $count = $check->fetchColumn();
-
-            if ($count > 0) {
-                echo json_encode([
-                    'ok' => false,
-                    'msg' => "ACCIÓN BLOQUEADA: Existen $count productos vinculados a esta marca en el catálogo. Debe eliminar o reasignar los productos antes de borrar la marca."
-                ]);
-                exit;
-            }
-
-            $stmt = $pdo->prepare("DELETE FROM tab_Marcas WHERE id_marca = ?");
-            if ($stmt->execute([$idMarca])) {
-                echo json_encode(['ok' => true, 'msg' => 'Marca eliminada permanentemente']);
-            }
-            else {
-                $error = $stmt->errorInfo();
-                echo json_encode(['ok' => false, 'msg' => 'Error de integridad en BD: ' . ($error[2] ?? 'Fallo desconocido')]);
-            }
+            $stmt = $pdo->prepare("SELECT fn_cat_delete_marca(?)");
+            $stmt->execute([$idMarca]);
+            echo json_encode(json_decode($stmt->fetchColumn(), true));
             break;
 
         default:
@@ -149,14 +131,5 @@ try {
 }
 catch (Throwable $e) {
     http_response_code(500);
-    $raw = file_get_contents('php://input');
-    echo json_encode([
-        'ok' => false,
-        'msg' => 'Error crítico en servicio de marcas: ' . $e->getMessage(),
-        'debug_info' => [
-            'file' => basename($e->getFile()),
-            'line' => $e->getLine(),
-            'raw_input' => $raw
-        ]
-    ]);
+    echo json_encode(['ok' => false, 'msg' => 'Error crítico en servicio de marcas: ' . $e->getMessage()]);
 }

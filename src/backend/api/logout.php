@@ -1,15 +1,24 @@
 <?php
 /**
- * API: CIERRE DE SESIÓN (LOGOUT)
- * ---------------------------------------------------------
- * Propósito: Finalizar de forma segura la sesión del usuario tanto en el 
- * lado del servidor como en el navegador del cliente.
- * 
- * Flujo de Seguridad:
- * 1. Inicializa el motor de sesiones si no está activo.
- * 2. Purga todas las variables de $_SESSION.
- * 3. Destruye la persistencia en el servidor (session_destroy).
- * 4. Invalida la cookie PHPSESSID en el cliente configurando su tiempo en el pasado.
+ * ============================================================
+ * API: CIERRE DE SESIÓN SEGURO (logout.php)
+ * ============================================================
+ * ENDPOINT: POST /api/logout.php
+ *
+ * PROPÓSITO:
+ * Finaliza la sesión del usuario de forma segura tanto en el
+ * servidor como en el navegador del cliente.
+ *
+ * FLUJO DE SEGURIDAD:
+ * 1. Validar token CSRF (previene logout forzado por CSRF)
+ * 2. Limpiar $_SESSION en memoria
+ * 3. Destruir sesión en el servidor
+ * 4. Invalidar cookie PHPSESSID en el navegador
+ *
+ * NOTA: Este archivo NO toca la BD directamente.
+ * No requiere migración a PostgreSQL, pero se documenta
+ * exhaustivamente como parte del cierre del blindaje.
+ * ============================================================
  */
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -27,7 +36,7 @@ session_destroy();
 
 /**
  * 3. SEGURIDAD DEL CLIENTE: LIMPIEZA DE COOKIE
- * Al espirar la cookie en el pasado, el navegador la elimina, 
+ * Al expirar la cookie en el pasado, el navegador la elimina,
  * mitigando riesgos de Session Fixation o Hijacking.
  */
 if (ini_get("session.use_cookies")) {

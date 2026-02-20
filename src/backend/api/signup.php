@@ -1,24 +1,61 @@
 <?php
 /**
- * API: REGISTRO DE USUARIOS (SIGNUP)
- * ---------------------------------------------------------
- * Propósito: Permitir a nuevos visitantes crear una cuenta de 'cliente' 
- * en la plataforma de forma autónoma.
+ * ============================================================
+ * API: REGISTRO DE USUARIOS NUEVOS (signup.php)
+ * ============================================================
+ * ENDPOINT: POST /api/signup.php
+ *
+ * PROPÓSITO:
+ * Permite a personas nuevas crear una cuenta de cliente.
+ * La validación de duplicados se hace DENTRO de PostgreSQL,
+ * no en PHP. Esto garantiza atomicidad (no hay race conditions).
+ *
+ * PRINCIPIO DE OCULTACIÓN TOTAL:
+ * Solo se ejecuta: "SELECT fn_auth_register(?, ?, ?, ?)"
+ * PHP no sabe QUÉ tablas existen ni CÓMO se valida.
+ *
+ * FUNCIONES POSTGRESQL QUE USA:
+ * - fn_auth_register(nombre, email, teléfono, hash) → JSON
+ *   Internamente esta función:
+ *   1. Verifica duplicado por email
+ *   2. Verifica duplicado por nombre+teléfono
+ *   3. Auto-genera el siguiente ID
+ *   4. Inserta con rol='cliente', activo=TRUE
+ *   5. Retorna {ok: bool, msg: '...'}
+ *
+ * FLUJO COMPLETO:
+ * 1. Validar token CSRF (protección anti-forgery)
+ * 2. Validar formato del input (name, email, phone, password)
+ * 3. Generar hash bcrypt de la contraseña
+ * 4. Llamar fn_auth_register → deja que PostgreSQL valide TODO
+ * 5. Reenviar respuesta JSON al frontend
+ * ============================================================
  */
 
-require_once '../config.php';
-require_once '../utils/security_utils.php';
-require_once '../utils/Validation.php';
+require_once '../config.php'; // Conexión PDO a PostgreSQL
+require_once '../utils/security_utils.php'; // CSRF, getJsonInput
+require_once '../utils/Validation.php'; // Validaciones de formato
 
 header('Content-Type: application/json');
 
-// 🛡️ SEGURIDAD: Validación CSRF obligatoria
+// ──────────────────────────────────────────────
+// PASO 1: VALIDACIÓN CSRF
+// ──────────────────────────────────────────────
+// El segundo parámetro TRUE hace que acepte el token
+// desde el header X-CSRF-Token (para peticiones AJAX)
 validateCsrfToken(null, true);
 
-// Captura de datos JSON desde el flujo de entrada centralizado
+// ──────────────────────────────────────────────
+// PASO 2: OBTENER Y VALIDAR INPUT
+// ──────────────────────────────────────────────
 $input = getJsonInput();
 
-// 🛡️ VALIDACIÓN ESTRICTA (ISO 830)
+// validateOrReject verifica que cada campo tenga el formato correcto:
+// 'name' = texto no vacío, longitud razonable
+// 'email' = formato email válido
+// 'phone' = formato telefónico
+// 'password' = longitud mínima 6 caracteres y complejidad
+// Si alguno falla → lanza excepción → PHP responde con error 400
 Validation::validateOrReject($input, [
     'nombre' => 'name',
     'email' => 'email',
@@ -26,73 +63,44 @@ Validation::validateOrReject($input, [
     'password' => 'password'
 ]);
 
-$nombre = Validation::sanitizeString($input['nombre']);
-$email = Validation::sanitizeString($input['email']);
-$telefono = $input['telefono'];
-$pass = $input['password'];
-
-// Validación de complejidad de contraseña
-$passwordErrors = [];
-if (strlen($pass) < 8) {
-    $passwordErrors[] = "mínimo 8 caracteres";
-}
-if (!preg_match('/[A-Z]/', $pass)) {
-    $passwordErrors[] = "una letra mayúscula";
-}
-if (!preg_match('/[0-9]/', $pass)) {
-    $passwordErrors[] = "un número";
-}
-if (!preg_match('/[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/', $pass)) {
-    $passwordErrors[] = "un carácter especial";
-}
-
-if (!empty($passwordErrors)) {
-    echo json_encode([
-        "ok" => false,
-        "msg" => "La contraseña debe contener: " . implode(", ", $passwordErrors)
-    ]);
-    exit;
-}
-
 try {
-    $stmt = $pdo->prepare("SELECT id_usuario FROM tab_Usuarios WHERE correo_usuario = ?");
-    $stmt->execute([$email]);
-    if ($stmt->fetch()) {
-        echo json_encode(["ok" => false, "msg" => "Inconsistencia: Esta dirección de correo electrónico ya posee una cuenta activa"]);
-        exit;
-    }
-
-    $stmtRedundancy = $pdo->prepare("SELECT id_usuario FROM tab_Usuarios WHERE nom_usuario = ? AND num_telefono_usuario = ?");
-    $stmtRedundancy->execute([$nombre, $telefono]);
-    if ($stmtRedundancy->fetch()) {
-        echo json_encode(["ok" => false, "msg" => "Inconsistencia: Ya existe un registro con esta combinación de nombre y teléfono."]);
-        exit;
-    }
-
+    // ──────────────────────────────────────────────
+    // PASO 3: GENERAR HASH BCRYPT
+    // ──────────────────────────────────────────────
+    // password_hash() crea un hash seguro de la contraseña
+    // PASSWORD_BCRYPT usa el algoritmo blowfish con 60 caracteres de output
+    // NUNCA enviamos la contraseña en texto plano a PostgreSQL
+    $pass = $input['password'];
     $hash = password_hash($pass, PASSWORD_BCRYPT);
 
-    $sql = "INSERT INTO tab_Usuarios (
-                id_usuario, nom_usuario, correo_usuario, num_telefono_usuario, 
-                contra, salt, rol, activo, bloqueado, fecha_registro, intentos_fallidos
-            ) VALUES (
-                (SELECT COALESCE(MAX(id_usuario), 0) + 1 FROM tab_Usuarios),
-                ?, ?, ?, ?, 'legacy_salt', 'cliente', TRUE, FALSE, NOW(), 0
-            )";
+    // ──────────────────────────────────────────────
+    // PASO 4: REGISTRAR EN BASE DE DATOS
+    // ──────────────────────────────────────────────
+    // Consulta opaca: PHP envía 4 valores y recibe JSON
+    // fn_auth_register hace TODAS las validaciones de duplicados internamente
+    // Retorna SIEMPRE un JSON: {ok: true/false, msg: '...'}
+    $stmt = $pdo->prepare("SELECT fn_auth_register(?, ?, ?, ?)");
+    $stmt->execute([
+        $input['nombre'], // Nombre completo
+        $input['email'], // Correo electrónico
+        $input['telefono'], // Teléfono (se convierte a BIGINT dentro de la función)
+        $hash // Hash bcrypt de la contraseña
+    ]);
 
-    $stmtInsert = $pdo->prepare($sql);
-
-    if ($stmtInsert->execute([$nombre, $email, $telefono, $hash])) {
-        echo json_encode([
-            "ok" => true,
-            "msg" => "¡Bienvenido a RD-Watch, " . $nombre . "! Tu cuenta ha sido creada exitosamente. Ya puedes iniciar sesión."
-        ]);
-    }
-    else {
-        throw new Exception("Error interno al ejecutar la sentencia de inserción");
-    }
+    // ──────────────────────────────────────────────
+    // PASO 5: REENVIAR RESPUESTA AL FRONTEND
+    // ──────────────────────────────────────────────
+    // json_decode convierte el string JSON de PostgreSQL en array PHP
+    // Luego json_encode lo vuelve a serializar para el frontend
+    // La respuesta ya viene formateada desde PostgreSQL
+    $result = json_decode($stmt->fetchColumn(), true);
+    echo json_encode($result);
 
 }
-catch (Exception $e) {
+catch (Throwable $e) {
     http_response_code(500);
-    echo json_encode(["ok" => false, "msg" => "Fallo técnico en el sistema de registro: " . $e->getMessage()]);
+    echo json_encode([
+        "ok" => false,
+        "msg" => "Error técnico en el registro: " . $e->getMessage()
+    ]);
 }

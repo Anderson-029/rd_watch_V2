@@ -22,12 +22,11 @@ ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 // 🛡️ SEGURIDAD DE SESIONES (COOKIES)
-// Nota: 'cookie_secure' está en 0 para permitir funcionamiento en HTTP (Entorno de Pruebas).
-// En Producción con HTTPS, cambiar a 1.
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_only_cookies', 1);
-ini_set('session.cookie_secure', 0); // 0 = Permitir HTTP
+ini_set('session.cookie_secure', 0); // 0 = Permitir HTTP (Entorno de Pruebas)
 ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.cookie_path', '/'); // Asegurar que la sesión esté disponible en toda la app
 
 header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");
@@ -40,21 +39,19 @@ header("Expires: 0");
 // CSP Básico (Nivel Desarrollo): Permite scripts propios y conexiones HTTP/HTTPS para evitar bloqueos en red local
 header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' http: https:; frame-src 'self' https://js.stripe.com;");
 
-/**
- * ==========================================
- * 🛡️ 2. POLÍTICA DE SEGURIDAD CORS
- * ==========================================
- * El Cross-Origin Resource Sharing (CORS) es esencial para que el frontend 
- * (Vite/React/Vanilla JS) pueda enviar peticiones AJAX/Fetch a este backend 
- * si están en diferentes puertos o dominios.
- */
-// Detectamos el origen de la petición para permitir navegación con credenciales
+// 🛡️ 2. POLÍTICA DE SEGURIDAD CORS
+// El Cross-Origin Resource Sharing (CORS) es esencial para que el frontend pueda enviar
+// credenciales (cookies) en peticiones AJAX/Fetch.
+// NUNCA usar '*' si se requiere 'Access-Control-Allow-Credentials: true'.
 if (isset($_SERVER['HTTP_ORIGIN'])) {
     header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-    header("Access-Control-Allow-Credentials: true"); // Vital para persistencia de login
-} else {
-    header("Access-Control-Allow-Origin: *");
 }
+else {
+    // Si no hay Origin (petición del mismo sitio), reflejamos el host actual
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
+    header("Access-Control-Allow-Origin: $protocol://{$_SERVER['HTTP_HOST']}");
+}
+header("Access-Control-Allow-Credentials: true");
 
 // Definición de verbos HTTP permitidos y cabeceras de seguridad
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -110,7 +107,8 @@ try {
         PDO::ATTR_EMULATE_PREPARES => false
     ]);
 
-} catch (PDOException $e) {
+}
+catch (PDOException $e) {
     // Ofuscación de errores técnicos en el cliente por seguridad preventiva
     http_response_code(500);
     error_log("Falla en HANDSHAKE de Base de Datos: " . $e->getMessage());

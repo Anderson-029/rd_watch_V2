@@ -1,18 +1,34 @@
 <?php
 /**
- * API: GESTIÓN DE CARRITO DE COMPRAS
- * ---------------------------------------------------------
- * Propósito: Administra la persistencia de productos que un cliente ha seleccionado
- * para su compra. El carrito se guarda en base de datos para preservar los ítems
- * entre sesiones o dispositivos del mismo usuario.
- * 
- * Requisito: Sesión de usuario activa ($_SESSION['user_id']).
- * 
- * Métodos:
- * - GET: Obtener lista de productos en el carrito activo.
- * - POST: Agregar un nuevo producto o incrementar cantidad existente.
- * - PUT: Actualizar cantidad específica de un producto.
- * - DELETE: Eliminar un producto o vaciar el carrito por completo.
+ * ============================================================
+ * API: GESTIÓN DE CARRITO DE COMPRAS (carrito.php)
+ * ============================================================
+ * ENDPOINTS:
+ *   GET    /api/carrito.php → Listar contenido del carrito
+ *   POST   /api/carrito.php → Agregar producto al carrito
+ *   PUT    /api/carrito.php → Actualizar cantidad de un ítem
+ *   DELETE /api/carrito.php → Quitar producto o vaciar todo
+ *
+ * PROPÓSITO:
+ * Administra la persistencia de productos seleccionados por
+ * el cliente. El carrito se guarda en BD (no en localStorage)
+ * para preservar ítems entre sesiones y dispositivos.
+ *
+ * REQUISITO: Sesión de usuario activa ($_SESSION['user_id']).
+ *
+ * FUNCIONES POSTGRESQL QUE USA:
+ * - fn_cart_get_or_create(user_id) → JSON {id_carrito, created}
+ * - fn_cart_get_items(cart_id)     → JSON array con ítems
+ * - fn_cart_add_item(cart, prod, qty) → JSON {ok, msg}
+ * - fn_cart_update_qty(cart, prod, qty) → JSON {ok, msg}
+ * - fn_cart_remove_item(cart, prod) → JSON {ok, msg}
+ * - fn_cart_clear(cart_id)          → JSON {ok, msg}
+ *
+ * FLUJO:
+ * 1. Verificar sesión activa
+ * 2. Obtener/crear carrito: fn_cart_get_or_create
+ * 3. Ejecutar operación según método HTTP
+ * ============================================================
  */
 
 header('Content-Type: application/json');
@@ -27,15 +43,15 @@ if (!isset($pdo)) {
     exit;
 }
 
-// Asegurar que la sesión PHP esté iniciada para acceder a $_SESSION
+// Asegurar sesión PHP activa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-/**
- * 1. SEGURIDAD: CONTROL DE ACCESO
- * El carrito es una funcionalidad privada del usuario autenticado.
- */
+// ──────────────────────────────────────────────
+// SEGURIDAD: CONTROL DE ACCESO
+// ──────────────────────────────────────────────
+// El carrito es privado del usuario autenticado
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode(['ok' => false, 'msg' => 'Sesión no válida o expirada. Inicie sesión de nuevo.']);
@@ -45,59 +61,38 @@ if (!isset($_SESSION['user_id'])) {
 $userId = $_SESSION['user_id'];
 $method = $_SERVER['REQUEST_METHOD'];
 
-// La función getJsonInput() ahora se provee globalmente por security_utils.php de forma segura (con caché).
-
-
 try {
-    /**
-     * 2. INICIALIZACIÓN DEL CARRITO
-     * Antes de cualquier operación, se verifica si el usuario tiene un carrito con estado 'activo'.
-     * Si no existe, se crea uno automáticamente para las operaciones de escritura.
-     */
-    $stmt = $pdo->prepare("SELECT id_carrito FROM tab_Carrito WHERE id_usuario = ? AND estado_carrito = 'activo'");
-    $stmt->execute([$userId]);
-    $carrito = $stmt->fetch(PDO::FETCH_ASSOC);
+    // ──────────────────────────────────────────────
+    // INICIALIZACIÓN: Obtener/crear carrito activo
+    // ──────────────────────────────────────────────
+    // fn_cart_get_or_create busca un carrito con estado 'activo'
+    // Si no existe, crea uno automáticamente
+    // Retorna: {id_carrito: 123, created: true/false}
+    $cartStmt = $pdo->prepare("SELECT fn_cart_get_or_create(?)");
+    $cartStmt->execute([$userId]);
+    $cartData = json_decode($cartStmt->fetchColumn(), true);
+    $carritoId = $cartData['id_carrito'];
 
-    if (!$carrito && in_array($method, ['POST', 'PUT', 'GET'])) {
-        // Crear carrito nuevo (Usamos time() como ID único secuencial simple)
-        $id_carrito = time();
-        $sql = "INSERT INTO tab_Carrito (id_carrito, id_usuario, estado_carrito, fec_insert, usr_insert) 
-                VALUES (?, ?, 'activo', NOW(), 'system_cart')";
-        $pdo->prepare($sql)->execute([$id_carrito, $userId]);
-        $carritoId = $id_carrito;
-    }
-    else {
-        $carritoId = $carrito ? $carrito['id_carrito'] : null;
-    }
-
-    // Procesamiento según el verbo HTTP
     switch ($method) {
+        // ══════════════════════════════════════
+        // GET: LISTAR CONTENIDO DEL CARRITO
+        // ══════════════════════════════════════
+        // fn_cart_get_items hace JOIN interno con tab_Productos
+        // para obtener nombres, precios ACTUALES e imágenes
         case 'GET':
-            /**
-             * ACCIÓN: Listar Contenido
-             * Une la tabla de detalles con la de productos para obtener nombres, precios e imágenes.
-             */
-            if (!$carritoId) {
-                echo json_encode(['ok' => true, 'items' => []]);
-                exit;
-            }
-
-            $sql = "SELECT d.id_producto, p.nom_producto, p.precio, p.url_imagen, p.stock, d.cantidad 
-                    FROM tab_Carrito_Detalle d
-                    JOIN tab_Productos p ON d.id_producto = p.id_producto
-                    WHERE d.id_carrito = ?";
-            $stmt = $pdo->prepare($sql);
+            $stmt = $pdo->prepare("SELECT fn_cart_get_items(?)");
             $stmt->execute([$carritoId]);
-            $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+            $items = json_decode($stmt->fetchColumn(), true);
             echo json_encode(['ok' => true, 'items' => $items]);
             break;
 
+        // ══════════════════════════════════════
+        // POST: AGREGAR PRODUCTO
+        // ══════════════════════════════════════
+        // fn_cart_add_item tiene lógica inteligente:
+        // - Si el producto YA está → incrementa cantidad
+        // - Si es nuevo → lo inserta
         case 'POST':
-            /**
-             * ACCIÓN: Agregar Ítem
-             * Si el producto ya está en el carrito, se suma la cantidad nueva a la anterior.
-             */
             validateCsrfToken(null, true);
             $data = getJsonInput();
 
@@ -109,33 +104,17 @@ try {
                 exit;
             }
 
-            // Comprobar existencia previa en el detalle del carrito
-            $check = $pdo->prepare("SELECT cantidad FROM tab_Carrito_Detalle WHERE id_carrito = ? AND id_producto = ?");
-            $check->execute([$carritoId, $id_prod]);
-            $existing = $check->fetch();
-
-            if ($existing) {
-                // Actualización (Incremento acumulativo)
-                $newQty = $existing['cantidad'] + $qty;
-                $stmt = $pdo->prepare("UPDATE tab_Carrito_Detalle SET cantidad = ?, fec_update = NOW() WHERE id_carrito = ? AND id_producto = ?");
-                $stmt->execute([$newQty, $carritoId, $id_prod]);
-            }
-            else {
-                // Inserción de nuevo registro de detalle
-                $id_detalle = $carritoId . rand(100, 999); // Generador de ID basado en el carrito + aleatorio
-                $sql = "INSERT INTO tab_Carrito_Detalle (id_carrito_detalle, id_carrito, id_producto, cantidad, fec_insert, usr_insert) 
-                        VALUES (?, ?, ?, ?, NOW(), 'user_add')";
-                $pdo->prepare($sql)->execute([$id_detalle, $carritoId, $id_prod, $qty]);
-            }
-
-            echo json_encode(['ok' => true, 'msg' => 'Producto añadido exitosamente al carrito']);
+            // Consulta 100% opaca
+            $stmt = $pdo->prepare("SELECT fn_cart_add_item(?, ?, ?)");
+            $stmt->execute([$carritoId, $id_prod, $qty]);
+            echo json_encode(json_decode($stmt->fetchColumn(), true));
             break;
 
+        // ══════════════════════════════════════
+        // PUT: ACTUALIZAR CANTIDAD
+        // ══════════════════════════════════════
+        // Reemplaza la cantidad actual (no incrementa)
         case 'PUT':
-            /**
-             * ACCIÓN: Actualizar Cantidad
-             * Reemplaza la cantidad actual por la enviada (usado en el selector de cantidad del UI).
-             */
             validateCsrfToken(null, true);
             $data = getJsonInput();
             $id_prod = Validation::validateNumeric($data['id_producto'] ?? '') ? (int)$data['id_producto'] : null;
@@ -146,33 +125,32 @@ try {
                 exit;
             }
 
-            $stmt = $pdo->prepare("UPDATE tab_Carrito_Detalle SET cantidad = ?, fec_update = NOW() WHERE id_carrito = ? AND id_producto = ?");
-            $stmt->execute([$data['cantidad'], $carritoId, $data['id_producto']]);
-
-            echo json_encode(['ok' => true, 'msg' => 'Cantidad modificada correctamente']);
+            $stmt = $pdo->prepare("SELECT fn_cart_update_qty(?, ?, ?)");
+            $stmt->execute([$carritoId, $id_prod, $qty]);
+            echo json_encode(json_decode($stmt->fetchColumn(), true));
             break;
 
+        // ══════════════════════════════════════
+        // DELETE: QUITAR PRODUCTO O VACIAR
+        // ══════════════════════════════════════
+        // Con id_producto → quita solo ese producto
+        // Sin id_producto → vacía todo el carrito
         case 'DELETE':
-            /**
-             * ACCIÓN: Eliminar / Vaciar
-             * Si se envía id_producto, solo elimina ese ítem. Si no, limpia todo el carrito.
-             */
             validateCsrfToken(null, true);
             $data = getJsonInput();
             $id_prod = $data['id_producto'] ?? null;
 
             if ($id_prod) {
-                // Eliminación quirúrgica
-                $stmt = $pdo->prepare("DELETE FROM tab_Carrito_Detalle WHERE id_carrito = ? AND id_producto = ?");
+                // Eliminación quirúrgica de UN producto
+                $stmt = $pdo->prepare("SELECT fn_cart_remove_item(?, ?)");
                 $stmt->execute([$carritoId, $id_prod]);
-                echo json_encode(['ok' => true, 'msg' => 'Producto retirado del carrito']);
             }
             else {
-                // Limpieza total
-                $stmt = $pdo->prepare("DELETE FROM tab_Carrito_Detalle WHERE id_carrito = ?");
+                // Vaciado total
+                $stmt = $pdo->prepare("SELECT fn_cart_clear(?)");
                 $stmt->execute([$carritoId]);
-                echo json_encode(['ok' => true, 'msg' => 'El carrito ha sido vaciado por completo']);
             }
+            echo json_encode(json_decode($stmt->fetchColumn(), true));
             break;
 
         default:

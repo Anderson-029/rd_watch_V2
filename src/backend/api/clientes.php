@@ -1,23 +1,38 @@
 <?php
 /**
- * API DE ADMINISTRACIÓN: GESTIÓN DE CLIENTES
- * ---------------------------------------------------------
- * Propósito: Facilita al administrador la visualización y auditoría de la base 
- * de usuarios con rol de 'cliente'. Permite ver datos de contacto y estado de cuenta.
- * 
- * Lógica:
- * - Filtra por rol 'cliente' para garantizar privacidad de cuentas administrativas.
- * - Ordena por ID descendente para mostrar los registros más recientes primero.
+ * ============================================================
+ * API: ADMINISTRACIÓN DE CLIENTES (clientes.php)
+ * ============================================================
+ * ENDPOINTS:
+ *   GET /api/clientes.php → Listar todos los clientes
+ *   PUT /api/clientes.php → Activar/desactivar un cliente
+ *
+ * PROPÓSITO:
+ * Panel administrativo para gestionar la base de clientes.
+ * Solo el admin puede ver la lista y cambiar el estado
+ * activo/inactivo de una cuenta.
+ *
+ * ACCESO: SOLO ADMIN (requireRole('admin'))
+ *
+ * FUNCIONES POSTGRESQL QUE USA:
+ * - fn_admin_list_clients()           → JSON array de clientes
+ * - fn_admin_toggle_client(id, state) → JSON {ok, msg}
+ *   (incluye verificación interna de que el target sea 'cliente')
+ *
+ * SEGURIDAD INTERNA (dentro de fn_admin_toggle_client):
+ * - Barrera de rol: solo permite modificar cuentas con rol 'cliente'
+ * - Impide que un admin desactive a otro admin
+ * - Si el target no existe, retorna error descriptivo
+ * ============================================================
  */
 
 header('Content-Type: application/json');
 require_once '../config.php';
 require_once '../utils/security_utils.php';
 
-// 🛡️ BARRERA ADMINISTRATIVA: Solo el administrador puede auditar la base de clientes.
+// 🛡️ BARRERA ADMINISTRATIVA
 requireRole('admin');
 
-// Verificación de integridad de la base de datos
 if (!isset($pdo)) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error de conexión: El motor de base de datos no está disponible']);
@@ -27,39 +42,29 @@ if (!isset($pdo)) {
 $method = $_SERVER['REQUEST_METHOD'];
 
 try {
-    /**
-     * ==========================================
-     * 🔍 LISTAR CLIENTES (GET)
-     * ==========================================
-     */
     if ($method === 'GET') {
-        /**
-         * Lógica de consulta: 
-         * Solo recuperamos columnas seguras (evitamos passwords o datos sensibles).
-         */
-        $sql = "SELECT id_usuario, nom_usuario, correo_usuario, num_telefono_usuario, activo, fecha_registro 
-                FROM tab_Usuarios 
-                WHERE rol = 'cliente' 
-                ORDER BY id_usuario DESC";
-
-        $stmt = $pdo->prepare($sql);
+        // ══════════════════════════════════════
+        // 🔍 LISTAR CLIENTES
+        // ══════════════════════════════════════
+        // fn_admin_list_clients filtra internamente por rol='cliente'
+        // y excluye contraseñas y datos sensibles
+        $stmt = $pdo->prepare("SELECT fn_admin_list_clients()");
         $stmt->execute();
-        $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $clientes = json_decode($stmt->fetchColumn(), true);
 
         echo json_encode([
             'ok' => true,
             'count' => count($clientes),
             'clientes' => $clientes
         ]);
+
     }
-    /**
-     * ==========================================
-     * 🔄 ACTUALIZAR ESTADO DE CLIENTE (PUT)
-     * ==========================================
-     */
     elseif ($method === 'PUT') {
+        // ══════════════════════════════════════
+        // 🔄 ACTIVAR/DESACTIVAR CLIENTE
+        // ══════════════════════════════════════
         validateCsrfToken(null, true);
-        $data = getCachedJsonInput();
+        $data = getJsonInput();
 
         if (!isset($data['id_usuario'], $data['activo'])) {
             echo json_encode(['ok' => false, 'msg' => 'Datos incompletos para actualizar estado']);
@@ -67,29 +72,16 @@ try {
         }
 
         $id = (int)$data['id_usuario'];
-        $nuevoEstado = $data['activo'] ? 'true' : 'false';
+        $nuevoEstado = $data['activo'] ? true : false;
 
-        // 🛡️ BARRERA DE ROL: Solo permitimos modificar si el objetivo es un 'cliente'
-        $check = $pdo->prepare("SELECT rol FROM tab_Usuarios WHERE id_usuario = ?");
-        $check->execute([$id]);
-        $user = $check->fetch();
+        // fn_admin_toggle_client verifica internamente:
+        // 1. Que el usuario exista
+        // 2. Que sea 'cliente' (no admin)
+        // 3. Solo entonces aplica el cambio
+        $stmt = $pdo->prepare("SELECT fn_admin_toggle_client(?, ?)");
+        $stmt->execute([$id, $nuevoEstado ? 'true' : 'false']);
+        echo json_encode(json_decode($stmt->fetchColumn(), true));
 
-        if (!$user || $user['rol'] !== 'cliente') {
-            echo json_encode(['ok' => false, 'msg' => 'Acción denegada: Solo se puede modificar el estado de cuentas de cliente']);
-            exit;
-        }
-
-        $sql = "UPDATE tab_Usuarios 
-                SET activo = $nuevoEstado, fec_update = NOW(), usr_update = 'admin_mgmt' 
-                WHERE id_usuario = ?";
-
-        $stmt = $pdo->prepare($sql);
-        if ($stmt->execute([$id])) {
-            echo json_encode(['ok' => true, 'msg' => 'Estado del cliente actualizado correctamente']);
-        }
-        else {
-            echo json_encode(['ok' => false, 'msg' => 'Fallo al actualizar el registro en la base de datos']);
-        }
     }
     else {
         http_response_code(405);

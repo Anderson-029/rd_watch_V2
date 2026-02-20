@@ -1,15 +1,36 @@
 <?php
 /**
- * API: GESTIÓN DE SERVICIOS TÉCNICOS (TALLER)
- * ---------------------------------------------------------
- * Propósito: Administra la oferta de servicios del taller profesional (Mantenimiento, 
- * Pulido, Cambio de Batería, etc.). Estos servicios son la base para las citas técnicas.
- * 
- * Funcionalidades:
- * - GET: Listado cronológico de servicios disponibles.
- * - POST: Registro de nuevos tipos de servicio con validación de nombre.
- * - PUT: Actualización de precios y tiempos estimados.
- * - DELETE: Eliminación física del registro de servicio.
+ * ============================================================
+ * API: GESTIÓN DE SERVICIOS TÉCNICOS / TALLER (servicios.php)
+ * ============================================================
+ * ENDPOINTS:
+ *   GET    /api/servicios.php → Listar todos los servicios
+ *   POST   /api/servicios.php → Crear nuevo servicio
+ *   PUT    /api/servicios.php → Actualizar servicio existente
+ *   DELETE /api/servicios.php → Eliminar servicio (con protección)
+ *
+ * PROPÓSITO:
+ * CRUD de los servicios técnicos del taller de relojería.
+ * Son diferentes a los productos: los servicios se RESERVAN
+ * (tab_Reservas), no se compran. Ejemplo:
+ * - "Cambio de batería" → $25.000
+ * - "Restauración completa" → $150.000
+ * - "Ajuste de correa" → $15.000
+ *
+ * PERMISOS:
+ * - GET: público (cualquiera puede ver servicios disponibles)
+ * - POST/PUT/DELETE: solo admin
+ *
+ * FUNCIONES POSTGRESQL QUE USA:
+ * - fn_cat_get_servicios()                              → JSON array
+ * - fn_cat_create_servicio(id,nom,desc,precio,dur,usr)  → JSON {ok, msg}
+ * - fn_cat_update_servicio(id,nom,desc,precio,dur)      → JSON {ok, msg}
+ * - fn_cat_delete_servicio(id)                          → JSON con protección
+ *
+ * PROTECCIÓN AL BORRAR:
+ * fn_cat_delete_servicio verifica si el servicio tiene reservas/citas
+ * vinculadas en tab_Reservas. Si hay citas → no se puede borrar.
+ * ============================================================
  */
 
 header('Content-Type: application/json');
@@ -17,7 +38,6 @@ require_once '../config.php';
 require_once '../utils/security_utils.php';
 require_once '../utils/Validation.php';
 
-// Verificación de salud de la conexión a la base de datos
 if (!isset($pdo)) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error de conexión: El motor de base de datos no responde']);
@@ -26,76 +46,50 @@ if (!isset($pdo)) {
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-// La función getJsonInput() ahora se provee globalmente por security_utils.php de forma segura (con caché).
-
-
 try {
     switch ($method) {
+        // ══════════════════════════════════════
+        // GET: LISTAR TODOS LOS SERVICIOS
+        // ══════════════════════════════════════
+        // fn_cat_get_servicios retorna: id, nombre, descripción, precio, duración
+        // Ordenados por ID descendente (más recientes primero)
         case 'GET':
-            /**
-             * ==========================================
-             * 🔍 LISTAR SERVICIOS (GET)
-             * ==========================================
-             * Lógica: Recupera todos los servicios del catálogo ordenados por ID de forma descendente.
-             */
-            $stmt = $pdo->prepare("SELECT id_servicio, nom_servicio, descripcion, precio_servicio, duracion_estimada FROM tab_Servicios ORDER BY id_servicio DESC");
+            $stmt = $pdo->prepare("SELECT fn_cat_get_servicios()");
             $stmt->execute();
-            $servicios = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+            $servicios = json_decode($stmt->fetchColumn(), true);
             echo json_encode(['ok' => true, 'servicios' => $servicios]);
             break;
 
+        // ══════════════════════════════════════
+        // POST: CREAR NUEVO SERVICIO
+        // ══════════════════════════════════════
+        // fn_cat_create_servicio valida internamente que no exista otro
+        // servicio con el mismo nombre (anti-duplicado)
         case 'POST':
-            /**
-             * ==========================================
-             * ➕ CREAR SERVICIO (POST)
-             * ==========================================
-             * Seguridad: Solo accesible por administradores y protegido por CSRF.
-             */
             requireRole('admin');
             validateCsrfToken(null, true);
 
             $data = getJsonInput();
-
-            // 🛡️ VALIDACIÓN FLEXIBILIZADA (Rescate funcional)
             Validation::validateOrReject($data, [
-                'id_servicio' => 'id',
-                'nom_servicio' => 'name',
-                'precio_servicio' => 'price'
+                'id_servicio' => 'id', // ID numérico
+                'nom_servicio' => 'name', // Nombre no vacío
+                'precio_servicio' => 'price' // Precio positivo
             ]);
 
-            // 1. Validar unicidad del nombre del servicio para evitar redundancia
-            $check = $pdo->prepare("SELECT id_servicio FROM tab_Servicios WHERE nom_servicio = ?");
-            $check->execute([$data['nom_servicio']]);
-            if ($check->fetch()) {
-                echo json_encode(['ok' => false, 'msg' => 'Inconsistencia: Ya existe un servicio técnico registrado con ese nombre']);
-                exit;
-            }
-
-            $sql = "INSERT INTO tab_Servicios (id_servicio, nom_servicio, descripcion, precio_servicio, duracion_estimada, fec_insert, usr_insert) 
-                    VALUES (?, ?, ?, ?, ?, NOW(), ?)";
-            $stmt = $pdo->prepare($sql);
-
+            // Campos opcionales con valores por defecto
             $desc = Validation::sanitizeString($data['descripcion'] ?? '');
             $duracion = Validation::sanitizeString($data['duracion_estimada'] ?? 'Consultar');
+            $user_id = $_SESSION['user_id'] ?? 'admin_manual'; // Auditoría
 
-            $user_id = $_SESSION['user_id'] ?? 'admin_manual';
-
-            if ($stmt->execute([$data['id_servicio'], $data['nom_servicio'], $desc, $data['precio_servicio'], $duracion, $user_id])) {
-                echo json_encode(['ok' => true, 'msg' => 'Nuevo servicio técnico añadido exitosamente']);
-            }
-            else {
-                $error = $stmt->errorInfo();
-                echo json_encode(['ok' => false, 'msg' => 'Fallo en BD: ' . ($error[2] ?? 'Error desconocido')]);
-            }
+            $stmt = $pdo->prepare("SELECT fn_cat_create_servicio(?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$data['id_servicio'], $data['nom_servicio'], $desc, $data['precio_servicio'], $duracion, $user_id]);
+            echo json_encode(json_decode($stmt->fetchColumn(), true));
             break;
 
+        // ══════════════════════════════════════
+        // PUT: ACTUALIZAR SERVICIO
+        // ══════════════════════════════════════
         case 'PUT':
-            /**
-             * ==========================================
-             * 🔄 ACTUALIZAR SERVICIO (PUT)
-             * ==========================================
-             */
             requireRole('admin');
             validateCsrfToken(null, true);
 
@@ -105,38 +99,31 @@ try {
                 exit;
             }
 
-            $sql = "UPDATE tab_Servicios 
-                    SET nom_servicio = ?, descripcion = ?, precio_servicio = ?, duracion_estimada = ?, fec_update = NOW(), usr_update = 'admin_editor'
-                    WHERE id_servicio = ?";
-            $stmt = $pdo->prepare($sql);
-
-            if ($stmt->execute([
-            $data['nom_servicio'],
-            $data['descripcion'],
-            $data['precio_servicio'],
-            $data['duracion_estimada'],
-            $data['id_servicio']
-            ])) {
-                echo json_encode(['ok' => true, 'msg' => 'Servicio actualizado correctamente']);
-            }
-            else {
-                $error = $stmt->errorInfo();
-                echo json_encode(['ok' => false, 'msg' => 'Fallo técnico en BD: ' . ($error[2] ?? 'Error desconocido')]);
-            }
+            $stmt = $pdo->prepare("SELECT fn_cat_update_servicio(?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $data['id_servicio'],
+                $data['nom_servicio'],
+                $data['descripcion'],
+                $data['precio_servicio'],
+                $data['duracion_estimada']
+            ]);
+            echo json_encode(json_decode($stmt->fetchColumn(), true));
             break;
 
+        // ══════════════════════════════════════
+        // DELETE: ELIMINAR SERVICIO (CON PROTECCIÓN)
+        // ══════════════════════════════════════
+        // fn_cat_delete_servicio cuenta reservas/citas vinculadas:
+        // - Si hay N citas → "Este servicio tiene N citas vinculadas"
+        // - Si hay 0 citas → borra el servicio definitivamente
         case 'DELETE':
-            /**
-             * ==========================================
-             * 🗑️ ELIMINAR SERVICIO (DELETE)
-             * ==========================================
-             */
             requireRole('admin');
             validateCsrfToken(null, true);
 
             $data = getJsonInput();
             $sid = $data['id_servicio'] ?? null;
 
+            // Logging de auditoría: registrar intento de borrado
             logDebug("DELETE SERVICE ATTEMPT: ID[" . ($sid ?? 'NULL') . "]");
 
             if (!$sid) {
@@ -144,30 +131,19 @@ try {
                 exit;
             }
 
-            // 1. Verificar si existen citas (reservas) vinculadas a este servicio
-            $checkCitas = $pdo->prepare("SELECT COUNT(id_reserva) FROM tab_Reservas WHERE id_servicio = ?");
-            $checkCitas->execute([$sid]);
-            $count = $checkCitas->fetchColumn();
+            $stmt = $pdo->prepare("SELECT fn_cat_delete_servicio(?)");
+            $stmt->execute([$sid]);
+            $result = json_decode($stmt->fetchColumn(), true);
 
-            if ($count > 0) {
-                logDebug("DELETE BLOCKED: Service $sid has $count linked reservations.");
-                echo json_encode([
-                    'ok' => false,
-                    'msg' => 'Imposible borrar: Este servicio tiene ' . $count . ' citas técnicas vinculadas'
-                ]);
-                exit;
-            }
-
-            // 2. Ejecutar borrado físico
-            $stmt = $pdo->prepare("DELETE FROM tab_Servicios WHERE id_servicio = ?");
-            if ($stmt->execute([$sid])) {
+            // Logging según resultado (para el log del servidor)
+            if ($result['ok']) {
                 logDebug("DELETE SUCCESS: Service $sid removed.");
-                echo json_encode(['ok' => true, 'msg' => 'Servicio eliminado permanentemente del catálogo']);
             }
             else {
-                logDebug("DELETE FAILED: DB Execute returned false for ID $sid.");
-                echo json_encode(['ok' => false, 'msg' => 'Falla técnica al procesar la eliminación en la base de datos']);
+                logDebug("DELETE BLOCKED: Service $sid has linked reservations.");
             }
+
+            echo json_encode($result);
             break;
 
         default:
@@ -178,5 +154,5 @@ try {
 }
 catch (Throwable $e) {
     http_response_code(500);
-    echo json_encode(['ok' => false, 'msg' => 'Error crítico en el servidor: ' . $e->getMessage(), 'file' => basename($e->getFile()), 'line' => $e->getLine()]);
+    echo json_encode(['ok' => false, 'msg' => 'Error crítico en el servidor: ' . $e->getMessage()]);
 }

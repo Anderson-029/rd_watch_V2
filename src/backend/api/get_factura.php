@@ -1,36 +1,43 @@
 <?php
 /**
- * API: CONSULTA DE FACTURACIÓN DETALLADA
- * ---------------------------------------------------------
- * Propósito: Recupera toda la información legal y comercial de una orden específica 
+ * ============================================================
+ * API: FACTURACIÓN DETALLADA (get_factura.php)
+ * ============================================================
+ * ENDPOINT: GET /api/get_factura.php?id_orden=X
+ *
+ * PROPÓSITO:
+ * Recupera toda la información legal y comercial de una orden
  * para su visualización en formato de factura electrónica.
- * 
- * Lógica de Seguridad:
- * 1. Exige sesión activa.
- * 2. Valida estrictamente que la orden solicitada pertenezca al ID_USUARIO en sesión 
- *    para prevenir ataques de Insecure Direct Object Reference (IDOR).
- * 
- * Datos Consolidados:
- * - Cabecera: Datos de la Factura, Orden y Perfil del Cliente.
- * - Detalle: Lista de items comprados con precios unitarios y subtotales.
+ *
+ * SEGURIDAD:
+ * - Sesión obligatoria
+ * - Protección IDOR: fn_invoice_get_header verifica internamente
+ *   que la factura pertenezca al user_id de la sesión
+ *
+ * FUNCIONES POSTGRESQL QUE USA:
+ * - fn_invoice_get_header(order_id, user_id) → JSON (cabecera)
+ * - fn_invoice_get_items(order_id)           → JSON array (productos)
+ *
+ * DATOS CONSOLIDADOS:
+ * - Cabecera: Factura + Orden + Perfil del Cliente (JOIN triple)
+ * - Detalle: Lista de ítems con precios y subtotales
+ * ============================================================
  */
 
 header('Content-Type: application/json');
 require_once '../config.php';
 
-// Integridad de la conexión
 if (!isset($pdo)) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error técnico: El motor de facturación no responde']);
     exit;
 }
 
-// Persistencia de sesión
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 1. Barrera de Autenticación
+// Barrera de autenticación
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode(['ok' => false, 'msg' => 'Acceso denegado: Inicie sesión para consultar sus comprobantes']);
@@ -44,48 +51,26 @@ if (!$idOrden) {
 }
 
 try {
-    /**
-     * ==========================================
-     * 📄 1. CABECERA DE FACTURACIÓN
-     * ==========================================
-     * Se consolidan 3 fuentes (Facturas, Ordenes, Usuarios) en una sola consulta.
-     */
-    $sqlFactura = "
-        SELECT f.id_factura, f.fecha_emision, f.total_factura,
-               o.id_orden, o.estado_orden, o.fecha_orden, o.concepto,
-               u.nom_usuario, u.correo_usuario, u.num_telefono_usuario, u.direccion_principal
-        FROM tab_Facturas f
-        JOIN tab_Orden o ON f.id_orden = o.id_orden
-        JOIN tab_Usuarios u ON f.id_usuario = u.id_usuario
-        WHERE o.id_orden = ? AND f.id_usuario = ?
-        LIMIT 1
-    ";
+    // ══════════════════════════════════════
+    // 📄 CABECERA DE FACTURACIÓN
+    // ══════════════════════════════════════
+    // fn_invoice_get_header incluye protección IDOR:
+    // Solo retorna datos si id_usuario de la factura == session user_id
+    $stmtFact = $pdo->prepare("SELECT fn_invoice_get_header(?, ?)");
+    $stmtFact->execute([$idOrden, $_SESSION['user_id']]);
+    $factura = json_decode($stmtFact->fetchColumn(), true);
 
-    $stmt = $pdo->prepare($sqlFactura);
-    $stmt->execute([$idOrden, $_SESSION['user_id']]);
-    $factura = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Validación de Existencia/Permisos
     if (!$factura) {
         echo json_encode(['ok' => false, 'msg' => 'Información restringida o factura inexistente']);
         exit;
     }
 
-    /**
-     * ==========================================
-     * 🛒 2. DETALLE DE ARTÍCULOS
-     * ==========================================
-     * Recupera los productos vinculados a la orden mediante JOIN a la tabla maestra de Productos.
-     */
-    $sqlProd = "
-        SELECT p.nom_producto, d.cantidad, d.precio_unitario, (d.cantidad * d.precio_unitario) as subtotal_linea
-        FROM tab_Detalle_Orden d
-        JOIN tab_Productos p ON d.id_producto = p.id_producto
-        WHERE d.id_orden = ?
-    ";
-    $stmtProd = $pdo->prepare($sqlProd);
+    // ══════════════════════════════════════
+    // 🛒 DETALLE DE PRODUCTOS
+    // ══════════════════════════════════════
+    $stmtProd = $pdo->prepare("SELECT fn_invoice_get_items(?)");
     $stmtProd->execute([$idOrden]);
-    $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
+    $productos = json_decode($stmtProd->fetchColumn(), true);
 
     echo json_encode([
         'ok' => true,
@@ -94,7 +79,8 @@ try {
         'msg' => 'Datos de facturación recuperados correctamente'
     ]);
 
-} catch (PDOException $e) {
+}
+catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Inconsistencia interna al generar el reporte: ' . $e->getMessage()]);
 }

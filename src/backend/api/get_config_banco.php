@@ -1,45 +1,51 @@
 <?php
 /**
- * API: CONFIGURACIÓN PARA PAGOS BANCARIOS
- * ---------------------------------------------------------
- * Propósito: Facilita al cliente los datos necesarios para realizar transferencias 
- * bancarias directas. Este endpoint es consumido durante el flujo de checkout 
- * cuando se selecciona el método de pago 'Transferencia'.
- * 
- * Estado de Implementación:
- * Actualmente utiliza valores estáticos (Hardcoded). 
- * RECOMENDACIÓN: Mover estos parámetros a una tabla `tab_Config_Pagos` para permitir 
- * cambios rápidos desde el panel administrativo sin tocar el código fuente.
+ * ============================================================
+ * API: CONFIGURACIÓN PARA PAGOS BANCARIOS (get_config_banco.php)
+ * ============================================================
+ * ENDPOINT: GET /api/get_config_banco.php
+ *
+ * PROPÓSITO:
+ * Facilita al cliente los datos bancarios necesarios para
+ * realizar transferencias durante el checkout.
+ *
+ * ACCESO: Solo usuarios autenticados (requireLogin)
+ *
+ * FUNCIÓN POSTGRESQL QUE USA:
+ * - fn_config_get_bank() → JSON {nombre, tipo_cuenta, numero_cuenta, ...}
+ *
+ * ESTADO: Datos estáticos dentro de la función PostgreSQL.
+ * En futuro se migrarán a tab_Config_Pagos para gestión dinámica.
+ * Cuando se cree la tabla, SOLO se modifica la función SQL,
+ * este PHP NO CAMBIA.
+ * ============================================================
  */
 
 header('Content-Type: application/json');
 require_once '../config.php';
 require_once '../utils/security_utils.php';
 
-// 🛡️ BARRERA DE SEGURIDAD: Solo usuarios autenticados pueden ver datos para transferencia.
+// 🛡️ Solo usuarios autenticados
 requireLogin();
 
-// Verificación de integridad de la base de datos (aunque los datos sean estáticos, config.php es necesario)
 if (!isset($pdo)) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error técnico: No se pudo cargar el motor de configuración']);
     exit;
 }
 
-/**
- * ==========================================
- * 🏦 DATOS DEL NEGOCIO (RELOJERÍA DURÁN)
- * ==========================================
- * Estos datos deben ser exactos para evitar devoluciones bancarias.
- */
-echo json_encode([
-    'ok' => true,
-    'banco' => [
-        'nombre' => 'Bancolombia',
-        'tipo_cuenta' => 'Ahorros',
-        'numero_cuenta' => '518-000123-45',
-        'titular' => 'Relojería Durán SAS',
-        'nit_o_llave' => 'relojeria.duran@negocio', // Alias o Llave RED BANCO
-        'instrucciones' => 'Por favor, envíe el comprobante de pago por el formulario de la orden para validar su pedido.'
-    ]
-]);
+try {
+    // Consulta 100% opaca — los datos bancarios vienen de PostgreSQL
+    $stmt = $pdo->prepare("SELECT fn_config_get_bank()");
+    $stmt->execute();
+    $bankData = json_decode($stmt->fetchColumn(), true);
+
+    echo json_encode([
+        'ok' => true,
+        'banco' => $bankData
+    ]);
+}
+catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'msg' => 'Error al consultar configuración bancaria: ' . $e->getMessage()]);
+}

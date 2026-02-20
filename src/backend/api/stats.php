@@ -1,10 +1,29 @@
 <?php
 /**
- * API: ESTADÍSTICAS DEL DASHBOARD
- * ---------------------------------------------------------
- * Propósito: Centraliza el cálculo de métricas clave para el dashboard administrativo.
- * Acción: GET
- * Salida: JSON { ok: bool, stats: { productos, pedidos, clientes, servicios, ventas_monto, ventas_cant }, chart_data: { estado: total } }
+ * ============================================================
+ * API: ESTADÍSTICAS DEL DASHBOARD ADMINISTRATIVO (stats.php)
+ * ============================================================
+ * ENDPOINT: GET /api/stats.php
+ *
+ * PROPÓSITO:
+ * Centraliza el cálculo de TODAS las métricas KPI del dashboard
+ * administrativo y las estadísticas públicas del landing page.
+ *
+ * ACCESO: SOLO ADMIN (requireRole('admin'))
+ *
+ * FUNCIONES POSTGRESQL QUE USA:
+ * - fn_stats_dashboard()    → JSON con 9 métricas (6 KPIs + 3 públicas)
+ * - fn_stats_chart_data()   → JSON array [{estado, total}, ...]
+ *
+ * OPTIMIZACIÓN MASIVA:
+ * Antes: 8 queries PHP separadas (6 conteos + JOIN reparados + satisfacción)
+ * Ahora: 2 funciones PostgreSQL que consolidan todo internamente.
+ *
+ * MÉTRICAS QUE RETORNA:
+ * - stats: productos, pedidos, clientes, servicios, ventas_monto, ventas_cant
+ * - chart_data: {pendiente: N, confirmado: N, enviado: N, cancelado: N}
+ * - public: years (desde 1972), repaired, satisfaction (%)
+ * ============================================================
  */
 
 header('Content-Type: application/json');
@@ -13,11 +32,9 @@ header('Pragma: no-cache');
 require_once '../config.php';
 require_once '../utils/security_utils.php';
 
-// 🛡️ PROTECCIÓN DE MÉTRICAS: Solo accesible por especialistas administrativos
+// 🛡️ PROTECCIÓN DE MÉTRICAS: Solo accesible por admins
 requireRole('admin');
 
-
-// Verificación de conexión a la base de datos
 if (!isset($pdo)) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error de configuración de BD']);
@@ -25,31 +42,22 @@ if (!isset($pdo)) {
 }
 
 try {
-    // 1. Conteo de Productos: Total de ítems registrados en el inventario.
-    $stmtProd = $pdo->query("SELECT COUNT(id_producto) FROM tab_Productos");
-    $resProductos = $stmtProd->fetchColumn();
+    // ══════════════════════════════════════
+    // 📊 MÉTRICAS KPI (todo en 1 llamada)
+    // ══════════════════════════════════════
+    // fn_stats_dashboard consolida 8 queries en 1 función
+    $stmtStats = $pdo->prepare("SELECT fn_stats_dashboard()");
+    $stmtStats->execute();
+    $statsData = json_decode($stmtStats->fetchColumn(), true);
 
-    // 2. Conteo de Pedidos: Total histórico de órdenes realizadas.
-    $stmtPed = $pdo->query("SELECT COUNT(id_orden) FROM tab_Orden");
-    $resPedidos = $stmtPed->fetchColumn();
+    // ══════════════════════════════════════
+    // 📈 DATOS DE GRÁFICA (por estado)
+    // ══════════════════════════════════════
+    $stmtChart = $pdo->prepare("SELECT fn_stats_chart_data()");
+    $stmtChart->execute();
+    $chartRaw = json_decode($stmtChart->fetchColumn(), true);
 
-    // 3. Conteo de Clientes: Usuarios registrados con rol de cliente.
-    $stmtCli = $pdo->query("SELECT COUNT(id_usuario) FROM tab_Usuarios WHERE rol = 'cliente'");
-    $resClientes = $stmtCli->fetchColumn();
-
-    // 4. Conteo de Servicios: Tipos de servicios técnicos ofrecidos.
-    $stmtServ = $pdo->query("SELECT COUNT(id_servicio) FROM tab_Servicios");
-    $resServicios = $stmtServ->fetchColumn();
-
-    // 5. Ventas Totales: Sumatoria y conteo de pedidos que ya han sido enviados (transacción completada).
-    $stmtVentas = $pdo->query("SELECT COALESCE(SUM(total_orden), 0) as monto, COUNT(id_orden) as cantidad FROM tab_Orden WHERE estado_orden = 'enviado'");
-    $resVentas = $stmtVentas->fetch(PDO::FETCH_ASSOC);
-
-    // 6. Datos para la gráfica: Agrupación de pedidos por estado (pendiente, confirmado, enviado, cancelado).
-    $stmtChart = $pdo->query("SELECT estado_orden, COUNT(id_orden) as total FROM tab_Orden GROUP BY estado_orden");
-    $chartDataRaw = $stmtChart->fetchAll(PDO::FETCH_ASSOC);
-
-    // Inicialización de estructura de gráfica con valores en cero para asegurar consistencia
+    // Estructurar para el frontend (inicializar con ceros)
     $chartData = [
         'pendiente' => 0,
         'confirmado' => 0,
@@ -57,8 +65,8 @@ try {
         'cancelado' => 0
     ];
 
-    // Mapeo de resultados de DB a la estructura de la gráfica
-    foreach ($chartDataRaw as $row) {
+    // Mapear los resultados de la función
+    foreach ($chartRaw as $row) {
         if (isset($chartData[$row['estado_orden']])) {
             $chartData[$row['estado_orden']] = (int)$row['total'];
         }
@@ -67,71 +75,24 @@ try {
     echo json_encode([
         'ok' => true,
         'stats' => [
-            'productos' => (int)$resProductos,
-            'pedidos' => (int)$resPedidos,
-            'clientes' => (int)$resClientes,
-            'servicios' => (int)$resServicios,
-            'ventas_monto' => (float)$resVentas['monto'],
-            'ventas_cant' => (int)$resVentas['cantidad']
+            'productos' => (int)$statsData['productos'],
+            'pedidos' => (int)$statsData['pedidos'],
+            'clientes' => (int)$statsData['clientes'],
+            'servicios' => (int)$statsData['servicios'],
+            'ventas_monto' => (float)$statsData['ventas_monto'],
+            'ventas_cant' => (int)$statsData['ventas_cant']
         ],
         'chart_data' => $chartData,
         // Estadísticas públicas para landing page
         'public' => [
-            'years' => date('Y') - 1972, // Años de experiencia desde 1972
-            'repaired' => getRepairedCount($pdo),
-            'satisfaction' => getSatisfactionPercentage($pdo)
+            'years' => (int)$statsData['years'],
+            'repaired' => (int)$statsData['repaired'],
+            'satisfaction' => (int)$statsData['satisfaction']
         ]
     ]);
 
 }
 catch (PDOException $e) {
-    // Captura de errores de SQL para depuración segura
     http_response_code(500);
     echo json_encode(['ok' => false, 'msg' => 'Error SQL: ' . $e->getMessage()]);
-}
-
-/**
- * Cuenta relojes reparados (órdenes de servicio/reparación)
- */
-function getRepairedCount($pdo)
-{
-    try {
-        // Contar órdenes que tienen servicios asociados
-        $stmt = $pdo->query("
-            SELECT COUNT(DISTINCT o.id_orden) 
-            FROM tab_Orden o
-            INNER JOIN tab_Orden_Servicios os ON o.id_orden = os.id_orden
-        ");
-        return (int)$stmt->fetchColumn();
-    }
-    catch (PDOException $e) {
-        error_log("Error calculando relojes reparados: " . $e->getMessage());
-        return 0;
-    }
-}
-
-/**
- * Calcula porcentaje de satisfacción basado en reseñas de 3+ estrellas
- */
-function getSatisfactionPercentage($pdo)
-{
-    try {
-        $stmt = $pdo->query("
-            SELECT 
-                COUNT(id_opinion) as total,
-                SUM(CASE WHEN calificacion >= 3 THEN 1 ELSE 0 END) as satisfied
-            FROM tab_Opiniones
-        ");
-        $result = $stmt->fetch();
-
-        if ($result['total'] == 0) {
-            return 98; // Valor por defecto si no hay reseñas
-        }
-
-        return round(($result['satisfied'] / $result['total']) * 100);
-    }
-    catch (PDOException $e) {
-        error_log("Error calculando satisfacción: " . $e->getMessage());
-        return 98; // Valor por defecto en caso de error
-    }
 }
