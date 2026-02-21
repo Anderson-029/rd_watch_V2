@@ -607,7 +607,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const matchSearch = !searchFilter ||
         c.nombre.toLowerCase().includes(searchFilter) ||
         c.email.toLowerCase().includes(searchFilter);
-      const matchStatus = !statusFilter || c.activo.toString() === statusFilter;
+      const matchStatus = !statusFilter || (c.activo ? "1" : "0") === statusFilter;
       return matchSearch && matchStatus;
     });
 

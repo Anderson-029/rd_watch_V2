@@ -7,7 +7,7 @@ set "ENV_FILE=%BASE_DIR%src\backend\.env"
 set "LOG_FILE=%BASE_DIR%install_db.log"
 
 REM Agregar ruta de PostgreSQL al PATH si no existe
-set "PG_PATH=C:\Program Files\PostgreSQL\18\bin"
+set "PG_PATH=C:\Program Files\PostgreSQL\17\bin"
 if exist "%PG_PATH%" set "PATH=%PATH%;%PG_PATH%"
 
 REM Limpiar log anterior
@@ -58,44 +58,56 @@ echo [INFO] Recreando base de datos '%DB_NAME%'...
 psql -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -c "DROP DATABASE IF EXISTS \"%DB_NAME%\";" >> "%LOG_FILE%" 2>&1
 psql -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -c "CREATE DATABASE \"%DB_NAME%\";" >> "%LOG_FILE%" 2>&1
 
-REM 3. Esquema
+REM 3. Paso 1: Estructura Base (Schema)
 echo.
 echo [INFO] --- Paso 1: Estructura (Schema) ---
 call :run_psql "%BASE_DIR%sql\schema\database_rdwatch_3_0.sql"
 
-REM 4. Funciones
+REM 4. Paso 2: Funciones y Procedimientos CRUD
 echo.
-echo [INFO] --- Paso 2: Funciones y Procedimientos ---
+echo [INFO] --- Paso 3: Funciones y Procedimientos CRUD ---
 for %%f in ("%BASE_DIR%sql\functions\*.sql") do (
     echo %%~nxf | find /i "inserts_" >NUL
     if errorlevel 1 call :run_psql "%%f"
 )
 
-REM 5. Triggers
+REM 6. Paso 4: Triggers de Auditoria
 echo.
-echo [INFO] --- Paso 3: Triggers ---
+echo [INFO] --- Paso 4: Triggers ---
 for %%f in ("%BASE_DIR%sql\triggers\*.sql") do (
     call :run_psql "%%f"
 )
 
-REM 6. Datos
+REM 7. Paso 5: Logica de Negocio (Backend Kernel)
 echo.
-echo [INFO] --- Paso 4: Carga de Datos ---
-
-REM 6.1. Datos referenciales
-if exist "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql" call :run_psql "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql"
-
-REM 6.2. Usuarios de Prueba (Seeders)
-if exist "%BASE_DIR%sql\scripts\05_seeders.sql" (
-    echo [INFO] Cargando usuarios de prueba...
-    call :run_psql "%BASE_DIR%sql\scripts\05_seeders.sql"
+echo [INFO] --- Paso 5: Logica de Negocio ---
+for %%f in ("%BASE_DIR%sql\logica_backend\*.sql") do (
+    call :run_psql "%%f"
 )
 
-REM 6.3. Scripts adicionales
-for %%f in ("%BASE_DIR%sql\scripts\*.sql") do (
-    set "FNAME=%%~nxf"
-    if not "!FNAME!"=="05_seeders.sql" call :run_psql "%%f"
+REM 8. Paso 6: Carga de Datos (Seeds)
+echo.
+echo [INFO] --- Paso 6: Carga de Datos ---
+
+REM 6.1. Datos referenciales geográficos
+if exist "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql" (
+    call :run_psql "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql"
 )
+
+REM 6.2. Scripts maestros numerados (01-05)
+echo [INFO] Cargando scripts maestros en orden...
+for /l %%i in (1,1,5) do (
+    set "NUM=0%%i"
+    set "NUM=!NUM:~-2!"
+    for %%f in ("%BASE_DIR%sql\scripts\!NUM!_*.sql") do (
+        call :run_psql "%%f"
+    )
+)
+
+REM 6.3. Seeders y configuraciones adicionales
+echo [INFO] Cargando configuraciones adicionales...
+if exist "%BASE_DIR%sql\scripts\configuracion_admin_pending.sql" call :run_psql "%BASE_DIR%sql\scripts\configuracion_admin_pending.sql"
+if exist "%BASE_DIR%sql\scripts\create_reviews_table.sql" call :run_psql "%BASE_DIR%sql\scripts\create_reviews_table.sql"
 
 echo.
 echo ==================================================

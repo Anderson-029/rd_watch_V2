@@ -25,19 +25,23 @@ INSERT INTO tab_Subcategorias (id_categoria, id_subcategoria, nom_subcategoria, 
 (4, 1, 'Correas y Brazaletes', 'system', NOW()), (4, 2, 'Cristales y Biseles', 'system', NOW())
 ON CONFLICT (id_categoria, id_subcategoria) DO NOTHING;
 
--- 4. SERVICIOS TÉCNICOS (Corregido según esquema: descripcion, duracion_estimada)
+-- 4. SERVICIOS TÉCNICOS (Descripciones profesionales y detalladas)
 INSERT INTO tab_Servicios (id_servicio, nom_servicio, descripcion, precio_servicio, duracion_estimada, usr_insert, fec_insert) VALUES
-(1, 'Cambio de Pila Premium', 'Instalación de batería suiza con empaque.', 45000, '30 min', 'system', NOW()),
-(2, 'Mantenimiento General Automático', 'Limpieza y ajuste de marcha.', 320000, '3-5 días', 'system', NOW()),
-(3, 'Pulido de Caja y Pulso', 'Restauración de brillo original.', 180000, '2 días', 'system', NOW()),
-(4, 'Cambio de Cristal Zafiro', 'Sustitución por zafiro irrayable.', 250000, '24 horas', 'system', NOW()),
-(5, 'Restauración de Esfera', 'Pintura técnica y LumiNova.', 450000, '15 días', 'system', NOW()),
-(6, 'Prueba de Hermeticidad', 'Test de presión profesional.', 85000, '1 hora', 'system', NOW()),
-(7, 'Ajuste de Brazalete', 'Remoción de eslabones.', 25000, '15 min', 'system', NOW()),
-(8, 'Revisión y Diagnóstico', 'Evaluación técnica.', 0, '20 min', 'system', NOW()),
-(9, 'Cambio de Corona y Tija', 'Repuesto original.', 120000, '1 día', 'system', NOW()),
-(10, 'Mantenimiento Cronógrafo', 'Servicio especializado.', 650000, '8 días', 'system', NOW())
-ON CONFLICT (id_servicio) DO NOTHING;
+(1, 'Cambio de Pila Premium', 'Sustitución de celda de energía por componentes suizos (Renata/Sony) de larga duración. Incluye limpieza de contactos, inspección de consumo electrónico y lubricación de empaque para preservar la estanqueidad.', 45000, '30 min', 'system', NOW()),
+(2, 'Mantenimiento General Automático', 'Desarmado íntegro del calibre, limpieza por ultrasonido, inspección de desgaste de rodaje, lubricación de precisión con aceites Moebius y ajuste maestro de marcha en cronocomparador profesional.', 320000, '3-5 días', 'system', NOW()),
+(3, 'Pulido de Caja y Pulso', 'Restauración estética mediante procesos de debastado, satinado y abrillantado siguiendo las especificaciones originales de fábrica. Elimina micro-rayones y recupera el espejo característico de metales de alta gama.', 180000, '2 días', 'system', NOW()),
+(4, 'Cambio de Cristal Zafiro', 'Sustitución de cristales minerales por zafiro sintético de dureza 9 en la escala Mohs (irrayable). Incluye biseles de sellado nuevos y prueba de presión para asegurar la estanqueidad.', 250000, '24 horas', 'system', NOW()),
+(5, 'Restauración de Esfera', 'Tratamiento artesanal de diales con pérdida de color o corrosión. Aplicación técnica de pintura esmaltada, recuperación de índices y renovación de material luminiscente (Super-LumiNova) de alta visibilidad.', 450000, '15 días', 'system', NOW()),
+(6, 'Prueba de Hermeticidad', 'Certificación de estanqueidad mediante test de presión atmosférica y vacío. Verificación de juntas de corona, pulsadores y cristal para garantizar la resistencia al agua según especificación oficial.', 85000, '1 hora', 'system', NOW()),
+(7, 'Ajuste de Brazalete', 'Personalización de la longitud del pulso mediante remoción técnica de eslabones. Incluye inspección de pasadores, limpieza del cierre deployante y ajuste fino para máximo confort ergonómico.', 25000, '15 min', 'system', NOW()),
+(8, 'Revisión y Diagnóstico', 'Evaluación integral de funciones mecánicas y electrónicas por maestro relojero. Incluye informe visual de estado, verificación de amplitud de volante y presupuesto detallado sin compromiso.', 0, '20 min', 'system', NOW()),
+(9, 'Cambio de Corona y Tija', 'Reemplazo de sistema de ajuste manual por componentes originales. Asegura el correcto engrane del remontuar y restaura la capacidad de sellado hermético contra humedad y polvo.', 120000, '1 día', 'system', NOW()),
+(10, 'Mantenimiento Cronógrafo', 'Servicio especializado para calibres complejos. Incluye reglaje de martillos, ajuste de rueda de pilares, lubricación de ejes de segundos y sincronización precisa de totalizadores de minutos y horas.', 650000, '8 días', 'system', NOW())
+ON CONFLICT (id_servicio) DO UPDATE SET
+    nom_servicio = EXCLUDED.nom_servicio,
+    descripcion = EXCLUDED.descripcion,
+    precio_servicio = EXCLUDED.precio_servicio,
+    duracion_estimada = EXCLUDED.duracion_estimada;
 
 -- 5. PRODUCTOS (1-55)
 INSERT INTO tab_Productos (id_producto, id_marca, nom_producto, descripcion, precio, id_categoria, id_subcategoria, stock, url_imagen, usr_insert, fec_insert) VALUES
