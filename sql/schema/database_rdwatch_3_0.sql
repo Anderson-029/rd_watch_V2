@@ -1,6 +1,17 @@
+-- =====================================================
+-- LIMPIEZA INICIAL (DROP TABLES)
+-- Orden jerárquico: Hijas -> Padres
+-- =====================================================
+DROP TABLE IF EXISTS tab_Rate_Limits;
 DROP TABLE IF EXISTS tab_Opiniones;
+DROP TABLE IF EXISTS tab_Pagos;
+DROP TABLE IF EXISTS tab_Detalle_Factura;
+DROP TABLE IF EXISTS tab_Facturas;
 DROP TABLE IF EXISTS tab_Envios;
+DROP TABLE IF EXISTS tab_Orden_Servicios;
+DROP TABLE IF EXISTS tab_Detalle_Orden;
 DROP TABLE IF EXISTS tab_Orden;
+DROP TABLE IF EXISTS tab_Carrito_Detalle;
 DROP TABLE IF EXISTS tab_Carrito;
 DROP TABLE IF EXISTS tab_Productos_Promociones;
 DROP TABLE IF EXISTS tab_Productos;
@@ -9,7 +20,6 @@ DROP TABLE IF EXISTS tab_Ciudades;
 DROP TABLE IF EXISTS tab_Departamentos;
 DROP TABLE IF EXISTS tab_Reservas;
 DROP TABLE IF EXISTS tab_Contacto;
-DROP TABLE IF EXISTS tab_Usuario_Metodo_Pago;
 DROP TABLE IF EXISTS tab_Metodos_Pago;
 DROP TABLE IF EXISTS tab_Servicios;
 DROP TABLE IF EXISTS tab_Promociones;

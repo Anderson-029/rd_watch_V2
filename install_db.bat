@@ -63,15 +63,7 @@ echo.
 echo [INFO] --- Paso 1: Estructura (Schema) ---
 call :run_psql "%BASE_DIR%sql\schema\database_rdwatch_3_0.sql"
 
-REM 4. Paso 2: Funciones y Procedimientos CRUD
-echo.
-echo [INFO] --- Paso 3: Funciones y Procedimientos CRUD ---
-for %%f in ("%BASE_DIR%sql\functions\*.sql") do (
-    echo %%~nxf | find /i "inserts_" >NUL
-    if errorlevel 1 call :run_psql "%%f"
-)
-
-REM 6. Paso 4: Triggers de Auditoria
+REM 4. Paso 3: Triggers de Auditoria (Auditoría depende de tablas base)
 echo.
 echo [INFO] --- Paso 4: Triggers ---
 for %%f in ("%BASE_DIR%sql\triggers\*.sql") do (
@@ -89,25 +81,15 @@ REM 8. Paso 6: Carga de Datos (Seeds)
 echo.
 echo [INFO] --- Paso 6: Carga de Datos ---
 
-REM 6.1. Datos referenciales geográficos
-if exist "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql" (
-    call :run_psql "%BASE_DIR%sql\functions\inserts_departamentos_y_ciudades.sql"
-)
-
-REM 6.2. Scripts maestros numerados (01-05)
+REM 6.2. Scripts maestros numerados (00-07)
 echo [INFO] Cargando scripts maestros en orden...
-for /l %%i in (1,1,5) do (
+for /l %%i in (0,1,7) do (
     set "NUM=0%%i"
     set "NUM=!NUM:~-2!"
     for %%f in ("%BASE_DIR%sql\scripts\!NUM!_*.sql") do (
         call :run_psql "%%f"
     )
 )
-
-REM 6.3. Seeders y configuraciones adicionales
-echo [INFO] Cargando configuraciones adicionales...
-if exist "%BASE_DIR%sql\scripts\configuracion_admin_pending.sql" call :run_psql "%BASE_DIR%sql\scripts\configuracion_admin_pending.sql"
-if exist "%BASE_DIR%sql\scripts\create_reviews_table.sql" call :run_psql "%BASE_DIR%sql\scripts\create_reviews_table.sql"
 
 echo.
 echo ==================================================

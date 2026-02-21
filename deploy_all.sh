@@ -99,35 +99,22 @@ echo -e "${BOLD}📋 PASO 1/6: SCHEMA (Tablas base)${NC}"
 run_sql "$SQL_DIR/schema/database_rdwatch_3_0.sql" "Schema principal (23 tablas)"
 echo ""
 
-# ─── PASO 2: MIGRACIONES ────────────────────────────────────
-echo -e "${BOLD}🔧 PASO 2/6: MIGRACIONES (Alteraciones de tablas)${NC}"
-run_sql "$SQL_DIR/migrations/add_foto_to_reservas.sql" "Migración: foto en reservas"
-echo ""
-
-# ─── PASO 3: TRIGGERS ───────────────────────────────────────
-echo -e "${BOLD}⚡ PASO 3/6: TRIGGERS (Auditoría automática)${NC}"
+# ─── PASO 2: TRIGGERS ───────────────────────────────────────
+echo -e "${BOLD}⚡ PASO 2/5: TRIGGERS (Auditoría automática)${NC}"
 run_sql "$SQL_DIR/triggers/audit_trail.sql" "Trigger: audit trail"
 echo ""
 
-# ─── PASO 4: FUNCIONES CRUD LEGACY ──────────────────────────
-echo -e "${BOLD}🔩 PASO 4/6: FUNCIONES CRUD LEGACY${NC}"
-for f in "$SQL_DIR"/functions/*.sql; do
-    BASENAME=$(basename "$f" .sql)
-    run_sql "$f" "CRUD: $BASENAME"
-done
-echo ""
-
-# ─── PASO 5: DATOS SEMILLA ──────────────────────────────────
-echo -e "${BOLD}🌱 PASO 5/6: DATOS SEMILLA (Scripts de inserción)${NC}"
-# Orden específico: departamentos primero (FK de ciudades)
-run_sql "$SQL_DIR/functions/inserts_departamentos_y_ciudades.sql" "Geodata: departamentos + ciudades"
+# ─── PASO 3: DATOS SEMILLA ──────────────────────────────────
+# Se eliminó el paso de funciones CRUD legacy por ser obsoletas.
+echo -e "${BOLD}🌱 PASO 3/5: DATOS SEMILLA (Scripts de inserción)${NC}"
+# El bucle cargará los scripts en orden alfabético (00_geography primero)
 for f in "$SQL_DIR"/scripts/*.sql; do
     BASENAME=$(basename "$f" .sql)
     run_sql "$f" "Seed: $BASENAME"
 done
 echo ""
 
-# ─── PASO 6: LÓGICA BACKEND (BLINDAJE) ──────────────────────
+# ─── PASO 4: LÓGICA BACKEND (BLINDAJE) ──────────────────────
 # ORDEN CRÍTICO: Las dependencias van de menor a mayor complejidad
 # Cada módulo usa CREATE OR REPLACE, así que:
 # - NO borra funciones de otros módulos
@@ -140,7 +127,7 @@ echo ""
 # 4. client_panel    → Usa: usuarios, órdenes, opiniones (panel)
 # 5. admin_reports   → Usa: TODO (reportes consolidados)
 
-echo -e "${BOLD}🛡️  PASO 6/6: LÓGICA BACKEND — BLINDAJE POSTGRESQL${NC}"
+echo -e "${BOLD}🛡️  PASO 4/5: LÓGICA BACKEND — BLINDAJE POSTGRESQL${NC}"
 echo -e "   ${CYAN}(Funciones CREATE OR REPLACE — idempotentes, sin conflictos)${NC}"
 echo ""
 
