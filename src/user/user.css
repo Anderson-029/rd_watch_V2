@@ -352,26 +352,22 @@ main {
 }
 
 .badge.pendiente {
-    background: #ffc107;
-    /* Amarillo */
+    background: #ffc107; /* Amarillo */
     color: #000;
 }
 
 .badge.enviado {
-    background: #28a745;
-    /* Verde */
+    background: #28a745; /* Verde */
     color: #fff;
 }
 
 .badge.confirmado {
-    background: #007bff;
-    /* Azul */
+    background: #007bff; /* Azul */
     color: #fff;
 }
 
 .badge.cancelado {
-    background: #dc3545;
-    /* Rojo */
+    background: #dc3545; /* Rojo */
     color: #fff;
 }
 
@@ -404,41 +400,9 @@ main {
     color: var(--primary-dark);
 }
 
-.service-card p.service-description {
+.service-card p {
     color: var(--text-light);
     margin-bottom: var(--spacing-md);
-    font-size: 0.95rem;
-    min-height: 4.5em;
-    /* Consistencia de altura */
-}
-
-.service-info {
-    display: flex;
-    justify-content: space-around;
-    padding: 15px 0;
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
-    margin-bottom: var(--spacing-md);
-}
-
-.service-price,
-.service-duration {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    color: var(--primary-dark);
-}
-
-.service-duration {
-    color: var(--text-light);
-    font-weight: 500;
-}
-
-.service-icon {
-    font-size: 2.5rem;
-    color: var(--primary-color);
-    margin-bottom: 15px;
 }
 
 .service-features {

@@ -44,6 +44,10 @@ CREATE TRIGGER tri_audit_subcategorias
     BEFORE INSERT OR UPDATE ON tab_Subcategorias
     FOR EACH ROW EXECUTE FUNCTION fun_audit_rdwatch();
 
+CREATE TRIGGER tri_audit_proveedor 
+    BEFORE INSERT OR UPDATE ON tab_Proveedor
+    FOR EACH ROW EXECUTE FUNCTION fun_audit_rdwatch();
+
 CREATE TRIGGER tri_audit_productos 
     BEFORE INSERT OR UPDATE ON tab_Productos
     FOR EACH ROW EXECUTE FUNCTION fun_audit_rdwatch();
@@ -88,13 +92,17 @@ CREATE TRIGGER tri_audit_opiniones
     BEFORE INSERT OR UPDATE ON tab_Opiniones
     FOR EACH ROW EXECUTE FUNCTION fun_audit_rdwatch();
 
-
+CREATE TRIGGER tri_audit_recepciones_proveedor 
+    BEFORE INSERT OR UPDATE ON tab_Recepciones_Proveedor
+    FOR EACH ROW EXECUTE FUNCTION fun_audit_rdwatch();
 
 CREATE TRIGGER tri_audit_metodos_pago 
     BEFORE INSERT OR UPDATE ON tab_Metodos_Pago
     FOR EACH ROW EXECUTE FUNCTION fun_audit_rdwatch();
 
-
+CREATE TRIGGER tri_audit_usuario_metodo_pago 
+    BEFORE INSERT OR UPDATE ON tab_Usuario_Metodo_Pago
+    FOR EACH ROW EXECUTE FUNCTION fun_audit_rdwatch();
 
 CREATE TRIGGER tri_audit_promociones 
     BEFORE INSERT OR UPDATE ON tab_Promociones

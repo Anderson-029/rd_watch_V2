@@ -1,17 +1,6 @@
--- =====================================================
--- LIMPIEZA INICIAL (DROP TABLES)
--- Orden jerárquico: Hijas -> Padres
--- =====================================================
-DROP TABLE IF EXISTS tab_Rate_Limits;
 DROP TABLE IF EXISTS tab_Opiniones;
-DROP TABLE IF EXISTS tab_Pagos;
-DROP TABLE IF EXISTS tab_Detalle_Factura;
-DROP TABLE IF EXISTS tab_Facturas;
 DROP TABLE IF EXISTS tab_Envios;
-DROP TABLE IF EXISTS tab_Orden_Servicios;
-DROP TABLE IF EXISTS tab_Detalle_Orden;
 DROP TABLE IF EXISTS tab_Orden;
-DROP TABLE IF EXISTS tab_Carrito_Detalle;
 DROP TABLE IF EXISTS tab_Carrito;
 DROP TABLE IF EXISTS tab_Productos_Promociones;
 DROP TABLE IF EXISTS tab_Productos;
@@ -20,6 +9,7 @@ DROP TABLE IF EXISTS tab_Ciudades;
 DROP TABLE IF EXISTS tab_Departamentos;
 DROP TABLE IF EXISTS tab_Reservas;
 DROP TABLE IF EXISTS tab_Contacto;
+DROP TABLE IF EXISTS tab_Usuario_Metodo_Pago;
 DROP TABLE IF EXISTS tab_Metodos_Pago;
 DROP TABLE IF EXISTS tab_Servicios;
 DROP TABLE IF EXISTS tab_Promociones;
@@ -199,7 +189,6 @@ CREATE TABLE IF NOT EXISTS tab_Servicios
     descripcion             TEXT NOT NULL, -- Descripción del servicio
     precio_servicio         DECIMAL(15, 2) NOT NULL, -- Costo del servicio, no puede ser negativo
     duracion_estimada       VARCHAR(50) NOT NULL, -- Duración estimada del servicio (ej. "1 hora", "2-3 días")
-    estado                  BOOLEAN DEFAULT TRUE, -- Indica si el servicio está activo para agendamiento
 
     -- Columnas de auditoría
     usr_insert VARCHAR(100),
@@ -555,7 +544,6 @@ CREATE TABLE IF NOT EXISTS tab_Opiniones
     calificacion            SMALLINT NOT NULL, -- Calificación del producto (1 a 5 estrellas)
     comentario              TEXT NOT NULL, -- Comentario adicional sobre el producto
     fecha_opinion           TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora en que se realizó la opinión
-    activo                  BOOLEAN DEFAULT TRUE, -- Estado de la reseña
 
     -- Columnas de auditoría
     usr_insert VARCHAR(100),
@@ -645,24 +633,11 @@ CREATE TABLE IF NOT EXISTS tab_Reservas
     usr_delete VARCHAR(100),
     fec_delete TIMESTAMP,
 
-    -- Columnas de fotos (Integradas de migración)
-    foto_adjunto            BYTEA,                        -- Contenido binario de la foto
-    foto_extension          VARCHAR(10),                  -- Extensión (jpg, png, svg)
-
     PRIMARY KEY (id_reserva),
     FOREIGN KEY (id_usuario) REFERENCES tab_Usuarios(id_usuario),
     FOREIGN KEY (id_servicio) REFERENCES tab_Servicios(id_servicio),
     CHECK (estado_reserva IN ('pendiente', 'confirmada', 'cancelada', 'completada'))
 );
-
--- Índice para reservas con fotos
-CREATE INDEX IF NOT EXISTS idx_reservas_con_foto 
-    ON tab_Reservas (id_reserva) 
-    WHERE foto_adjunto IS NOT NULL;
-
--- Comentarios de columnas de fotos
-COMMENT ON COLUMN tab_Reservas.foto_adjunto IS 'Archivo de imagen adjunto en formato binario (BYTEA). Formatos permitidos: JPG, PNG, SVG';
-COMMENT ON COLUMN tab_Reservas.foto_extension IS 'Extensión del archivo adjunto (jpg, png, svg) para reconstruir el MIME type al servir el archivo';
 
 -- ==========================================
 -- Tabla: tab_Empleados

@@ -17,42 +17,41 @@ El proyecto utiliza una pila tecnológica moderna basada en PHP y **PostgreSQL 1
 
 ---
 
-## 💾 2. Lógica de Base de Datos (Modular)
-A diferencia de sistemas convencionales, la lógica de negocio reside en **Funciones de PostgreSQL** organizadas por módulos en `sql/functions/`:
+## 💾 2. Lógica de Base de Datos (Blindaje PostgreSQL)
+La lógica de negocio reside en **Funciones de PostgreSQL** organizadas por módulos en `sql/logica_backend/` (patrón de ocultación total):
 
-- **`crud_usuarios.sql`**: Gestión de roles (Admin/Cliente), login y registro.
-- **`crud_productos.sql`**: Control de inventario, marcas y categorías.
-- **`crud_ordenes.sql`**: Procesamiento de transacciones y estados de pedido.
-- **`crud_facturas.sql`**: Generación automática de facturación digital.
+- **`auth_security.sql`**: Autenticación, sesiones, rate limiting y recuperación de contraseña (14 funciones `fn_auth_*`, `fn_sec_*`).
+- **`catalog_master.sql`**: Catálogo de productos, marcas, categorías, subcategorías y servicios (20 funciones `fn_cat_*`).
+- **`ecommerce_core.sql`**: Carrito, checkout atómico y gestión de órdenes (14 funciones `fn_cart_*`, `fn_checkout_*`, `fn_orders_*`).
+- **`client_panel.sql`**: Panel de usuario, dashboard, perfil, citas y reseñas (14 funciones `fn_user_*`, `fn_citas_*`, `fn_reviews_*`).
+- **`admin_reports.sql`**: Reportes, facturación, estadísticas y configuración (8 funciones `fn_stats_*`, `fn_invoice_*`, `fn_admin_*`).
 
 ---
 
 ## 🔐 3. Flujo de Autenticación
-- **`login.php`**: Valida credenciales contra la función `fun_login_usuario` y establece `$_SESSION['user_role']`.
-- **`signup.php`**: Registra usuarios asegurando el hash de contraseña (BCRYPT).
-- **`me.php`**: Sincroniza el estado de la sesión entre el servidor y el navegador.
+- **`login.php`**: Valida credenciales contra la función `fn_auth_get_user` con protección anti brute-force (`fn_sec_check_rate_limit`).
+- **`signup.php`**: Registra usuarios via `fn_auth_register` con hash BCRYPT y validación de duplicados.
+- **`me.php`**: Sincroniza el estado de la sesión entre el servidor y el navegador via `fn_auth_get_session`.
 
 ---
 
 ## ⚙️ 4. Automatización (DevOps)
-El proyecto incluye motores de instalación automática multiplataforma:
+El proyecto incluye un script maestro de despliegue:
 
 ### Linux / Mac (`.sh`)
-- **`install_db.sh`**: Script Bash que recrea la BD, carga el esquema, inyecta las funciones modulares y puebla el catálogo.
-- Ejecución: `./install_db.sh`
+- **`deploy_all.sh`**: Script Bash que ejecuta en orden: Schema → Migraciones → Triggers → Datos semilla → Blindaje (5 pasos).
+- Ejecución: `./deploy_all.sh`
 
 ### Windows (`.bat`)
 - **`install_db.bat`**: Script Batch equivalente que configura el entorno, lee credenciales y ejecuta la secuencia SQL usando `psql`.
 - Ejecución: Doble clic en el archivo o desde CMD.
 
-- **Logs**: Todas las instalaciones se registran en `install_db.log` para auditoría.
-
 ---
 
 ## 🔄 Flujo de Datos (Workflow)
 1. **Frontend**: El usuario realiza una acción (ej: Comprar).
-2. **API (PHP)**: Recibe la petición y valida el usuario (`config.php`).
-3. **Database (PL/pgSQL)**: El PHP llama a una función SQL (ej: `fun_crear_orden`). Esto garantiza que la lógica sea atómica y rápida.
+2. **API (PHP)**: Recibe la petición y valida el usuario (`config.php`). PHP actúa como proxy JSON opaco.
+3. **Database (PL/pgSQL)**: PHP llama a una función blindada (ej: `fn_checkout_process`). La lógica es atómica y las tablas nunca se exponen.
 4. **Respuesta**: El sistema devuelve JSON estándar al navegador.
 
 ---

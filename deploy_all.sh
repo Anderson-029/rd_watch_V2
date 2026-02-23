@@ -11,9 +11,8 @@
 # 1. Schema (tablas base)        ← Primero: crea todas las tablas
 # 2. Migraciones                 ← Segundo: altera tablas existentes
 # 3. Triggers                    ← Tercero: auditoría (depende de tablas)
-# 4. Funciones CRUD legacy       ← Cuarto: funciones que usan tablas
-# 5. Datos semilla (scripts)     ← Quinto: inserts iniciales
-# 6. Lógica Backend (blindaje)   ← Sexto: funciones de la migración PHP
+# 4. Datos semilla (scripts)     ← Cuarto: inserts iniciales (geodata, usuarios, catálogo)
+# 5. Lógica Backend (blindaje)   ← Quinto: funciones fn_* del blindaje PHP
 #
 # REGLA: Cada módulo de blindaje usa CREATE OR REPLACE FUNCTION,
 # por lo que re-ejecutar NUNCA borra funciones de otros módulos.
@@ -95,26 +94,31 @@ echo -e "${BOLD}╚════════════════════�
 echo ""
 
 # ─── PASO 1: SCHEMA BASE ────────────────────────────────────
-echo -e "${BOLD}📋 PASO 1/6: SCHEMA (Tablas base)${NC}"
+echo -e "${BOLD}📋 PASO 1/5: SCHEMA (Tablas base)${NC}"
 run_sql "$SQL_DIR/schema/database_rdwatch_3_0.sql" "Schema principal (23 tablas)"
 echo ""
 
-# ─── PASO 2: TRIGGERS ───────────────────────────────────────
-echo -e "${BOLD}⚡ PASO 2/5: TRIGGERS (Auditoría automática)${NC}"
+# ─── PASO 2: MIGRACIONES ────────────────────────────────────
+echo -e "${BOLD}🔧 PASO 2/5: MIGRACIONES (Alteraciones de tablas)${NC}"
+run_sql "$SQL_DIR/migrations/add_foto_to_reservas.sql" "Migración: foto en reservas"
+echo ""
+
+# ─── PASO 3: TRIGGERS ───────────────────────────────────────
+echo -e "${BOLD}⚡ PASO 3/5: TRIGGERS (Auditoría automática)${NC}"
 run_sql "$SQL_DIR/triggers/audit_trail.sql" "Trigger: audit trail"
 echo ""
 
-# ─── PASO 3: DATOS SEMILLA ──────────────────────────────────
-# Se eliminó el paso de funciones CRUD legacy por ser obsoletas.
-echo -e "${BOLD}🌱 PASO 3/5: DATOS SEMILLA (Scripts de inserción)${NC}"
-# El bucle cargará los scripts en orden alfabético (00_geography primero)
+# ─── PASO 4: DATOS SEMILLA ──────────────────────────────────
+echo -e "${BOLD}🌱 PASO 4/5: DATOS SEMILLA (Scripts de inserción)${NC}"
+# Los archivos en scripts/ están numerados para garantizar orden correcto:
+# 00_geodata.sql (departamentos+ciudades) se ejecuta primero por FK
 for f in "$SQL_DIR"/scripts/*.sql; do
     BASENAME=$(basename "$f" .sql)
     run_sql "$f" "Seed: $BASENAME"
 done
 echo ""
 
-# ─── PASO 4: LÓGICA BACKEND (BLINDAJE) ──────────────────────
+# ─── PASO 6: LÓGICA BACKEND (BLINDAJE) ──────────────────────
 # ORDEN CRÍTICO: Las dependencias van de menor a mayor complejidad
 # Cada módulo usa CREATE OR REPLACE, así que:
 # - NO borra funciones de otros módulos
@@ -127,7 +131,7 @@ echo ""
 # 4. client_panel    → Usa: usuarios, órdenes, opiniones (panel)
 # 5. admin_reports   → Usa: TODO (reportes consolidados)
 
-echo -e "${BOLD}🛡️  PASO 4/5: LÓGICA BACKEND — BLINDAJE POSTGRESQL${NC}"
+echo -e "${BOLD}🛡️  PASO 5/5: LÓGICA BACKEND — BLINDAJE POSTGRESQL${NC}"
 echo -e "   ${CYAN}(Funciones CREATE OR REPLACE — idempotentes, sin conflictos)${NC}"
 echo ""
 

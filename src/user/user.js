@@ -51,7 +51,6 @@ function getUser() {
         }
 
         await cargarDatosPerfil(user.id);
-        await cargarResumenDashboard(user.id);
         await cargarPedidos(user.id);
         await cargarCitas(user.id);
 
@@ -191,40 +190,6 @@ async function cargarCitas(userId) {
     }
 }
 
-// 🔄 CARGAR RESUMEN DEL DASHBOARD (CONTEOS RÁPIDOS)
-async function cargarResumenDashboard(userId) {
-    try {
-        const response = await secureFetch(`${API_BASE_URL}/user_actions.php?action=resumen&uid=${userId}`, {
-            method: 'GET'
-        });
-        const result = await response.json();
-
-        if (result.ok && result.data) {
-            const { pedidosActivos, pedidosCompletados, citasPendientes } = result.data;
-
-            // Actualizar Pedidos
-            const pActivosEl = document.getElementById('pedidosActivos');
-            const pCompletadosEl = document.getElementById('pedidosCompletados');
-            if (pActivosEl) pActivosEl.textContent = `${pedidosActivos} pedido${pedidosActivos !== 1 ? 's' : ''} activo${pedidosActivos !== 1 ? 's' : ''}`;
-            if (pCompletadosEl) pCompletadosEl.textContent = `${pedidosCompletados} completado${pedidosCompletados !== 1 ? 's' : ''}`;
-
-            // Actualizar Citas/Servicios
-            const citasActivasEl = document.getElementById('citasActivas');
-            if (citasActivasEl) {
-                if (citasPendientes > 0) {
-                    citasActivasEl.textContent = `${citasPendientes} cita${citasPendientes !== 1 ? 's' : ''} pendiente${citasPendientes !== 1 ? 's' : ''}`;
-                    citasActivasEl.style.color = 'var(--primary-color)';
-                } else {
-                    citasActivasEl.textContent = '0 citas pendientes';
-                    citasActivasEl.style.color = '';
-                }
-            }
-        }
-    } catch (error) {
-        console.error('Error al cargar resumen del dashboard:', error);
-    }
-}
-
 // Función auxiliar para determinar clase de badge según estado
 function getBadgeClass(estado) {
     const estadoLower = estado.toLowerCase();
@@ -238,18 +203,6 @@ function getBadgeClass(estado) {
 function capitalizeFirst(str) {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
-
-/**
- * Formatea un número como moneda colombiana (COP)
- */
-function formatPrice(amount) {
-    return Number(amount).toLocaleString('es-CO', {
-        style: 'currency',
-        currency: 'COP',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    });
 }
 
 // 🌆 CARGAR DEPARTAMENTOS Y CIUDADES
@@ -649,18 +602,9 @@ async function cargarServiciosPanel() {
         if (data.ok) {
             servicesGrid.innerHTML = data.servicios.map(s => `
                 <div class="service-card">
-                    <div class="service-icon"><i class="fas fa-tools"></i></div>
                     <h3>${s.nom_servicio}</h3>
-                    <p class="service-description">${s.descripcion}</p>
-                    <div class="service-info">
-                        <span class="service-price"><i class="fas fa-tag"></i> ${formatPrice(s.precio_servicio)}</span>
-                        <span class="service-duration"><i class="fas fa-clock"></i> ${s.duracion_estimada}</span>
-                    </div>
-                    <button class="button button-primary btn-solicitar-servicio" 
-                            data-nombre="${s.nom_servicio}" 
-                            data-id="${s.id_servicio}">
-                        SOLICITAR
-                    </button>
+                    <p>${s.descripcion}</p>
+                    <button class="button button-primary btn-solicitar-servicio" data-nombre="${s.nom_servicio}" data-id="${s.id_servicio}">Solicitar</button>
                 </div>
             `).join('');
         }
