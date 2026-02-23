@@ -352,22 +352,26 @@ main {
 }
 
 .badge.pendiente {
-    background: #ffc107; /* Amarillo */
+    background: #ffc107;
+    /* Amarillo */
     color: #000;
 }
 
 .badge.enviado {
-    background: #28a745; /* Verde */
+    background: #28a745;
+    /* Verde */
     color: #fff;
 }
 
 .badge.confirmado {
-    background: #007bff; /* Azul */
+    background: #007bff;
+    /* Azul */
     color: #fff;
 }
 
 .badge.cancelado {
-    background: #dc3545; /* Rojo */
+    background: #dc3545;
+    /* Rojo */
     color: #fff;
 }
 
@@ -382,27 +386,73 @@ main {
     background-color: var(--white);
     border: 1px solid #eee;
     padding: var(--spacing-lg);
-    border-radius: 8px;
+    border-radius: 12px;
     box-shadow: var(--shadow-sm);
     transition: all var(--transition-fast);
     text-align: center;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .service-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
     border-color: var(--primary-light);
+}
+
+.service-prime-tag {
+    position: absolute;
+    top: 15px;
+    right: -30px;
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 5px 35px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    transform: rotate(45deg);
+    box-shadow: var(--shadow-sm);
 }
 
 .service-card h3 {
     font-family: var(--font-heading);
-    margin-bottom: var(--spacing-md);
+    margin: var(--spacing-md) 0 var(--spacing-sm);
     color: var(--primary-dark);
+    font-size: 1.4rem;
 }
 
-.service-card p {
+.service-description {
     color: var(--text-light);
+    font-size: 0.95rem;
     margin-bottom: var(--spacing-md);
+    line-height: 1.5;
+    min-height: 4.5em;
+    /* Asegura alineación uniforme */
+}
+
+.service-meta {
+    display: flex;
+    justify-content: space-around;
+    padding: var(--spacing-sm) 0;
+    margin-bottom: var(--spacing-md);
+    border-top: 1px inset rgba(0, 0, 0, 0.05);
+    border-bottom: 1px inset rgba(0, 0, 0, 0.05);
+    background: rgba(184, 134, 11, 0.03);
+    border-radius: 4px;
+}
+
+.service-meta span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--secondary-light);
+}
+
+.service-meta i {
+    color: var(--primary-color);
+    margin-right: 4px;
 }
 
 .service-features {

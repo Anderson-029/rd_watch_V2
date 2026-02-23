@@ -353,7 +353,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (servicesGrid) {
         servicesGrid.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-solicitar-servicio');
-            if (btn) seleccionarServicio(btn.getAttribute('data-nombre'), btn.getAttribute('data-id'));
+            if (btn) {
+                seleccionarServicio(
+                    btn.getAttribute('data-nombre'),
+                    btn.getAttribute('data-id'),
+                    btn.getAttribute('data-precio'),
+                    btn.getAttribute('data-duracion')
+                );
+            }
         });
     }
 
@@ -460,9 +467,25 @@ async function guardarDireccion(e) {
     }
 }
 
-function seleccionarServicio(nombreServicio, idServicio) {
+function seleccionarServicio(nombreServicio, idServicio, precio, duracion) {
     document.getElementById('servicioSeleccionado').value = nombreServicio;
     document.getElementById('servicioSeleccionadoId').value = idServicio;
+
+    // Mostrar resumen del servicio en el formulario
+    const infoResumen = document.getElementById('infoResumenServicio');
+    if (infoResumen) {
+        infoResumen.innerHTML = `
+            <div style="background: rgba(184, 134, 11, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--primary-color);">
+                <p style="margin: 0; color: var(--secondary-color); font-weight: 600;">
+                    <i class="fas fa-tag"></i> Costo Base: <span style="color: var(--primary-dark);">$${parseFloat(precio).toLocaleString()}</span>
+                </p>
+                <p style="margin: 5px 0 0 0; color: var(--secondary-color); font-weight: 600;">
+                    <i class="fas fa-clock"></i> Tiempo Estm.: <span style="color: var(--primary-dark);">${duracion}</span>
+                </p>
+            </div>
+        `;
+    }
+
     const form = document.getElementById('formSolicitudServicio');
     if (form) {
         form.classList.remove('hidden');
@@ -602,9 +625,20 @@ async function cargarServiciosPanel() {
         if (data.ok) {
             servicesGrid.innerHTML = data.servicios.map(s => `
                 <div class="service-card">
+                    <div class="service-prime-tag">Premium</div>
                     <h3>${s.nom_servicio}</h3>
-                    <p>${s.descripcion}</p>
-                    <button class="button button-primary btn-solicitar-servicio" data-nombre="${s.nom_servicio}" data-id="${s.id_servicio}">Solicitar</button>
+                    <p class="service-description">${s.descripcion}</p>
+                    <div class="service-meta">
+                        <span><i class="fas fa-clock"></i> ${s.duracion_estimada}</span>
+                        <span><i class="fas fa-tag"></i> $${parseFloat(s.precio_servicio).toLocaleString()}</span>
+                    </div>
+                    <button class="button button-primary btn-solicitar-servicio" 
+                        data-nombre="${s.nom_servicio}" 
+                        data-id="${s.id_servicio}" 
+                        data-precio="${s.precio_servicio}" 
+                        data-duracion="${s.duracion_estimada}">
+                        Solicitar Servicio
+                    </button>
                 </div>
             `).join('');
         }

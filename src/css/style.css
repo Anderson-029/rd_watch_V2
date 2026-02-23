@@ -13,6 +13,8 @@
     --accent-color: #92000A;
     /* Rojo Carmesí (Detalles mecánicos) */
 
+    --success-color: #009D71;
+
     --text-color: #1A1A1A;
     /* Casi negro para máximo contraste */
     --text-light: #333333;
@@ -627,19 +629,11 @@ section {
 
 .card-text {
     font-size: 0.85rem;
-    /* Reduced from 0.95rem */
     color: var(--text-light);
     margin-bottom: 12px;
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    /* Limit text lines */
-    line-clamp: 3;
-    /* Standard property */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    line-height: 1.6;
+    /* Eliminado line-clamp para permitir descripciones completas */
     min-height: auto;
-    /* Remove fixed height constraint */
 }
 
 .service-features {

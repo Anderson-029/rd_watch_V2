@@ -1578,18 +1578,26 @@ if (authModal) {
     if (forgotLink && forgotWrapper) {
         forgotLink.addEventListener('click', (e) => {
             e.preventDefault();
-            // Ocultar todos los wrappers y mostrar el de recuperación
-            document.querySelectorAll('.form-wrapper').forEach(w => w.style.display = 'none');
+            // Ocultar todos los wrappers y remover clase activa
+            document.querySelectorAll('.form-wrapper').forEach(w => {
+                w.style.display = 'none';
+                w.classList.remove('is-active');
+            });
+            // Mostrar el de recuperación y activar
             forgotWrapper.style.display = 'block';
+            forgotWrapper.classList.add('is-active');
         });
     }
 
     if (backToLoginLink) {
         backToLoginLink.addEventListener('click', (e) => {
             e.preventDefault();
-            forgotWrapper.style.display = 'none';
+            // Ocultar todos los wrappers y remover clase activa
+            document.querySelectorAll('.form-wrapper').forEach(w => {
+                w.style.display = 'none';
+                w.classList.remove('is-active');
+            });
             // Restaurar vista de login
-            document.querySelectorAll('.form-wrapper').forEach(w => w.style.display = 'none');
             const loginFormWrapper = document.querySelector('.switcher-login').parentElement;
             loginFormWrapper.style.display = 'block';
             loginFormWrapper.classList.add('is-active');

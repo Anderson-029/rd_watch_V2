@@ -189,6 +189,7 @@ CREATE TABLE IF NOT EXISTS tab_Servicios
     descripcion             TEXT NOT NULL, -- Descripción del servicio
     precio_servicio         DECIMAL(15, 2) NOT NULL, -- Costo del servicio, no puede ser negativo
     duracion_estimada       VARCHAR(50) NOT NULL, -- Duración estimada del servicio (ej. "1 hora", "2-3 días")
+    estado                  BOOLEAN NOT NULL DEFAULT TRUE, -- Indica si el servicio está activo o inactivo
 
     -- Columnas de auditoría
     usr_insert VARCHAR(100),

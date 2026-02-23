@@ -25,19 +25,26 @@ INSERT INTO tab_Subcategorias (id_categoria, id_subcategoria, nom_subcategoria, 
 (4, 1, 'Correas y Brazaletes', 'system', NOW()), (4, 2, 'Cristales y Biseles', 'system', NOW())
 ON CONFLICT (id_categoria, id_subcategoria) DO NOTHING;
 
--- 4. SERVICIOS TÉCNICOS (Corregido según esquema: descripcion, duracion_estimada)
-INSERT INTO tab_Servicios (id_servicio, nom_servicio, descripcion, precio_servicio, duracion_estimada, usr_insert, fec_insert) VALUES
-(1, 'Cambio de Pila Premium', 'Instalación de batería suiza con empaque.', 45000, '30 min', 'system', NOW()),
-(2, 'Mantenimiento General Automático', 'Limpieza y ajuste de marcha.', 320000, '3-5 días', 'system', NOW()),
-(3, 'Pulido de Caja y Pulso', 'Restauración de brillo original.', 180000, '2 días', 'system', NOW()),
-(4, 'Cambio de Cristal Zafiro', 'Sustitución por zafiro irrayable.', 250000, '24 horas', 'system', NOW()),
-(5, 'Restauración de Esfera', 'Pintura técnica y LumiNova.', 450000, '15 días', 'system', NOW()),
-(6, 'Prueba de Hermeticidad', 'Test de presión profesional.', 85000, '1 hora', 'system', NOW()),
-(7, 'Ajuste de Brazalete', 'Remoción de eslabones.', 25000, '15 min', 'system', NOW()),
-(8, 'Revisión y Diagnóstico', 'Evaluación técnica.', 0, '20 min', 'system', NOW()),
-(9, 'Cambio de Corona y Tija', 'Repuesto original.', 120000, '1 día', 'system', NOW()),
-(10, 'Mantenimiento Cronógrafo', 'Servicio especializado.', 650000, '8 días', 'system', NOW())
-ON CONFLICT (id_servicio) DO NOTHING;
+-- 4. SERVICIOS TÉCNICOS (Ultra-Detallados: Claridad total para el cliente)
+INSERT INTO tab_Servicios (id_servicio, nom_servicio, descripcion, precio_servicio, duracion_estimada, estado, usr_insert, fec_insert) VALUES
+(1, 'Cambio de Pila Premium', 'Sustitución de celda de energía por una batería suiza de alta gama (Murata/Renata). El proceso incluye: 1. Apertura con herramienta de precisión, 2. Limpieza de sulfatación en contactos, 3. Lubricación de empaque de fondo con grasa de silicona Bergeon, 4. Verificación de consumo del circuito y 5. Sincronización horaria completa.', 45000, '30 min', TRUE, 'system', NOW()),
+(2, 'Mantenimiento General Automático', 'Servicio integral de restauración mecánica (Overhaul). Incluye: 1. Desarmado pieza por pieza del calibre, 2. Lavado por ultrasonido en 4 ciclos (limpieza y enjuagues), 3. Inspección de desgaste en pivotes y rubíes, 4. Aceitado técnico con 5 tipos de lubricantes Moebius según la función de cada componente, 5. Armado, 6. Calibración de precisión en cronocomparador y 7. Prueba de reserva de marcha de 48 horas.', 320000, '3-5 días', TRUE, 'system', NOW()),
+(3, 'Pulido de Caja y Pulso', 'Restauración estética de alto nivel. Utilizamos tecnología de Lapping para devolver los acabados originales: 1. Lijado controlado de rayas profundas, 2. Pulido industrial para brillo espejo, 3. Satinado fino de eslabones y 4. Lavado por ultrasonido de los componentes externos para eliminar residuos de pasta de pulir, dejando el reloj con apariencia de estreno.', 180000, '2 días', TRUE, 'system', NOW()),
+(4, 'Cambio de Cristal Zafiro', 'Mejora de resistencia y visibilidad. Sustituimos su cristal mineral deteriorado por un Cristal de Zafiro sintético irrayable (Dureza 9 en escala Mohs). El proceso incluye: 1. Extracción con prensa Bergeon, 2. Limpieza de bisel interno, 3. Instalación de empaque nuevo de teflón y 4. Certificación de estanqueidad para asegurar que no ingrese humedad al reloj.', 250000, '24 horas', TRUE, 'system', NOW()),
+(5, 'Restauración de Esfera', 'Proceso artesanal para diales manchados o decolorados. Comprende: 1. Desmontaje cuidadoso de manecillas e índices, 2. Limpieza química de la placa base, 3. Repintado técnico fiel al diseño original, 4. Aplicación de nueva pasta luminosa Super-LumiNova® en puntos horarios para lectura nocturna y 5. Barnizado protector contra rayos UV para evitar futuras decoloraciones.', 450000, '15 días', TRUE, 'system', NOW()),
+(6, 'Prueba de Hermeticidad', 'Certificación de resistencia al agua. Sometemos el reloj a pruebas de vacío y presión hidrostática controlada mediante equipo Witschi ALC-2000. Identificamos fugas microscópicas en corona, cristal o fondo. Es vital para relojes de buceo o uso diario, entregando un reporte técnico de los bares de presión resistidos.', 85000, '1 hora', TRUE, 'system', NOW()),
+(7, 'Ajuste de Brazalete', 'Adaptación perfecta a su muñeca. Ajustamos la longitud de su pulso metálico mediante: 1. Remoción técnica de eslabones sobrantes con punzones de precisión, 2. Inspección de pasadores y tornillos de seguridad, 3. Centrado del broche para mayor comodidad y 4. Limpieza profunda del brazalete en ultrasonido para retirar impurezas acumuladas entre eslabones.', 25000, '15 min', TRUE, 'system', NOW()),
+(8, 'Revisión y Diagnóstico', 'Evaluación técnica sin compromiso de pago. Realizamos: 1. Análisis visual de la maquinaria, 2. Prueba electrónica de precisión (amplitud y error de beat), 3. Verificación de magnetismo y 4. Revisión de juntas de sellado. Al finalizar, le entregamos un presupuesto detallado especificando los repuestos y mano de obra necesaria para la salud de su pieza.', 0, '20 min', TRUE, 'system', NOW()),
+(9, 'Cambio de Corona y Tija', 'Restauración del sistema de mando. Incluye: 1. Sustitución de la corona deteriorada por una original (roscada o a presión), 2. Cambio de la tija de remontuar (eje interno), 3. Lubricación del sistema de piñones de puesta en hora y 4. Verificación de que el cambio de fecha y hora sea suave y preciso.', 120000, '1 día', TRUE, 'system', NOW()),
+(10, 'Mantenimiento Cronógrafo', 'Servicio especializado para relojes de alta complejidad. Además del mantenimiento general, realizamos: 1. Sincronización de los contadores de minutos y horas, 2. Ajuste de la fuerza de los martillos de reseteo, 3. Lubricación específica para sistemas de rueda de pilares o levas y 4. Verificación de que el inicio, parada y retorno a cero funcionen con precisión absoluta.', 650000, '8 días', TRUE, 'system', NOW())
+ON CONFLICT (id_servicio) DO UPDATE SET 
+    nom_servicio = EXCLUDED.nom_servicio,
+    descripcion = EXCLUDED.descripcion,
+    precio_servicio = EXCLUDED.precio_servicio,
+    duracion_estimada = EXCLUDED.duracion_estimada,
+    estado = EXCLUDED.estado,
+    usr_update = 'system_fix',
+    fec_update = NOW();
 
 -- 5. PRODUCTOS (1-55)
 INSERT INTO tab_Productos (id_producto, id_marca, nom_producto, descripcion, precio, id_categoria, id_subcategoria, stock, url_imagen, usr_insert, fec_insert) VALUES

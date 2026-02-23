@@ -1039,15 +1039,20 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  FUNCIÓN 20: fn_cat_get_servicios                       ║
 -- ╠══════════════════════════════════════════════════════════╣
 -- ║  Propósito  : Listar la oferta técnica completa del       ║
--- ║               taller para administración.               ║
+-- ║               taller para administración y agendamiento.║
 -- ║  Llamada PHP: SELECT fn_cat_get_servicios()             ║
 -- ║  Retorna    : JSON array con la ficha técnica completa.  ║
 -- ║                                                         ║
 -- ║  FLUJO:                                                 ║
--- ║  1. Admin abre la sección "Servicios" del panel.        ║
--- ║  2. PHP ejecuta SELECT fn_cat_get_servicios().          ║
--- ║  3. La función escanea tab_Servicios completa.          ║
--- ║  4. Retorna JSON array → PHP decodifica y envía al UI.  ║
+-- ║  1. El sistema (Admin/Cliente) solicita el portafolio.   ║
+-- ║  2. La función consulta tab_Servicios.                   ║
+-- ║  3. Retorna JSON array con IDs, nombres, precios y       ║
+-- ║     el indicador de estado (Activo/Inactivo).           ║
+-- ║                                                         ║
+-- ║  ¿Por qué incluimos 'estado'?                           ║
+-- ║  Para que el frontend pueda filtrar servicios que ya no  ║
+-- ║  se prestan sin tener que eliminarlos físicamente,       ║
+-- ║  preservando la integridad de las reservas pasadas.     ║
 -- ╚══════════════════════════════════════════════════════════╝
 DROP FUNCTION IF EXISTS fn_cat_get_servicios();
 CREATE OR REPLACE FUNCTION fn_cat_get_servicios()
@@ -1055,22 +1060,21 @@ RETURNS JSON AS $$
 DECLARE 
     v_result JSON;
 BEGIN
-    -- Captura del buffer de servicios técnicos.
     SELECT COALESCE(json_agg(row_to_json(t)), '[]'::json) INTO v_result FROM (
         SELECT 
-            s.id_servicio,          -- PK
-            s.nom_servicio,         -- Etiqueta (ej: Mantención)
-            s.descripcion,          -- Detalle del procedimiento
-            s.precio_servicio,      -- Valor base
-            s.duracion_estimada,    -- Tiempo de entrega
-            s.estado                -- Disponibilidad para citas
+            s.id_servicio,          -- Identificador único
+            s.nom_servicio,         -- Etiqueta comercial
+            s.descripcion,          -- Detalle técnico
+            s.precio_servicio,      -- Tarifa base
+            s.duracion_estimada,    -- Tiempo de compromiso
+            s.estado                -- Disponibilidad (TRUE=Activo, FALSE=Pausado)
         FROM tab_Servicios s
-        ORDER BY s.id_servicio DESC -- Los añadidos recientemente arriba
+        ORDER BY s.id_servicio DESC 
     ) t;
 
     RETURN v_result;
 END;
-$$ LANGUAGE plpgsql STABLE; -- Función de consulta pura
+$$ LANGUAGE plpgsql STABLE;
 
 
 -- ╔══════════════════════════════════════════════════════════╗
@@ -1136,23 +1140,29 @@ $$ LANGUAGE plpgsql;
 -- ╔══════════════════════════════════════════════════════════╗
 -- ║  FUNCIÓN 22: fn_cat_update_servicio                     ║
 -- ╠══════════════════════════════════════════════════════════╣
--- ║  Propósito  : Actualizar los parámetros comerciales y     ║
--- ║               técnicos de un servicio.                  ║
--- ║  Llamada PHP: SELECT fn_cat_update_servicio(5, ...)     ║
+-- ║  Propósito  : Actualizar los parámetros comerciales,      ║
+-- ║               técnicos y de disponibilidad de un servicio.║
+-- ║  Llamada PHP: SELECT fn_cat_update_servicio(5, ..., t/f) ║
 -- ║  Retorna    : JSON {ok: true, msg: text}                ║
 -- ║                                                         ║
 -- ║  FLUJO:                                                 ║
--- ║  1. Admin edita datos del servicio en el panel.         ║
--- ║  2. PHP ejecuta fn_cat_update_servicio(...).            ║
+-- ║  1. Admin edita datos o alterna el interruptor de estado.║
+-- ║  2. PHP (servicios.php) ejecuta la actualización.        ║
 -- ║  3. UPDATE con sello de auditoría (fec_update).         ║
 -- ║  4. Retorna {ok, msg} → PHP confirma al frontend.       ║
+-- ║                                                         ║
+-- ║  IMPORTANCIA DEL ESTADO:                                 ║
+-- ║  Permite retirar un servicio de la vista del cliente sin ║
+-- ║  romper las FK de citas previas en tab_Reservas.        ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_cat_update_servicio(bigint, text, text, numeric, text);
 CREATE OR REPLACE FUNCTION fn_cat_update_servicio(
-    p_id       BIGINT,  -- ID del servicio a modificar
-    p_nombre   TEXT,    -- Nuevo nombre
-    p_desc     TEXT,    -- Nueva especificación
-    p_precio   NUMERIC, -- Ajuste de tarifa
-    p_duracion TEXT     -- Ajuste de tiempo
+    p_id       BIGINT,   -- ID del servicio a modificar
+    p_nombre   TEXT,     -- Nuevo nombre
+    p_desc     TEXT,     -- Nueva especificación
+    p_precio   NUMERIC,  -- Ajuste de tarifa
+    p_duracion TEXT,     -- Ajuste de tiempo
+    p_estado   BOOLEAN DEFAULT TRUE -- Disponibilidad lógica
 ) RETURNS JSON AS $$
 BEGIN
     -- DML con sello de auditoría de edición.
@@ -1161,11 +1171,12 @@ BEGIN
         descripcion = p_desc,
         precio_servicio = p_precio, 
         duracion_estimada = p_duracion,
+        estado = p_estado,           -- Sincronización con el nuevo campo de base
         fec_update = NOW(), 
         usr_update = 'admin_editor'
     WHERE id_servicio = p_id;
 
-    RETURN json_build_object('ok', true, 'msg', 'Servicio técnico actualizado correctamente.');
+    RETURN json_build_object('ok', true, 'msg', 'Servicio técnico actualizado y auditado correctamente.');
 END;
 $$ LANGUAGE plpgsql;
 

@@ -108,38 +108,27 @@ echo -e "${BOLD}⚡ PASO 3/5: TRIGGERS (Auditoría automática)${NC}"
 run_sql "$SQL_DIR/triggers/audit_trail.sql" "Trigger: audit trail"
 echo ""
 
-# ─── PASO 4: DATOS SEMILLA ──────────────────────────────────
-echo -e "${BOLD}🌱 PASO 4/5: DATOS SEMILLA (Scripts de inserción)${NC}"
-# Los archivos en scripts/ están numerados para garantizar orden correcto:
-# 00_geodata.sql (departamentos+ciudades) se ejecuta primero por FK
+# ─── PASO 4: DATOS SEMILLA & TABLAS AUXILIARES ──────────────
+echo -e "${BOLD}🌱 PASO 4/5: SEMILLAS Y TABLAS (Scripts numerados)${NC}"
+# Los archivos en scripts/ están numerados (00, 01, 04a, etc.)
+# El bucle for garantiza el orden alfabético/numérico correcto.
 for f in "$SQL_DIR"/scripts/*.sql; do
     BASENAME=$(basename "$f" .sql)
-    run_sql "$f" "Seed: $BASENAME"
+    run_sql "$f" "Script: $BASENAME"
 done
 echo ""
 
-# ─── PASO 6: LÓGICA BACKEND (BLINDAJE) ──────────────────────
-# ORDEN CRÍTICO: Las dependencias van de menor a mayor complejidad
-# Cada módulo usa CREATE OR REPLACE, así que:
-# - NO borra funciones de otros módulos
-# - Es 100% idempotente (se puede re-ejecutar sin riesgo)
-#
-# Orden lógico:
-# 1. auth_security   → Base: usuarios, sesiones, rate limiting
-# 2. catalog_master  → Usa: usuarios (quién crea productos)
-# 3. ecommerce_core  → Usa: productos, usuarios (carrito, checkout)
-# 4. client_panel    → Usa: usuarios, órdenes, opiniones (panel)
-# 5. admin_reports   → Usa: TODO (reportes consolidados)
-
+# ─── PASO 5: LÓGICA BACKEND (BLINDAJE) ──────────────────────
+# ORDEN LÓGICO: auth -> catalog -> ecommerce -> client -> admin
 echo -e "${BOLD}🛡️  PASO 5/5: LÓGICA BACKEND — BLINDAJE POSTGRESQL${NC}"
-echo -e "   ${CYAN}(Funciones CREATE OR REPLACE — idempotentes, sin conflictos)${NC}"
+echo -e "   ${CYAN}(Funciones CREATE OR REPLACE — idempotentes)${NC}"
 echo ""
 
-run_sql "$SQL_DIR/logica_backend/auth_security.sql"   "Fase 1: Seguridad y Acceso"
-run_sql "$SQL_DIR/logica_backend/catalog_master.sql"  "Fase 2: Catálogo e Inventario"
-run_sql "$SQL_DIR/logica_backend/ecommerce_core.sql"  "Fase 3: Transacciones y Compras"
-run_sql "$SQL_DIR/logica_backend/client_panel.sql"    "Fase 4: Panel de Cliente y Reseñas"
-run_sql "$SQL_DIR/logica_backend/admin_reports.sql"   "Fase 5: Reportes y Facturación"
+run_sql "$SQL_DIR/logica_backend/auth_security.sql"   "Módulo 1: Seguridad y Acceso"
+run_sql "$SQL_DIR/logica_backend/catalog_master.sql"  "Módulo 2: Catálogo e Inventario"
+run_sql "$SQL_DIR/logica_backend/ecommerce_core.sql"  "Módulo 3: Transacciones y Compras"
+run_sql "$SQL_DIR/logica_backend/client_panel.sql"    "Módulo 4: Panel de Cliente y Reseñas"
+run_sql "$SQL_DIR/logica_backend/admin_reports.sql"   "Módulo 5: Reportes y Facturación"
 echo ""
 
 # ─── RESUMEN FINAL ───────────────────────────────────────────
