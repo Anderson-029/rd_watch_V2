@@ -1,31 +1,18 @@
 <?php
 /**
  * ============================================================
- * API: CONTACTO / AGENDAMIENTO DESDE LANDING (contacto.php)
+ * API: CONTACTO GENERAL (contacto.php)
  * ============================================================
  * ENDPOINT: POST /api/contacto.php
  *
  * PROPÓSITO:
- * Maneja las solicitudes de contacto desde la página principal
- * (landing page). Crea reservas en la BD directamente.
+ * Maneja las solicitudes de contacto desde la página principal.
+ * Inserta el mensaje en `tab_Contacto`, no requiere inicio de sesión.
  *
  * SEGURIDAD:
- * - Solo usuarios logueados pueden agendar (anti-spam)
- * - Rate limiting para usuarios anónimos
- * - Anti-duplicado: no permite enviar el mismo mensaje 2 veces
- *   en 5 minutos (fn_contacto_check_dup)
- * - Validación de teléfono: exactamente 10 dígitos
- *
- * FUNCIONES POSTGRESQL QUE USA:
- * - fn_sec_check_rate_limit(ip, acción, límite, ventana) → BOOLEAN
- * - fn_sec_log_attempt(ip, acción) → Registra intento anónimo
- * - fn_contacto_check_dup(user_id, mensaje) → BOOLEAN
- * - fn_contacto_create(user_id, servicio_txt, notas) → JSON {ok, msg}
- *
- * MAPEO DE SERVICIOS:
- * El frontend envía un código de servicio ('repair', 'maintenance'...)
- * que se traduce a un término en español para buscar en la BD.
- * fn_contacto_create busca el servicio por nombre parcial (ILIKE).
+ * - Rate limiting para evitar el spam (5 intentos por hora).
+ * - CSRF obligatorio
+ * - Validación y sanitización estricta
  * ============================================================
  */
 
@@ -52,37 +39,21 @@ validateCsrfToken(null, true);
 
 $data = getJsonInput();
 
+$clientIP = getClientIP();
+
 // ──────────────────────────────────────────────
-// RECONOCIMIENTO: ¿Logueado o anónimo?
+// RATE LIMITING DE MENSAJES DE CONTACTO
 // ──────────────────────────────────────────────
-$isLoggedIn = isset($_SESSION['user_id']);
-
-if (!$isLoggedIn) {
-    // ──────────────────────────────────────────────
-    // BLOQUEO DE ANÓNIMOS CON RATE LIMITING
-    // ──────────────────────────────────────────────
-    // Los anónimos tienen límite de 3 intentos en 60 minutos
-    // Esto previene spam masivo sin cuenta
-    $clientIP = getClientIP();
-
-    $rlStmt = $pdo->prepare("SELECT fn_sec_check_rate_limit(?, ?, 3, 60)");
-    $rlStmt->execute([$clientIP, 'contact_form_anonymous']);
-    if (!$rlStmt->fetchColumn()) {
-        http_response_code(429);
-        echo json_encode(["ok" => false, "msg" => "Has excedido el límite de intentos anónimos. Por favor inicia sesión."]);
-        exit;
-    }
-    // Registrar intento del anónimo
-    $pdo->prepare("SELECT fn_sec_log_attempt(?, ?)")->execute([$clientIP, 'contact_form_anonymous']);
-
-    // Bloqueo: exigir sesión para agendar
-    http_response_code(401);
-    echo json_encode(['ok' => false, 'msg' => 'Para su seguridad, debe iniciar sesión antes de agendar una cita.']);
+$rlStmt = $pdo->prepare("SELECT fn_sec_check_rate_limit(?, ?, 5, 60)");
+$rlStmt->execute([$clientIP, 'contact_form_submission']);
+if (!$rlStmt->fetchColumn()) {
+    http_response_code(429);
+    echo json_encode(["ok" => false, "msg" => "Has enviado muchos mensajes en poco tiempo. Por favor intenta más tarde."]);
     exit;
 }
 
-// Si llegamos aquí → usuario logueado
-$id_usuario = $_SESSION['user_id'];
+// Registrar intento
+$pdo->prepare("SELECT fn_sec_log_attempt(?, ?)")->execute([$clientIP, 'contact_form_submission']);
 
 try {
     // ──────────────────────────────────────────────
@@ -92,7 +63,7 @@ try {
         'nombre' => 'name',
         'email' => 'email',
         'telefono' => 'name',
-        'servicio' => 'name',
+        'asunto' => 'name',
         'mensaje' => 'name'
     ]);
 
@@ -100,7 +71,7 @@ try {
     $email = Validation::sanitizeString($data['email']);
     $telefonoRaw = Validation::sanitizeString($data['telefono']);
     $telefono = preg_replace('/\D/', '', $telefonoRaw); // Solo dígitos
-    $servicio = Validation::sanitizeString($data['servicio']);
+    $asunto = Validation::sanitizeString($data['asunto']);
     $mensaje = Validation::sanitizeString($data['mensaje']);
 
     // Validar teléfono: exactamente 10 dígitos
@@ -110,45 +81,28 @@ try {
     }
 
     // ──────────────────────────────────────────────
-    // ANTI-DUPLICADO (consulta opaca)
+    // INSERTAR EL MENSAJE EN TAB_CONTACTO
     // ──────────────────────────────────────────────
-    // fn_contacto_check_dup busca si ya envió este mismo mensaje
-    // en los últimos 5 minutos
-    $dupStmt = $pdo->prepare("SELECT fn_contacto_check_dup(?, ?)");
-    $dupStmt->execute([$id_usuario, $mensaje]);
-    if ($dupStmt->fetchColumn()) {
-        echo json_encode(['ok' => false, 'msg' => 'Su solicitud ya ha sido recibida.']);
-        exit;
+    
+    // Generar nuevo identificador
+    $idStmt = $pdo->query("SELECT COALESCE(MAX(id_contacto), 0) + 1 FROM tab_Contacto");
+    $newId = $idStmt->fetchColumn();
+
+    $stmt = $pdo->prepare("SELECT fun_insert_contacto(?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$newId, $nombre, $email, $telefono, $asunto, $mensaje]);
+    
+    $result = $stmt->fetchColumn();
+    
+    if (strpos($result, 'SUCCESS') !== false) {
+        echo json_encode(['ok' => true, 'msg' => 'Tu mensaje ha sido enviado correctamente. Nos pondremos en contacto pronto!']);
+    } else {
+        error_log("Error BD contacto: " . $result);
+        echo json_encode(['ok' => false, 'msg' => 'Hubo un error interno al guardar el mensaje. Inténtelo más tarde.']);
     }
-
-    // ──────────────────────────────────────────────
-    // MAPEO DE SERVICIOS (frontend → español)
-    // ──────────────────────────────────────────────
-    // El frontend envía códigos en inglés → los traducimos
-    // para buscar en la BD con ILIKE
-    $service_map = [
-        'repair' => 'reparación',
-        'maintenance' => 'mantenimiento',
-        'parts' => 'repuesto',
-        'appraisal' => 'valuación',
-        'other' => 'otro'
-    ];
-    $search_term = $service_map[$servicio] ?? $servicio;
-
-    // ──────────────────────────────────────────────
-    // CREAR RESERVA (consulta opaca)
-    // ──────────────────────────────────────────────
-    // fn_contacto_create busca el servicio por nombre parcial
-    // y crea la reserva automáticamente
-    $notas = "Cita agendada desde el Landing:\n\nServicio: $servicio\n\nMensaje:\n$mensaje";
-
-    $stmt = $pdo->prepare("SELECT fn_contacto_create(?, ?, ?)");
-    $stmt->execute([$id_usuario, $search_term, $notas]);
-    echo json_encode(json_decode($stmt->fetchColumn(), true));
 
 }
 catch (PDOException $e) {
     http_response_code(500);
-    error_log("Error en contacto.php: " . $e->getMessage());
-    echo json_encode(['ok' => false, 'msg' => 'Error al procesar la solicitud: ' . $e->getMessage()]);
+    error_log("PDOException en contacto.php: " . $e->getMessage());
+    echo json_encode(['ok' => false, 'msg' => 'Error al procesar la solicitud en el servidor.']);
 }

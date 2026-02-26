@@ -1071,25 +1071,18 @@ function initRequestButtons() {
     if (requestButtons.length > 0) {
         requestButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const searchTerm = btn.getAttribute('data-search').toLowerCase();
-                const select = document.getElementById('contact-service');
+                const subjectInput = document.getElementById('contact-subject');
 
                 // Esperamos un momento para el scroll
                 setTimeout(() => {
-                    if (select && select.options.length > 1) {
-                        for (let i = 0; i < select.options.length; i++) {
-                            const optionText = select.options[i].text.toLowerCase();
-                            if (optionText.includes(searchTerm)) {
-                                select.selectedIndex = i;
-                                select.style.borderColor = 'var(--primary-color)';
-                                select.style.boxShadow = '0 0 10px rgba(184, 134, 11, 0.3)';
-                                setTimeout(() => {
-                                    select.style.borderColor = '';
-                                    select.style.boxShadow = '';
-                                }, 1500);
-                                break;
-                            }
-                        }
+                    if (subjectInput) {
+                        subjectInput.value = btn.getAttribute('data-search');
+                        subjectInput.style.borderColor = 'var(--primary-color)';
+                        subjectInput.style.boxShadow = '0 0 10px rgba(184, 134, 11, 0.3)';
+                        setTimeout(() => {
+                            subjectInput.style.borderColor = '';
+                            subjectInput.style.boxShadow = '';
+                        }, 1500);
                     }
                 }, 100);
             });
@@ -1711,36 +1704,18 @@ async function handleContactForm(e) {
     const btnText = submitBtn.querySelector('.btn-text');
     const btnLoader = submitBtn.querySelector('.btn-loader');
 
-    // === RECONOCIMIENTO INTELIGENTE (COHERENCIA Y SEGURIDAD) ===
-    const currentUser = JSON.parse(sessionStorage.getItem('user'));
-    if (!currentUser) {
-        // El usuario no está logueado -> Mostrar alerta modal obligatoria
-        if (window.showAlert) {
-            showAlert('Para garantizar la seguridad y el seguimiento de su cita, debe estar registrado e iniciar sesión en nuestro sistema.', 'Módulo de Reservas');
-        } else {
-            alert('Debe iniciar sesión para agendar una cita.');
-        }
-
-        // Proyectar el modal de login automáticamente después de la alerta
-        const authModal = document.getElementById('auth-modal');
-        if (authModal) {
-            authModal.style.display = 'flex';
-            setTimeout(() => authModal.classList.add('show'), 500);
-        }
-        return;
-    }
 
     // Get form data
     const nombre = document.getElementById('contact-name').value.trim();
     const email = document.getElementById('contact-email').value.trim();
     const telefono = document.getElementById('contact-phone').value.trim();
-    const servicio = document.getElementById('contact-service').value;
+    const asunto = document.getElementById('contact-subject').value.trim();
     const mensaje = document.getElementById('contact-message').value.trim();
 
     // === VALIDACIONES ===
 
     // Validación básica de campos obligatorios
-    if (!nombre || !email || !servicio || !mensaje) {
+    if (!nombre || !email || !asunto || !mensaje) {
         showNotification('❌ Por favor completa todos los campos obligatorios', true);
         return;
     }
@@ -1765,12 +1740,11 @@ async function handleContactForm(e) {
     submitBtn.disabled = true;
 
     try {
-        // Crear payload JSON (más coherente con nuestras APIs de seguridad)
         const payload = {
             nombre,
             email,
             telefono,
-            servicio,
+            asunto,
             mensaje
         };
 
@@ -1806,35 +1780,6 @@ async function handleContactForm(e) {
 /**
  * Carga servicios dinámicamente en el select del formulario de contacto
  */
-async function loadContactServices() {
-    const serviceSelect = document.getElementById('contact-service');
-    if (!serviceSelect) return;
-
-    try {
-        const response = await secureFetch(`${API_BASE_SHOP}/servicios.php`);
-        const data = await response.json();
-
-        if (data.ok && data.servicios && data.servicios.length > 0) {
-            // Limpiar opciones existentes excepto la primera (placeholder)
-            while (serviceSelect.options.length > 1) {
-                serviceSelect.remove(1);
-            }
-
-            // Agregar servicios dinámicamente
-            data.servicios.forEach(servicio => {
-                const option = document.createElement('option');
-                option.value = servicio.id_servicio;
-                option.textContent = servicio.nom_servicio;
-                option.style.color = '#333'; // Asegurar que el texto sea visible
-                serviceSelect.appendChild(option);
-            });
-        } else {
-            console.warn('No se pudieron cargar los servicios');
-        }
-    } catch (error) {
-        console.error('Error al cargar servicios:', error);
-    }
-}
 
 /**
  * Validación en tiempo real del teléfono de contacto
@@ -1866,8 +1811,6 @@ document.addEventListener('DOMContentLoaded', () => {
         contactForm.addEventListener('submit', handleContactForm);
     }
 
-    // Cargar servicios en el formulario de contacto
-    loadContactServices();
 
     // Configurar validación de contacto
     setupContactValidation();

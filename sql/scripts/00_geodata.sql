@@ -1,4 +1,32 @@
---INSERTS DEPARTAMENTOS
+-- DEFINICIÓN DE FUNCIONES DE SOPORTE PARA GEODATA
+CREATE OR REPLACE FUNCTION fun_insert_departamentos(p_id integer, p_nombre varchar, p_iso varchar)
+RETURNS void AS $$
+BEGIN
+    INSERT INTO tab_Departamentos (id_departamento, nombre_departamento, codigo_iso, usr_insert, fec_insert)
+    VALUES (p_id, p_nombre, p_iso, 'system', CURRENT_TIMESTAMP)
+    ON CONFLICT (id_departamento) DO UPDATE 
+    SET nombre_departamento = EXCLUDED.nombre_departamento,
+        codigo_iso = EXCLUDED.codigo_iso,
+        usr_update = 'system',
+        fec_update = CURRENT_TIMESTAMP;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fun_insert_ciudades(p_id integer, p_dept integer, p_nombre varchar, p_postal varchar)
+RETURNS void AS $$
+BEGIN
+    INSERT INTO tab_Ciudades (id_ciudad, id_departamento, nombre_ciudad, codigo_postal, usr_insert, fec_insert)
+    VALUES (p_id, p_dept, p_nombre, p_postal, 'system', CURRENT_TIMESTAMP)
+    ON CONFLICT (id_ciudad) DO UPDATE 
+    SET id_departamento = EXCLUDED.id_departamento,
+        nombre_ciudad = EXCLUDED.nombre_ciudad,
+        codigo_postal = EXCLUDED.codigo_postal,
+        usr_update = 'system',
+        fec_update = CURRENT_TIMESTAMP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- INSERTS DEPARTAMENTOS
 
 -- Región Amazonía
 SELECT fun_insert_departamentos(1, 'Amazonas', 'CO-AMA');

@@ -1,18 +1,22 @@
+DROP TABLE IF EXISTS tab_Rate_Limits;
 DROP TABLE IF EXISTS tab_Opiniones;
+DROP TABLE IF EXISTS tab_Pagos;
 DROP TABLE IF EXISTS tab_Envios;
+DROP TABLE IF EXISTS tab_Detalle_Factura;
+DROP TABLE IF EXISTS tab_Facturas;
+DROP TABLE IF EXISTS tab_Orden_Servicios;
+DROP TABLE IF EXISTS tab_Detalle_Orden;
 DROP TABLE IF EXISTS tab_Orden;
+DROP TABLE IF EXISTS tab_Carrito_Detalle;
 DROP TABLE IF EXISTS tab_Carrito;
-DROP TABLE IF EXISTS tab_Productos_Promociones;
 DROP TABLE IF EXISTS tab_Productos;
 DROP TABLE IF EXISTS tab_Direcciones_Envio;
 DROP TABLE IF EXISTS tab_Ciudades;
 DROP TABLE IF EXISTS tab_Departamentos;
 DROP TABLE IF EXISTS tab_Reservas;
 DROP TABLE IF EXISTS tab_Contacto;
-DROP TABLE IF EXISTS tab_Usuario_Metodo_Pago;
 DROP TABLE IF EXISTS tab_Metodos_Pago;
 DROP TABLE IF EXISTS tab_Servicios;
-DROP TABLE IF EXISTS tab_Promociones;
 DROP TABLE IF EXISTS tab_Marcas;
 DROP TABLE IF EXISTS tab_Subcategorias;
 DROP TABLE IF EXISTS tab_Categorias;
@@ -28,7 +32,7 @@ DROP TABLE IF EXISTS tab_Eventos;
 
 CREATE TABLE IF NOT EXISTS tab_Usuarios
 (
-    id_usuario              BIGINT NOT NULL,              -- Identificador único del usuario
+    id_usuario              SMALLINT NOT NULL,            -- Identificador único del usuario
     nom_usuario             VARCHAR(100) NOT NULL,        -- Nombre completo del usuario
     correo_usuario          VARCHAR(100) NOT NULL,        -- Correo electrónico del usuario
     num_telefono_usuario    BIGINT NOT NULL CHECK (LENGTH(CAST(num_telefono_usuario AS TEXT)) = 10), -- Número de teléfono (10 dígitos)
@@ -73,7 +77,7 @@ CREATE INDEX IF NOT EXISTS idx_usuarios_rol                     ON tab_Usuarios 
 -- Almacena las categorías de los productos (ej. "Relojes de Pulsera", "Relojes de Bolsillo").
 CREATE TABLE IF NOT EXISTS tab_Categorias
 (
-    id_categoria            INT NOT NULL, -- Identificador único de la categoría
+    id_categoria            SMALLINT NOT NULL, -- Identificador único de la categoría
     nom_categoria           VARCHAR(100) NOT NULL, -- Nombre de la categoría
     descripcion_categoria   TEXT NOT NULL, -- Descripción de la categoría
     estado                  BOOLEAN NOT NULL DEFAULT TRUE, -- Indica si la categoría está activa o inactiva
@@ -95,8 +99,8 @@ CREATE TABLE IF NOT EXISTS tab_Categorias
 -- Almacena las subcategorías de los productos, vinculadas a una categoría principal.
 CREATE TABLE IF NOT EXISTS tab_Subcategorias
 (
-    id_categoria            INT NOT NULL, -- Clave foránea a tab_Categorias
-    id_subcategoria         INT NOT NULL, -- Identificador único de la subcategoría
+    id_categoria            SMALLINT NOT NULL, -- Clave foránea a tab_Categorias
+    id_subcategoria         SMALLINT NOT NULL, -- Identificador único de la subcategoría
     nom_subcategoria        VARCHAR(100) NOT NULL, -- Nombre de la subcategoría
     estado                  BOOLEAN NOT NULL DEFAULT TRUE, -- Indica si la subcategoría está activa o inactiva
 
@@ -119,7 +123,7 @@ CREATE TABLE IF NOT EXISTS tab_Subcategorias
 -- Almacena las marcas de los productos.
 CREATE TABLE IF NOT EXISTS tab_Marcas
 (
-    id_marca                BIGINT NOT NULL, -- Identificador único de la marca
+    id_marca                SMALLINT NOT NULL, -- Identificador único de la marca
     nom_marca               VARCHAR(100) NOT NULL, -- Nombre de la marca
     estado_marca            BOOLEAN DEFAULT TRUE, -- Indica si la marca está activa o inactiva
 
@@ -157,34 +161,14 @@ CREATE TABLE IF NOT EXISTS tab_Metodos_Pago
 
 
 
--- Tabla: tab_Promociones
--- Almacena las promociones disponibles.
-CREATE TABLE IF NOT EXISTS tab_Promociones
-(
-    id_promocion            INT NOT NULL, -- Identificador único de la promoción
-    descripcion             TEXT NOT NULL, -- Descripción detallada de la promoción
-    descuento               NUMERIC(5, 2) NOT NULL, -- Porcentaje de descuento (0-100)
-    fecha_inicio            TIMESTAMP NOT NULL, -- Fecha y hora de inicio de la promoción
-    fecha_fin               TIMESTAMP NOT NULL, -- Fecha y hora de fin de la promoción
 
-    -- Columnas de auditoría
-    usr_insert VARCHAR(100),
-    fec_insert TIMESTAMP,
-    usr_update VARCHAR(100),
-    fec_update TIMESTAMP,
-    usr_delete VARCHAR(100),
-    fec_delete TIMESTAMP,
-    PRIMARY KEY (id_promocion),
-    CHECK (descuento BETWEEN 0 AND 100), -- Porcentaje de descuento (0-100)
-    CHECK (fecha_fin >= fecha_inicio) -- Asegura que la fecha de fin no sea anterior a la de inicio
-);
 
 
 -- Tabla: tab_Servicios
 -- Almacena los servicios ofrecidos (ej. "Mantenimiento", "Reparación").
 CREATE TABLE IF NOT EXISTS tab_Servicios
 (
-    id_servicio             BIGINT NOT NULL, -- Identificador único del servicio
+    id_servicio             SMALLINT NOT NULL, -- Identificador único del servicio
     nom_servicio            VARCHAR(100) NOT NULL, -- Nombre del servicio
     descripcion             TEXT NOT NULL, -- Descripción del servicio
     precio_servicio         DECIMAL(15, 2) NOT NULL, -- Costo del servicio, no puede ser negativo
@@ -208,7 +192,7 @@ CREATE TABLE IF NOT EXISTS tab_Servicios
 -- Almacena los mensajes de contacto enviados por los usuarios.
 CREATE TABLE IF NOT EXISTS tab_Contacto
 (
-    id_contacto             BIGINT NOT NULL, -- Identificador único del mensaje de contacto
+    id_contacto             INTEGER NOT NULL, -- Identificador único del mensaje de contacto
     nombre_remitente        VARCHAR(100) NOT NULL, -- Nombre de la persona que envía el mensaje
     correo_remitente        VARCHAR(100) NOT NULL, -- Correo electrónico de la persona que envía el mensaje
     telefono_remitente      BIGINT NOT NULL, -- Número de teléfono de la persona que envía el mensaje
@@ -235,7 +219,7 @@ CREATE TABLE IF NOT EXISTS tab_Contacto
 -- Tabla: tab_Departamentos
 -- Almacena la información de los departamentos/estados/provincias.
 CREATE TABLE IF NOT EXISTS tab_Departamentos (
-    id_departamento         INTEGER NOT NULL, -- Identificador único del departamento (PK)
+    id_departamento         SMALLINT NOT NULL, -- Identificador único del departamento (PK)
     nombre_departamento     VARCHAR(100) NOT NULL, -- Nombre del departamento/estado/provincia
     codigo_iso              VARCHAR(10), -- Código ISO (opcional)
 
@@ -254,8 +238,8 @@ CREATE TABLE IF NOT EXISTS tab_Departamentos (
 -- Tabla: tab_Ciudades (Modificada)
 -- Almacena la información de ciudades.
 CREATE TABLE IF NOT EXISTS tab_Ciudades (
-    id_ciudad              INTEGER NOT NULL, -- Identificador único de la ciudad
-    id_departamento        INTEGER NOT NULL, -- Clave foránea a tab_Departamentos
+    id_ciudad              SMALLINT NOT NULL, -- Identificador único de la ciudad
+    id_departamento        SMALLINT NOT NULL, -- Clave foránea a tab_Departamentos
     nombre_ciudad          VARCHAR(100) NOT NULL, -- Nombre de la ciudad
     codigo_postal          VARCHAR(10), -- Código postal de la ciudad
 
@@ -275,8 +259,8 @@ CREATE TABLE IF NOT EXISTS tab_Ciudades (
 -- Almacena múltiples direcciones de envío para cada usuario.
 CREATE TABLE IF NOT EXISTS tab_Direcciones_Envio
 (
-    id_direccion            BIGINT, -- Identificador único de la dirección de envío
-    id_usuario              BIGINT NOT NULL, -- Identificador del usuario al que pertenece la dirección
+    id_direccion            SMALLINT, -- Identificador único de la dirección de envío
+    id_usuario              SMALLINT NOT NULL, -- Identificador del usuario al que pertenece la dirección
     direccion_completa      VARCHAR(255) NOT NULL, -- Dirección postal completa
     id_ciudad               SMALLINT NOT NULL, -- Ciudad
     codigo_postal           VARCHAR(10) NOT NULL, -- Código postal
@@ -299,13 +283,13 @@ CREATE TABLE IF NOT EXISTS tab_Direcciones_Envio
 -- Almacena la información de los productos (relojes, accesorios, etc.).
 CREATE TABLE IF NOT EXISTS tab_Productos
 (
-    id_producto             BIGINT NOT NULL, -- Identificador único del producto
-    id_marca               BIGINT NOT NULL, -- Clave foránea a tab_Marcas
+    id_producto             SMALLINT NOT NULL, -- Identificador único del producto
+    id_marca               SMALLINT NOT NULL, -- Clave foránea a tab_Marcas
     nom_producto            VARCHAR(255) NOT NULL, -- Nombre del producto
     descripcion             TEXT NOT NULL, -- Descripción detallada del producto
     precio                  DECIMAL(15,2) NOT NULL, -- Precio del producto
-    id_categoria            INT NOT NULL, -- Clave foránea a tab_Categorias
-    id_subcategoria         INT NOT NULL, -- Clave foránea a tab_Subcategorias
+    id_categoria            SMALLINT NOT NULL, -- Clave foránea a tab_Categorias
+    id_subcategoria         SMALLINT NOT NULL, -- Clave foránea a tab_Subcategorias
     stock                   SMALLINT NOT NULL, -- Cantidad de stock disponible
     url_imagen              VARCHAR(255), -- URL de la imagen del producto
     fecha_creacion          TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de creación del registro del producto
@@ -331,8 +315,8 @@ CREATE INDEX idx_producto_nombre ON tab_Productos (nom_producto); -- Índice par
 -- Almacena la cabecera de los carritos de compra de los usuarios.
 CREATE TABLE IF NOT EXISTS tab_Carrito
 (
-    id_carrito              BIGINT NOT NULL, -- Identificador único del carrito
-    id_usuario              BIGINT NOT NULL, -- Clave foránea a tab_Usuarios, un usuario tiene un único carrito activo
+    id_carrito              INTEGER NOT NULL, -- Identificador único del carrito
+    id_usuario              SMALLINT NOT NULL, -- Clave foránea a tab_Usuarios, un usuario tiene un único carrito activo
     fecha_creacion          TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de creación del carrito
     fecha_ultima_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de la última modificación del carrito
     estado_carrito          VARCHAR(50) DEFAULT 'activo', -- Estado del carrito
@@ -354,9 +338,9 @@ CREATE TABLE IF NOT EXISTS tab_Carrito
 -- Almacena los productos individuales dentro de cada carrito de compra.
 CREATE TABLE IF NOT EXISTS tab_Carrito_Detalle
 (
-    id_carrito_detalle      BIGINT NOT NULL, -- Identificador único del detalle del carrito
-    id_carrito              BIGINT NOT NULL, -- Clave foránea a tab_Carrito
-    id_producto             BIGINT NOT NULL, -- Clave foránea a tab_Productos
+    id_carrito_detalle      INTEGER NOT NULL, -- Identificador único del detalle del carrito
+    id_carrito              INTEGER NOT NULL, -- Clave foránea a tab_Carrito
+    id_producto             SMALLINT NOT NULL, -- Clave foránea a tab_Productos
     cantidad                INT NOT NULL, -- Cantidad del producto en esta línea del carrito
 
     -- Columnas de auditoría
@@ -378,8 +362,8 @@ CREATE TABLE IF NOT EXISTS tab_Carrito_Detalle
 -- Almacena la cabecera de las órdenes de compra.
 CREATE TABLE IF NOT EXISTS tab_Orden
 (
-    id_orden                BIGINT NOT NULL, -- Identificador único de la orden
-    id_usuario              BIGINT NOT NULL, -- Clave foránea a tab_Usuarios
+    id_orden                INTEGER NOT NULL, -- Identificador único de la orden
+    id_usuario              SMALLINT NOT NULL, -- Clave foránea a tab_Usuarios
     fecha_orden             TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora en que se realizó la orden
     estado_orden            VARCHAR(50) NOT NULL, -- Estado actual de la orden
     concepto                VARCHAR(100), -- Descripción o concepto general de la orden
@@ -404,12 +388,11 @@ CREATE INDEX idx_orden_usuario ON tab_Orden (id_usuario); -- Índice para aceler
 -- Almacena los productos individuales dentro de cada orden.
 CREATE TABLE IF NOT EXISTS tab_Detalle_Orden
 (
-    id_detalle_orden        BIGINT NOT NULL, -- Identificador único del detalle de la orden
-    id_orden                BIGINT NOT NULL, -- Clave foránea a tab_Orden
-    id_producto             BIGINT NOT NULL, -- Clave foránea a tab_Productos
+    id_detalle_orden        INTEGER NOT NULL, -- Identificador único del detalle de la orden
+    id_orden                INTEGER NOT NULL, -- Clave foránea a tab_Orden
+    id_producto             SMALLINT NOT NULL, -- Clave foránea a tab_Productos
     cantidad                INT NOT NULL, -- Cantidad del producto en esta línea de la orden
     precio_unitario         DECIMAL(15, 2) NOT NULL, -- Precio del producto al momento de la compra
-    id_promocion_aplicada   SMALLINT, -- Clave foránea a tab_Promociones (puede ser nulo si no hay promoción directa)
 
     -- Columnas de auditoría
     usr_insert VARCHAR(100),
@@ -422,7 +405,6 @@ CREATE TABLE IF NOT EXISTS tab_Detalle_Orden
     PRIMARY KEY (id_detalle_orden),
     FOREIGN KEY (id_orden) REFERENCES tab_Orden(id_orden),
     FOREIGN KEY (id_producto) REFERENCES tab_Productos(id_producto),
-    FOREIGN KEY (id_promocion_aplicada) REFERENCES tab_Promociones(id_promocion),
     CHECK (cantidad > 0), -- Cantidad del producto en esta línea de la orden
     CHECK (precio_unitario >= 0) -- Precio del producto al momento de la compra
 );
@@ -431,9 +413,9 @@ CREATE TABLE IF NOT EXISTS tab_Detalle_Orden
 -- Almacena los servicios individuales comprados como parte de una orden.
 CREATE TABLE IF NOT EXISTS tab_Orden_Servicios
 (
-    id_orden_servicio       BIGINT NOT NULL, -- Identificador único del detalle de servicio en la orden
-    id_orden                BIGINT NOT NULL, -- Clave foránea a tab_Orden
-    id_servicio             BIGINT NOT NULL, -- Clave foránea a tab_Servicios
+    id_orden_servicio       INTEGER NOT NULL, -- Identificador único del detalle de servicio en la orden
+    id_orden                INTEGER NOT NULL, -- Clave foránea a tab_Orden
+    id_servicio             SMALLINT NOT NULL, -- Clave foránea a tab_Servicios
     cantidad                INT NOT NULL, -- Cantidad de veces que se aplica el servicio
     precio_servicio_aplicado DECIMAL(15, 2) NOT NULL, -- Precio del servicio al momento de la orden
 
@@ -455,9 +437,9 @@ CREATE TABLE IF NOT EXISTS tab_Orden_Servicios
 -- Tabla: tab_Facturas
 -- Almacena la información principal de cada factura generada por una orden.
 CREATE TABLE IF NOT EXISTS tab_Facturas (
-    id_factura      BIGINT NOT NULL, -- Clave primaria de la factura
-    id_orden        BIGINT NOT NULL,     -- ID de la orden asociada a la factura
-    id_usuario      BIGINT NOT NULL,     -- ID del usuario (cliente) asociado a la factura
+    id_factura      INTEGER NOT NULL, -- Clave primaria de la factura
+    id_orden        INTEGER NOT NULL,     -- ID de la orden asociada a la factura
+    id_usuario      SMALLINT NOT NULL,     -- ID del usuario (cliente) asociado a la factura
     fecha_emision   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de emisión de la factura
     total_factura   DECIMAL(15, 2) NOT NULL, -- Total de la factura
     estado_factura  VARCHAR(50) NOT NULL DEFAULT 'Emitida', -- Estado de la factura
@@ -480,9 +462,9 @@ CREATE INDEX idx_factura_usuario ON tab_Facturas (id_usuario);
 -- Tabla: tab_Detalle_Factura
 -- Contiene los ítems individuales de cada factura.
 CREATE TABLE IF NOT EXISTS tab_Detalle_Factura (
-    id_detalle_factura    BIGINT NOT NULL, -- Clave primaria del detalle de factura
-    id_factura            BIGINT NOT NULL,              -- ID de la factura a la que pertenece este detalle
-    id_producto           BIGINT NOT NULL,             -- ID del producto incluido en este detalle
+    id_detalle_factura    INTEGER NOT NULL, -- Clave primaria del detalle de factura
+    id_factura            INTEGER NOT NULL,              -- ID de la factura a la que pertenece este detalle
+    id_producto           SMALLINT NOT NULL,             -- ID del producto incluido en este detalle
     cantidad              SMALLINT NOT NULL,                -- Cantidad del producto
     precio_unitario       DECIMAL(15, 2) NOT NULL, -- Precio del producto al momento de la facturación
     subtotal_linea        DECIMAL(15, 2) NOT NULL, -- Subtotal para esta línea
@@ -509,9 +491,9 @@ CREATE INDEX idx_detalle_factura_producto ON tab_Detalle_Factura (id_producto);
 -- Almacena la información de los envíos asociados a las órdenes.
 CREATE TABLE IF NOT EXISTS tab_Envios
 (
-    id_envio                BIGINT NOT NULL, -- Identificador único del envío
-    id_orden                BIGINT NOT NULL, -- Clave foránea a tab_Orden, una orden tiene un único envío
-    id_direccion_envio      BIGINT NOT NULL, -- Clave foránea a tab_Direcciones_Envio
+    id_envio                INTEGER NOT NULL, -- Identificador único del envío
+    id_orden                INTEGER NOT NULL, -- Clave foránea a tab_Orden, una orden tiene un único envío
+    id_direccion_envio      SMALLINT NOT NULL, -- Clave foránea a tab_Direcciones_Envio
     metodo_envio            VARCHAR(100) NOT NULL, -- Método de envío utilizado
     estado_envio            VARCHAR(50) NOT NULL, -- Estado actual del envío
     fecha_envio             TIMESTAMP NOT NULL, -- Fecha y hora en que se realizó el envío
@@ -540,8 +522,8 @@ CREATE TABLE IF NOT EXISTS tab_Envios
 CREATE TABLE IF NOT EXISTS tab_Opiniones
 (
     id_opinion              SERIAL PRIMARY KEY, -- Identificador único de la opinión (SERIAL para autoincremento)
-    id_usuario              BIGINT NOT NULL, -- Identificador del usuario que realizó la opinión
-    id_producto             BIGINT  NULL, -- Identificador del producto sobre el que se realizó la opinión
+    id_usuario              SMALLINT NOT NULL, -- Identificador del usuario que realizó la opinión
+    id_producto             SMALLINT  NULL, -- Identificador del producto sobre el que se realizó la opinión
     calificacion            SMALLINT NOT NULL, -- Calificación del producto (1 a 5 estrellas)
     comentario              TEXT NOT NULL, -- Comentario adicional sobre el producto
     fecha_opinion           TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora en que se realizó la opinión
@@ -566,8 +548,8 @@ CREATE TABLE IF NOT EXISTS tab_Opiniones
 -- Almacena los registros de pagos de las órdenes.
 CREATE TABLE IF NOT EXISTS tab_Pagos
 (
-    id_pago                 BIGINT NOT NULL, -- Identificador único del pago
-    id_orden                BIGINT NOT NULL, -- Clave foránea a tab_Orden, una orden tiene un único pago
+    id_pago                 INTEGER NOT NULL, -- Identificador único del pago
+    id_orden                INTEGER NOT NULL, -- Clave foránea a tab_Orden, una orden tiene un único pago
     monto                   DECIMAL(15, 2) NOT NULL, -- Monto del pago
     id_metodo_pago          SMALLINT NOT NULL, -- Clave foránea a tab_Metodos_Pago
     estado_pago             VARCHAR(50) NOT NULL, -- Estado actual del pago
@@ -591,35 +573,15 @@ CREATE TABLE IF NOT EXISTS tab_Pagos
     CHECK (estado_pago IN ('pendiente', 'completado', 'fallido', 'reembolsado')) -- Estado actual del pago
 );
 
--- Tabla: tab_Productos_Promociones
--- Tabla de relación muchos a muchos entre productos y promociones.
-CREATE TABLE IF NOT EXISTS tab_Productos_Promociones
-(
-    id_producto_promocion   BIGINT NOT NULL, -- Identificador único de la relación producto-promoción
-    id_producto             BIGINT NOT NULL, -- Identificador del producto asociado a la promoción
-    id_promocion            INT NOT NULL, -- Identificador de la promoción aplicada al producto
 
-    -- Columnas de auditoría
-    usr_insert VARCHAR(100),
-    fec_insert TIMESTAMP,
-    usr_update VARCHAR(100),
-    fec_update TIMESTAMP,
-    usr_delete VARCHAR(100),
-    fec_delete TIMESTAMP,
-
-    PRIMARY KEY (id_producto_promocion),
-    UNIQUE (id_producto, id_promocion), -- Asegura que un producto no tenga la misma promoción aplicada varias veces
-    FOREIGN KEY (id_producto) REFERENCES tab_Productos(id_producto),
-    FOREIGN KEY (id_promocion) REFERENCES tab_Promociones(id_promocion)
-);
 
 -- Tabla: tab_Reservas
 -- Almacena las reservas de servicios realizadas por los usuarios.
 CREATE TABLE IF NOT EXISTS tab_Reservas
 (
-    id_reserva              BIGINT NOT NULL, -- Identificador único de la reserva
-    id_usuario              BIGINT NOT NULL, -- Identificador del usuario que realizó la reserva
-    id_servicio             BIGINT NOT NULL, -- Identificador del servicio reservado
+    id_reserva              INTEGER NOT NULL, -- Identificador único de la reserva
+    id_usuario              SMALLINT NOT NULL, -- Identificador del usuario que realizó la reserva
+    id_servicio             SMALLINT NOT NULL, -- Identificador del servicio reservado
     fecha_reserva           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha real de creación
     fecha_preferida         DATE, -- (NUEVO) Fecha en la que el cliente desea el servicio
     notas_cliente           TEXT, -- (NUEVO) Notas adicionales del cliente
@@ -645,7 +607,7 @@ CREATE TABLE IF NOT EXISTS tab_Reservas
 -- Almacena la información de los empleados de la empresa.
 -- ==========================================
 CREATE TABLE IF NOT EXISTS tab_Empleados (
-    id_empleado          BIGINT NOT NULL,
+    id_empleado          SMALLINT NOT NULL,
     num_documento        VARCHAR(20),
     nom_empleado         VARCHAR(100) NOT NULL,
     apellido_empleado    VARCHAR(100) NOT NULL,
@@ -672,7 +634,7 @@ CREATE TABLE IF NOT EXISTS tab_Empleados (
 -- Almacena eventos, promociones especiales o hitos del negocio.
 -- ==========================================
 CREATE TABLE IF NOT EXISTS tab_Eventos (
-    id_evento            BIGINT NOT NULL,
+    id_evento            SMALLINT NOT NULL,
     titulo               VARCHAR(200) NOT NULL,
     descripcion          TEXT,
     fecha_inicio         TIMESTAMP NOT NULL,
