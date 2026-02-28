@@ -64,7 +64,7 @@ try {
         }
         else {
             // Cliente solo ve sus propias citas
-            $stmt = $pdo->prepare("SELECT fn_citas_list_cliente(?::BIGINT)");
+            $stmt = $pdo->prepare("SELECT fn_citas_list_cliente(?::INTEGER)");
             $stmt->execute([$user_id]);
         }
 
@@ -94,7 +94,7 @@ try {
             ]);
 
             // Llamada opaca
-            $stmt = $pdo->prepare("SELECT fn_citas_update_status(?::BIGINT, ?, ?)");
+            $stmt = $pdo->prepare("SELECT fn_citas_update_status(?::INTEGER, ?, ?)");
             $stmt->execute([$data['id_reserva'], $data['estado'], 'admin_' . $user_id]);
             echo json_encode(json_decode($stmt->fetchColumn(), true));
             exit;
@@ -113,7 +113,7 @@ try {
         $notas = Validation::sanitizeString($data['p_notas'] ?? '');
 
         // fn_citas_create incluye anti-duplicado internamente
-        $stmt = $pdo->prepare("SELECT fn_citas_create(?::BIGINT, ?::BIGINT, ?::date, ?, ?)");
+        $stmt = $pdo->prepare("SELECT fn_citas_create(?::INTEGER, ?::INTEGER, ?::date, ?, ?)");
         $stmt->execute([$user_id, $id_servicio, $fecha_pref, $prioridad, $notas]);
         echo json_encode(json_decode($stmt->fetchColumn(), true));
 
@@ -137,7 +137,7 @@ try {
             exit;
         }
 
-        $stmt = $pdo->prepare("SELECT fn_citas_update_status(?::BIGINT, ?, ?)");
+        $stmt = $pdo->prepare("SELECT fn_citas_update_status(?::INTEGER, ?, ?)");
         $stmt->execute([$id_reserva, $nuevo_estado, 'admin_' . $user_id]);
         echo json_encode(json_decode($stmt->fetchColumn(), true));
 

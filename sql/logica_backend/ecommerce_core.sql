@@ -433,6 +433,26 @@ BEGIN
             'msg', 'Error de sesión: No se detectó un carrito pendiente de procesar.');
     END IF;
 
+    -- PASO 1.1: Auto-completado de dirección y ciudad si vienen vacíos.
+    -- Si el frontend no envía dirección, buscamos en la agenda del usuario.
+    IF p_direccion IS NULL OR p_direccion = '' THEN
+        SELECT de.direccion_completa, ci.nombre_ciudad INTO p_direccion, p_ciudad
+        FROM tab_Direcciones_Envio de
+        JOIN tab_Ciudades ci ON de.id_ciudad = ci.id_ciudad
+        WHERE de.id_usuario = p_user_id
+        ORDER BY de.es_predeterminada DESC, de.id_direccion DESC
+        LIMIT 1;
+
+        -- Si aún es NULL, intentamos del perfil maestro.
+        p_direccion := COALESCE(p_direccion, (SELECT direccion_principal FROM tab_Usuarios WHERE id_usuario = p_user_id));
+        p_ciudad := COALESCE(p_ciudad, 'Ciudad Metropolitana'); -- Fallback final
+    END IF;
+
+    -- Validación final: Si después de los intentos sigue sin haber dirección, error.
+    IF p_direccion IS NULL OR p_direccion = '' THEN
+        RETURN json_build_object('ok', false, 'msg', 'Requerimiento: Por favor, ingrese o seleccione una dirección de envío.');
+    END IF;
+
     -- PASO 2-3: Auditoría de Disponibilidad y Costeo.
     -- Recorremos la selección del usuario para validar stock antes de comprometer la orden.
     FOR v_item IN

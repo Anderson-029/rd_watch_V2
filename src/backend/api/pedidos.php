@@ -90,7 +90,7 @@ try {
 
         // fn_orders_update_status valida internamente la lista blanca
         // de estados: pendiente, confirmado, enviado, cancelado, entregado
-        $stmt = $pdo->prepare("SELECT fn_orders_update_status(?::BIGINT, ?)");
+        $stmt = $pdo->prepare("SELECT fn_orders_update_status(?::INTEGER, ?)");
         $stmt->execute([$id_orden, $nuevo_estado]);
         echo json_encode(json_decode($stmt->fetchColumn(), true));
 

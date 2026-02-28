@@ -359,18 +359,19 @@ BEGIN
             u.nom_usuario,          -- Nombre completo
             u.rol,                  -- 'admin' o 'cliente'
             u.direccion_principal,  -- Dirección guardada en la tabla de usuarios
-            d.direccion_completa,   -- Dirección detallada (de la tabla de envíos)
+            -- Priorizamos la predeterminada; si no hay, devolvemos lo que haya en direccion_principal.
+            COALESCE(d.direccion_completa, u.direccion_principal) as direccion_completa,
             c.nombre_ciudad         -- Nombre de la ciudad asociada
         FROM tab_Usuarios u
-        -- LEFT JOIN: Si el usuario no tiene dirección de envío, aún retorna sus datos
+        -- LEFT JOIN: Buscamos la predeterminada en la agenda
         LEFT JOIN tab_Direcciones_Envio d
             ON u.id_usuario = d.id_usuario
-            AND d.es_predeterminada = TRUE   -- Solo la dirección marcada como predeterminada
-        -- LEFT JOIN: Si la dirección no tiene ciudad, aún retorna
+            AND d.es_predeterminada = TRUE
+        -- LEFT JOIN: Ciudad relacionada
         LEFT JOIN tab_Ciudades c
             ON d.id_ciudad = c.id_ciudad
         WHERE u.id_usuario = p_uid
-        LIMIT 1  -- Solo necesitamos una fila
+        LIMIT 1
     ) t;
 
     RETURN v_result;

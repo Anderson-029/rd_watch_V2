@@ -47,7 +47,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
     $userId = $_SESSION['user_id'];
 
     try {
-        $stmt = $pdo->prepare("SELECT fn_auth_get_session(?::BIGINT)");
+        $stmt = $pdo->prepare("SELECT fn_auth_get_session(?::INTEGER)");
         $stmt->execute([$userId]);
         $jsonResult = $stmt->fetchColumn();
 

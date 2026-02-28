@@ -294,45 +294,40 @@ CREATE OR REPLACE FUNCTION fn_user_update_address(
 RETURNS JSON
 AS $$
 DECLARE
-    v_existing_id INTEGER; -- Puntero a dirección actual
+    v_existing_id INTEGER; -- Puntero a dirección encontrada
     v_new_id      INTEGER; -- Generador de ID para nueva dirección
 BEGIN
-    -- ANTI-FLOOD: Evita re-guardar la misma dirección múltiples veces.
-    IF EXISTS (
-        SELECT 1 FROM tab_Direcciones_Envio
-        WHERE id_usuario = p_user_id
-          AND direccion_completa = p_direccion
-          AND id_ciudad = p_ciudad_id
-    ) THEN
-        RETURN json_build_object('ok', false,
-            'msg', 'Aviso: La dirección proporcionada ya se encuentra registrada en su sistema.');
-    END IF;
-
-    -- PASO 1: Sincronización del Perfil Maestro.
+    -- PASO 1: Sincronización del Perfil Maestro (Update rápido).
     UPDATE tab_Usuarios
     SET direccion_principal = p_direccion, 
         fec_update = NOW(), 
         usr_update = 'addr_sync'
     WHERE id_usuario = p_user_id;
 
-    -- PASO 2: Identificación de la dirección predeterminada vigente.
-    SELECT de.id_direccion INTO v_existing_id
-    FROM tab_Direcciones_Envio de
-    WHERE de.id_usuario = p_user_id AND de.es_predeterminada = TRUE
-    LIMIT 1;
+    -- PASO 2: Gestión de la agenda de envíos.
+    -- Buscamos si la dirección ya existe para este usuario.
+    SELECT id_direccion INTO v_existing_id
+    FROM tab_Direcciones_Envio
+    WHERE id_usuario = p_user_id
+      AND direccion_completa = p_direccion
+      AND id_ciudad = p_ciudad_id;
 
-    -- PASO 3: Escritura en la agenda logística.
+    -- PASO 3: Desmarcar cualquier otra dirección predeterminada previa.
+    UPDATE tab_Direcciones_Envio
+    SET es_predeterminada = FALSE
+    WHERE id_usuario = p_user_id;
+
+    -- PASO 4: Escritura o Actualización.
     IF v_existing_id IS NOT NULL THEN
-        -- Sobrescritura de la dirección operativa anterior.
+        -- Si existe, la activamos como predeterminada y actualizamos código postal si cambió.
         UPDATE tab_Direcciones_Envio
-        SET direccion_completa = p_direccion,
-            id_ciudad = p_ciudad_id,
+        SET es_predeterminada = TRUE,
             codigo_postal = p_postal,
             fec_update = NOW(),
             usr_update = 'addr_sync'
         WHERE id_direccion = v_existing_id;
     ELSE
-        -- Creación de nuevo vértice logístico.
+        -- Si no existe, creamos una nueva.
         SELECT COALESCE(MAX(d.id_direccion), 0) + 1 INTO v_new_id FROM tab_Direcciones_Envio d;
         INSERT INTO tab_Direcciones_Envio (
             id_direccion, id_usuario, direccion_completa, id_ciudad, codigo_postal, es_predeterminada, fec_insert, usr_insert
@@ -341,7 +336,7 @@ BEGIN
         );
     END IF;
 
-    RETURN json_build_object('ok', true, 'msg', 'Su domicilio de envío ha sido actualizado y priorizado.');
+    RETURN json_build_object('ok', true, 'msg', 'Su domicilio de envío ha sido actualizado y establecido como principal.');
 END;
 $$ LANGUAGE plpgsql;
 
