@@ -60,7 +60,7 @@ BEGIN
     -- La subconsulta "t" selecciona exactamente las columnas que necesitamos
     SELECT row_to_json(t) INTO v_result FROM (
         SELECT
-            u.id_usuario,   -- ID numérico del usuario (BIGINT)
+            u.id_usuario,   -- ID numérico del usuario (INTEGER)
             u.nom_usuario,  -- Nombre completo del usuario
             u.contra,       -- Hash bcrypt de la contraseña (PHP lo necesita para password_verify)
             u.rol,          -- 'admin' o 'cliente' (controla acceso a funciones admin)
@@ -97,8 +97,10 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  4. El usuario no nota nada, su próximo login usará     ║
 -- ║     bcrypt automáticamente                              ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_auth_update_hash(bigint, text);
+DROP FUNCTION IF EXISTS fn_auth_update_hash(integer, text);
 CREATE OR REPLACE FUNCTION fn_auth_update_hash(
-    p_uid      BIGINT,  -- ID del usuario cuya contraseña se actualiza
+    p_uid      INTEGER,  -- ID del usuario cuya contraseña se actualiza
     p_new_hash TEXT     -- Nuevo hash bcrypt generado por PHP con password_hash()
 )
 RETURNS VOID  -- No retorna nada, solo actualiza
@@ -135,6 +137,7 @@ $$ LANGUAGE plpgsql;
 -- ║  6. Si hay duplicado, retorna {ok: false, msg: '...'}   ║
 -- ║  7. PHP simplemente reenvía el JSON al frontend         ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_auth_register(text, text, text, text);
 CREATE OR REPLACE FUNCTION fn_auth_register(
     p_nombre    TEXT,  -- Nombre completo del usuario
     p_email     TEXT,  -- Correo electrónico (debe ser único)
@@ -144,7 +147,7 @@ CREATE OR REPLACE FUNCTION fn_auth_register(
 RETURNS JSON  -- Siempre retorna {ok: bool, msg: string}
 AS $$
 DECLARE
-    v_new_id BIGINT;  -- ID que se asignará al nuevo usuario
+    v_new_id INTEGER;  -- ID que se asignará al nuevo usuario
 BEGIN
     -- VALIDACIÓN 1: ¿El email ya existe?
     -- Si alguien ya se registró con este correo, bloqueamos
@@ -275,6 +278,7 @@ $$ LANGUAGE plpgsql;
 -- ║  6. Si el token es válido: actualiza contraseña y limpia token ║
 -- ║  7. Si no: retorna error                                ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_auth_reset_password(text, text);
 CREATE OR REPLACE FUNCTION fn_auth_reset_password(
     p_token    TEXT,  -- Token de 64 caracteres que vino en la URL
     p_new_hash TEXT   -- Hash bcrypt de la nueva contraseña (generado por PHP)
@@ -282,7 +286,7 @@ CREATE OR REPLACE FUNCTION fn_auth_reset_password(
 RETURNS JSON  -- Siempre retorna {ok: bool, msg: string}
 AS $$
 DECLARE
-    v_uid BIGINT;  -- ID del usuario que posee este token
+    v_uid INTEGER;  -- ID del usuario que posee este token
 BEGIN
     -- BÚSQUEDA: ¿Existe un usuario con este token que NO haya expirado?
     -- NOW() = fecha y hora actual del servidor
@@ -340,8 +344,9 @@ $$ LANGUAGE plpgsql;
 -- ║  (LEFT JOIN porque un usuario puede no tener dirección) ║
 -- ╚══════════════════════════════════════════════════════════╝
 DROP FUNCTION IF EXISTS fn_auth_get_session(bigint);
+DROP FUNCTION IF EXISTS fn_auth_get_session(integer);
 CREATE OR REPLACE FUNCTION fn_auth_get_session(
-    p_uid BIGINT  -- ID del usuario logueado (viene de $_SESSION['user_id'])
+    p_uid INTEGER  -- ID del usuario logueado (viene de $_SESSION['user_id'])
 )
 RETURNS JSON  -- JSON con perfil completo del usuario
 AS $$

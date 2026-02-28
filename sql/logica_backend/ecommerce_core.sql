@@ -73,7 +73,7 @@
 -- ║  Propósito  : Gestionar la sesión persistente del        ║
 -- ║               carrito de compras del usuario.           ║
 -- ║  Llamada PHP: SELECT fn_cart_get_or_create(user_id)     ║
--- ║  Retorna    : JSON {id_carrito: BIGINT, created: BOOL}   ║
+-- ║  Retorna    : JSON {id_carrito: INTEGER, created: BOOL}  ║
 -- ║                                                         ║
 -- ║  FLUJO LÓGICO:                                          ║
 -- ║  1. Búsqueda: Intenta localizar un carrito con estado    ║
@@ -83,13 +83,15 @@
 -- ║     - Si no: Genera un ID basado en Epoch (TIMESTAMP),  ║
 -- ║       inserta el registro y marca created=TRUE.         ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_cart_get_or_create(bigint);
+DROP FUNCTION IF EXISTS fn_cart_get_or_create(integer);
 CREATE OR REPLACE FUNCTION fn_cart_get_or_create(
-    p_user_id BIGINT  -- ID único del usuario autenticado
+    p_user_id INTEGER  -- ID único del usuario autenticado
 )
 RETURNS JSON
 AS $$
 DECLARE
-    v_cart_id BIGINT;   -- Variable de captura de ID
+    v_cart_id INTEGER;   -- Variable de captura de ID
     v_created BOOLEAN := FALSE; -- Flag de creación
 BEGIN
     -- PASO 1: Consulta de estado actual.
@@ -103,9 +105,9 @@ BEGIN
 
     -- PASO 2: Inicialización en caso de primer acceso.
     IF v_cart_id IS NULL THEN
-        -- El ID se genera usando segundos transcurridos desde 1970.
-        -- Esto garantiza IDs BIGINT altos y con significado temporal implícito.
-        v_cart_id := EXTRACT(EPOCH FROM NOW())::BIGINT;
+        -- Generación manual de ID: Buscamos el máximo actual + 1.
+        -- Esto asegura IDs pequeños y evita el desbordamiento de INTEGER.
+        SELECT COALESCE(MAX(id_carrito), 0) + 1 INTO v_cart_id FROM tab_Carrito;
         
         INSERT INTO tab_Carrito (
             id_carrito, 
@@ -148,8 +150,10 @@ $$ LANGUAGE plpgsql;
 -- ║  el precio oficial vigente, incluso si este cambió      ║
 -- ║  desde que el producto se agregó al carrito.            ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_cart_get_items(bigint);
+DROP FUNCTION IF EXISTS fn_cart_get_items(integer);
 CREATE OR REPLACE FUNCTION fn_cart_get_items(
-    p_cart_id BIGINT  -- Localizador único del carrito
+    p_cart_id INTEGER  -- Localizador único del carrito
 )
 RETURNS JSON
 AS $$
@@ -195,16 +199,18 @@ $$ LANGUAGE plpgsql STABLE; -- Función estable optimizada para lectura
 -- ║  una suma aritmética a la cantidad previa. De lo        ║
 -- ║  contrario, crea una nueva línea de detalle.            ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_cart_add_item(bigint, bigint, integer);
+DROP FUNCTION IF EXISTS fn_cart_add_item(integer, integer, integer);
 CREATE OR REPLACE FUNCTION fn_cart_add_item(
-    p_cart_id  BIGINT,   -- Relación con tab_Carrito
-    p_prod_id  BIGINT,   -- Relación con tab_Productos
+    p_cart_id  INTEGER,   -- Relación con tab_Carrito
+    p_prod_id  INTEGER,   -- Relación con tab_Productos
     p_qty      INTEGER   -- Unidades a incorporar
 )
 RETURNS JSON
 AS $$
 DECLARE
     v_existing INTEGER;  -- Buffer para cantidad previa
-    v_det_id   BIGINT;   -- Generación de PK para detalle
+    v_det_id   INTEGER;   -- Generación de PK para detalle
 BEGIN
     -- VERIFICACIÓN: ¿Existe el solapamiento en el carrito?
     SELECT d.cantidad INTO v_existing
@@ -219,8 +225,8 @@ BEGIN
         WHERE id_carrito = p_cart_id AND id_producto = p_prod_id;
     ELSE
         -- OPERACIÓN 2: Nueva inserción.
-        -- Se genera un ID compuesto por el ID del carrito y un factor de dispersión.
-        v_det_id := p_cart_id * 1000 + (RANDOM() * 999)::INTEGER;
+        -- Generación manual de ID para el detalle.
+        SELECT COALESCE(MAX(id_carrito_detalle), 0) + 1 INTO v_det_id FROM tab_Carrito_Detalle;
         
         INSERT INTO tab_Carrito_Detalle (
             id_carrito_detalle, 
@@ -258,9 +264,11 @@ $$ LANGUAGE plpgsql;
 -- ║  3. UPDATE focalizado por carrito+producto.             ║
 -- ║  4. Retorna {ok, msg} → PHP refresca la vista.          ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_cart_update_qty(bigint, bigint, integer);
+DROP FUNCTION IF EXISTS fn_cart_update_qty(integer, integer, integer);
 CREATE OR REPLACE FUNCTION fn_cart_update_qty(
-    p_cart_id BIGINT,  -- Referencia al carrito activo
-    p_prod_id BIGINT,  -- Referencia al producto
+    p_cart_id INTEGER,  -- Referencia al carrito activo
+    p_prod_id INTEGER,  -- Referencia al producto
     p_qty     INTEGER  -- Nueva cantidad absoluta
 )
 RETURNS JSON
@@ -291,9 +299,11 @@ $$ LANGUAGE plpgsql;
 -- ║  3. DELETE físico de la línea de detalle.               ║
 -- ║  4. Retorna {ok, msg} → PHP refresca la vista.          ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_cart_remove_item(bigint, bigint);
+DROP FUNCTION IF EXISTS fn_cart_remove_item(integer, integer);
 CREATE OR REPLACE FUNCTION fn_cart_remove_item(
-    p_cart_id BIGINT, -- Localizador de la sesión
-    p_prod_id BIGINT  -- ID del producto a retirar
+    p_cart_id INTEGER, -- Localizador de la sesión
+    p_prod_id INTEGER  -- ID del producto a retirar
 )
 RETURNS JSON
 AS $$
@@ -321,8 +331,10 @@ $$ LANGUAGE plpgsql;
 -- ║  3. DELETE masivo de tab_Carrito_Detalle.                ║
 -- ║  4. Retorna {ok, msg} → PHP refresca la vista vacía.    ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_cart_clear(bigint);
+DROP FUNCTION IF EXISTS fn_cart_clear(integer);
 CREATE OR REPLACE FUNCTION fn_cart_clear(
-    p_cart_id BIGINT -- ID del carrito a vaciar
+    p_cart_id INTEGER -- ID del carrito a vaciar
 )
 RETURNS JSON
 AS $$
@@ -386,8 +398,10 @@ $$ LANGUAGE plpgsql;
 -- ║  5. Ajuste de Inventario (UPDATE Stock).                ║
 -- ║  6. Clausura del carrito (Lógica de conversión).        ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_checkout_process(integer, text, text, text);
+DROP FUNCTION IF EXISTS fn_checkout_process(bigint, text, text, text);
 CREATE OR REPLACE FUNCTION fn_checkout_process(
-    p_user_id    BIGINT,   -- ID del comprador
+    p_user_id    INTEGER,   -- ID del comprador
     p_direccion  TEXT,     -- Domicilio de destino
     p_ciudad     TEXT,     -- Ciudad para logística local
     p_metodo     TEXT      -- Referencia al medio de pago
@@ -395,12 +409,12 @@ CREATE OR REPLACE FUNCTION fn_checkout_process(
 RETURNS JSON
 AS $$
 DECLARE
-    v_cart_id     BIGINT;     -- Localizador del carrito
-    v_order_id    BIGINT;     -- PK de la nueva Orden
-    v_invoice_id  BIGINT;     -- PK de la nueva Factura
-    v_shipping_id BIGINT;     -- PK del proceso de Envío
-    v_payment_id  BIGINT;     -- PK del registro de Pago
-    v_addr_id     BIGINT;     -- ID de dirección (nueva o existente)
+    v_cart_id     INTEGER;     -- Localizador del carrito
+    v_order_id    INTEGER;     -- PK de la nueva Orden
+    v_invoice_id  INTEGER;     -- PK de la nueva Factura
+    v_shipping_id INTEGER;     -- PK del proceso de Envío
+    v_payment_id  INTEGER;     -- PK del registro de Pago
+    v_addr_id     INTEGER;     -- ID de dirección (nueva o existente)
     v_city_id     INTEGER;    -- ID de mapeo de ciudad
     v_total       NUMERIC := 0; -- Acumulador de precio final
     v_concepto    TEXT;       -- Glosa descriptiva
@@ -442,7 +456,7 @@ BEGIN
     END IF;
 
     -- PASO 4: Generación de Entidad Orden (Maestro).
-    v_order_id := EXTRACT(EPOCH FROM NOW())::BIGINT; -- ID temporalmente único
+    SELECT COALESCE(MAX(id_orden), 0) + 1 INTO v_order_id FROM tab_Orden;
     v_concepto := LEFT('Relojería RD-Watch: Despacho a ' || p_direccion, 100);
 
     INSERT INTO tab_Orden (
@@ -452,7 +466,7 @@ BEGIN
     );
 
     -- PASO 5: Registro Contable (Facturación).
-    v_invoice_id := v_order_id + 500; -- Offset de ID para factura
+    SELECT COALESCE(MAX(id_factura), 0) + 1 INTO v_invoice_id FROM tab_Facturas;
     INSERT INTO tab_Facturas (
         id_factura, id_orden, id_usuario, fecha_emision, total_factura, estado_factura, fec_insert, usr_insert
     ) VALUES (
@@ -469,18 +483,20 @@ BEGIN
         v_idx := v_idx + 1;
         v_subtotal := v_item.cantidad * v_item.precio;
 
-        -- Registro en Detalle de Orden.
+        -- Registro en Detalle de Orden (ID manual secuencial).
         INSERT INTO tab_Detalle_Orden (
             id_detalle_orden, id_orden, id_producto, cantidad, precio_unitario, fec_insert, usr_insert
         ) VALUES (
-            (v_order_id * 10) + v_idx, v_order_id, v_item.id_producto, v_item.cantidad, v_item.precio, NOW(), 'checkout_kernel'
+            (SELECT COALESCE(MAX(id_detalle_orden), 0) + 1 FROM tab_Detalle_Orden), 
+            v_order_id, v_item.id_producto, v_item.cantidad, v_item.precio, NOW(), 'checkout_kernel'
         );
 
-        -- Registro en Detalle de Factura.
+        -- Registro en Detalle de Factura (ID manual secuencial).
         INSERT INTO tab_Detalle_Factura (
             id_detalle_factura, id_factura, id_producto, cantidad, precio_unitario, subtotal_linea, fec_insert, usr_insert
         ) VALUES (
-            (v_invoice_id * 10) + v_idx, v_invoice_id, v_item.id_producto, v_item.cantidad, v_item.precio, v_subtotal, NOW(), 'checkout_kernel'
+            (SELECT COALESCE(MAX(id_detalle_factura), 0) + 1 FROM tab_Detalle_Factura), 
+            v_invoice_id, v_item.id_producto, v_item.cantidad, v_item.precio, v_subtotal, NOW(), 'checkout_kernel'
         );
 
         -- COMPROMISO DE STOCK: Reducción inmediata de unidades disponibles.
@@ -498,8 +514,8 @@ BEGIN
     LIMIT 1;
 
     IF v_addr_id IS NULL THEN
-        -- Normalización de Ciudad y creación de nueva dirección.
-        v_addr_id := EXTRACT(EPOCH FROM NOW())::BIGINT + (RANDOM() * 999)::INTEGER;
+        -- Normalización de Ciudad y creación de nueva dirección (ID manual).
+        SELECT COALESCE(MAX(id_direccion), 0) + 1 INTO v_addr_id FROM tab_Direcciones_Envio;
 
         SELECT ci.id_ciudad INTO v_city_id
         FROM tab_Ciudades ci
@@ -516,7 +532,7 @@ BEGIN
     END IF;
 
     -- PASO 8: Planificación de Despacho (Logística).
-    v_shipping_id := v_order_id + 1000;
+    SELECT COALESCE(MAX(id_envio), 0) + 1 INTO v_shipping_id FROM tab_Envios;
     INSERT INTO tab_Envios (
         id_envio, id_orden, id_direccion_envio, metodo_envio, estado_envio, fecha_envio, fecha_entrega_estimada, costo_envio, fec_insert, usr_insert
     ) VALUES (
@@ -524,7 +540,7 @@ BEGIN
     );
 
     -- PASO 9: Inicialización del Recibo de Pago.
-    v_payment_id := v_order_id + 2000;
+    SELECT COALESCE(MAX(id_pago), 0) + 1 INTO v_payment_id FROM tab_Pagos;
     INSERT INTO tab_Pagos (
         id_pago, id_orden, monto, id_metodo_pago, estado_pago, fecha_pago, fec_insert, usr_insert
     ) VALUES (
@@ -637,8 +653,10 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  Valida el nuevo estado contra una lista blanca para     ║
 -- ║  prevenir inyecciones de estados no controlados.        ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_orders_update_status(bigint, text);
+DROP FUNCTION IF EXISTS fn_orders_update_status(integer, text);
 CREATE OR REPLACE FUNCTION fn_orders_update_status(
-    p_order_id   BIGINT,   -- ID de la orden objeto del cambio
+    p_order_id   INTEGER,   -- ID de la orden objeto del cambio
     p_new_status TEXT      -- Etiqueta del nuevo estado
 )
 RETURNS JSON
@@ -738,8 +756,10 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  Filtra estrictamente por id_usuario, impidiendo que un ║
 -- ║  usuario vea citas de terceros modificando el parámetro.║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_citas_list_cliente(bigint);
+DROP FUNCTION IF EXISTS fn_citas_list_cliente(integer);
 CREATE OR REPLACE FUNCTION fn_citas_list_cliente(
-    p_user_id BIGINT   -- ID del usuario autenticado
+    p_user_id INTEGER   -- ID del usuario autenticado
 )
 RETURNS JSON
 AS $$
@@ -787,9 +807,11 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  2. Identificador: Genera una PK incremental basada en   ║
 -- ║     el máximo actual para mantener orden numérico.      ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_citas_create(bigint, bigint, date, text, text);
+DROP FUNCTION IF EXISTS fn_citas_create(integer, integer, date, text, text);
 CREATE OR REPLACE FUNCTION fn_citas_create(
-    p_user_id     BIGINT,   -- ID del cliente solicitante
-    p_servicio_id BIGINT,   -- ID del tipo de servicio (catálogo)
+    p_user_id     INTEGER,   -- ID del cliente solicitante
+    p_servicio_id INTEGER,   -- ID del tipo de servicio (catálogo)
     p_fecha       DATE,     -- Jornada preferida para el taller
     p_prioridad   TEXT,     -- Escala de urgencia (ej: 'normal')
     p_notas       TEXT      -- Detalle del fallo o requerimiento
@@ -797,7 +819,7 @@ CREATE OR REPLACE FUNCTION fn_citas_create(
 RETURNS JSON
 AS $$
 DECLARE
-    v_new_id BIGINT; -- Albergue de la nueva identidad
+    v_new_id INTEGER; -- Albergue de la nueva identidad
 BEGIN
     -- BARRERA DE INTEGRIDAD: Prevención de agendamientos redundantes.
     IF EXISTS (
@@ -862,8 +884,10 @@ $$ LANGUAGE plpgsql;
 -- ║  Conserva el rastro de qué administrador u operador      ║
 -- ║  modificó la cita y en qué momento preciso.             ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_citas_update_status(bigint, text, text);
+DROP FUNCTION IF EXISTS fn_citas_update_status(integer, text, text);
 CREATE OR REPLACE FUNCTION fn_citas_update_status(
-    p_reserva_id  BIGINT,  -- ID de la reserva a gestionar
+    p_reserva_id  INTEGER,  -- ID de la reserva a gestionar
     p_new_status  TEXT,    -- Nuevo estado (confirmada, cancelada, etc)
     p_admin_id    TEXT     -- Sello del operador actuante
 )
@@ -909,8 +933,10 @@ $$ LANGUAGE plpgsql;
 -- ║  Busca coincidencias exactas del mensaje en una ventana ║
 -- ║  temporal de 5 minutos para el mismo usuario.           ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_contacto_check_dup(bigint, text);
+DROP FUNCTION IF EXISTS fn_contacto_check_dup(integer, text);
 CREATE OR REPLACE FUNCTION fn_contacto_check_dup(
-    p_user_id BIGINT,   -- ID del remitente
+    p_user_id INTEGER,   -- ID del remitente
     p_mensaje TEXT      -- Contenido del mensaje a auditar
 )
 RETURNS BOOLEAN
@@ -946,16 +972,18 @@ $$ LANGUAGE plpgsql STABLE; -- Función de validación pura (rápida)
 -- ║  Mapea automáticamente el texto del selector hacia un    ║
 -- ║  ID de servicio técnico real mediante ILIKE.             ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_contacto_create(bigint, text, text);
+DROP FUNCTION IF EXISTS fn_contacto_create(integer, text, text);
 CREATE OR REPLACE FUNCTION fn_contacto_create(
-    p_user_id      BIGINT,   -- Remitente autenticado
+    p_user_id      INTEGER,   -- Remitente autenticado
     p_servicio_txt TEXT,     -- Etiqueta del servicio (ej: 'Relojería')
     p_notas        TEXT      -- Mensaje estructurado del cliente
 )
 RETURNS JSON
 AS $$
 DECLARE
-    v_service_id BIGINT;   -- ID de enlace obtenido
-    v_new_id     BIGINT;   -- PK para el nuevo registro de contacto
+    v_service_id INTEGER;   -- ID de enlace obtenido
+    v_new_id     INTEGER;   -- PK para el nuevo registro de contacto
 BEGIN
     -- Mapeo semántico: Busca la mejor coincidencia en el catálogo.
     SELECT s.id_servicio INTO v_service_id

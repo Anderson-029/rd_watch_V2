@@ -160,14 +160,16 @@ $$ LANGUAGE plpgsql STABLE; -- STABLE indica seguridad para lecturas repetitivas
 -- ║  AUDITORÍA:                                             ║
 -- ║  Registra automáticamente fecha y usuario de creación.  ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_cat_create_producto(BIGINT, TEXT, TEXT, NUMERIC, SMALLINT, TEXT, BIGINT, INTEGER, INTEGER, TEXT);
+DROP FUNCTION IF EXISTS fn_cat_create_producto(INTEGER, TEXT, TEXT, NUMERIC, SMALLINT, TEXT, INTEGER, INTEGER, INTEGER, TEXT);
 CREATE OR REPLACE FUNCTION fn_cat_create_producto(
-    p_id         BIGINT,    -- ID manual asignado por el administrador
+    p_id         INTEGER,    -- ID manual asignado por el administrador
     p_nombre     TEXT,      -- Nombre oficial del producto
     p_desc       TEXT,      -- Reseña técnica sanitizada
     p_precio     NUMERIC,   -- Valor comercial
     p_stock      SMALLINT,  -- Existencias iniciales
     p_imagen     TEXT,      -- Ruta del archivo de imagen
-    p_id_marca   BIGINT,    -- Enlace con tab_Marcas
+    p_id_marca   INTEGER,    -- Enlace con tab_Marcas
     p_id_cat     INTEGER,   -- Enlace con tab_Categorias
     p_id_subcat  INTEGER,   -- Enlace con tab_Subcategorias (Validación estricta)
     p_usr        TEXT       -- ID/Nombre del administrador operador
@@ -241,22 +243,24 @@ $$ LANGUAGE plpgsql;
 -- ║  2. Trazabilidad: Marca automáticamente fecha y el      ║
 -- ║     origen del cambio para auditoría interna.           ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_cat_update_producto(BIGINT, TEXT, TEXT, NUMERIC, SMALLINT, TEXT, BIGINT, INTEGER, INTEGER, BOOLEAN);
+DROP FUNCTION IF EXISTS fn_cat_update_producto(INTEGER, TEXT, TEXT, NUMERIC, SMALLINT, TEXT, INTEGER, INTEGER, INTEGER, BOOLEAN);
 CREATE OR REPLACE FUNCTION fn_cat_update_producto(
-    p_id         BIGINT,    -- ID único del producto a modificar
+    p_id         INTEGER,    -- ID único del producto a modificar
     p_nombre     TEXT,      -- Nombre actualizado
     p_desc       TEXT,      -- Descripción editada
     p_precio     NUMERIC,   -- Nuevo precio oficial
     p_stock      SMALLINT,  -- Nueva cifra de inventario
     p_imagen     TEXT,      -- Actualización de asset visual
-    p_id_marca   BIGINT,    -- Referencia a marca (validación por FK física)
+    p_id_marca   INTEGER,    -- Referencia a marca
     p_id_cat     INTEGER,   -- Referencia a categoría principal
-    p_id_subcat  INTEGER    -- Referencia a subcategoría (validación compuesta)
+    p_id_subcat  INTEGER,   -- Referencia a subcategoría
+    p_estado     BOOLEAN    -- Nuevo estado (TRUE=Activo, FALSE=Inactivo)
 )
 RETURNS JSON  -- Retorno estándar de confirmación
 AS $$
 BEGIN
-    -- VALIDACIÓN TAXONÓMICA: Evita que el admin asigne, por ejemplo, 
-    -- el tipo "Goma" (sub) a la categoría "Repuestos Metálicos" (padre).
+    -- VALIDACIÓN TAXONÓMICA
     IF NOT EXISTS (SELECT 1 FROM tab_Subcategorias
                    WHERE id_categoria = p_id_cat AND id_subcategoria = p_id_subcat) THEN
         RETURN json_build_object('ok', false,
@@ -273,6 +277,7 @@ BEGIN
         id_marca = p_id_marca,
         id_categoria = p_id_cat,
         id_subcategoria = p_id_subcat,
+        estado = p_estado,                  -- Actualización de visibilidad
         fec_update = NOW(),                 -- Timestamp automático de auditoría
         usr_update = 'admin_editor'         -- Marca de sistema para el editor
     WHERE id_producto = p_id;               -- Focalizado por clave primaria
@@ -311,8 +316,10 @@ $$ LANGUAGE plpgsql;
 -- ║  Si no se puede borrar, usar fn_cat_update_producto     ║
 -- ║  para establecer estado = FALSE (borrado lógico).       ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_cat_delete_producto(BIGINT);
+DROP FUNCTION IF EXISTS fn_cat_delete_producto(INTEGER);
 CREATE OR REPLACE FUNCTION fn_cat_delete_producto(
-    p_id BIGINT  -- ID único del producto objetivo
+    p_id INTEGER  -- ID único del producto objetivo
 )
 RETURNS JSON  -- {ok: bool, msg: string}
 AS $$
@@ -408,8 +415,10 @@ $$ LANGUAGE plpgsql STABLE; -- Función de solo lectura optimizada
 -- ║  1. Evita colisión de IDs manuales.                     ║
 -- ║  2. Evita duplicidad de nombres comerciales.            ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_cat_create_marca(BIGINT, TEXT, BOOLEAN);
+DROP FUNCTION IF EXISTS fn_cat_create_marca(INTEGER, TEXT, BOOLEAN);
 CREATE OR REPLACE FUNCTION fn_cat_create_marca(
-    p_id     BIGINT,   -- ID designado por arquitectura
+    p_id     INTEGER,   -- ID designado por arquitectura
     p_nombre TEXT,     -- Etiqueta comercial de la marca
     p_estado BOOLEAN DEFAULT TRUE  -- Disponibilidad inicial
 )
@@ -460,8 +469,10 @@ $$ LANGUAGE plpgsql;
 -- ║  productos vinculados podrían dejar de ser visibles en   ║
 -- ║  el frontend dependiendo de la lógica de negocio.       ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_cat_update_marca(BIGINT, TEXT, BOOLEAN);
+DROP FUNCTION IF EXISTS fn_cat_update_marca(INTEGER, TEXT, BOOLEAN);
 CREATE OR REPLACE FUNCTION fn_cat_update_marca(
-    p_id     BIGINT,   -- Identificador de la marca objetivo
+    p_id     INTEGER,   -- Identificador de la marca objetivo
     p_nombre TEXT,     -- Nuevo nombre comercial
     p_estado BOOLEAN DEFAULT TRUE  -- Nuevo estado binario
 )
@@ -501,8 +512,10 @@ $$ LANGUAGE plpgsql;
 -- ║  informa de la cantidad exacta para que el admin tome   ║
 -- ║  una decisión (borrar productos primero o reasignar).   ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_cat_delete_marca(BIGINT);
+DROP FUNCTION IF EXISTS fn_cat_delete_marca(INTEGER);
 CREATE OR REPLACE FUNCTION fn_cat_delete_marca(
-    p_id BIGINT  -- ID de la marca a remover
+    p_id INTEGER  -- ID de la marca a remover
 )
 RETURNS JSON AS $$
 DECLARE

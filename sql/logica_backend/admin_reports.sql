@@ -62,6 +62,7 @@
 -- ║  Sustituye 6 llamadas PHP independientes con una sola    ║
 -- ║  transacción SQL estable, reduciendo el I/O en un 80%.   ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_stats_dashboard();
 CREATE OR REPLACE FUNCTION fn_stats_dashboard()
 RETURNS JSON
 AS $$
@@ -140,6 +141,7 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  3. GROUP BY estado_orden agrega volúmenes.             ║
 -- ║  4. Retorna JSON array → Chart.js renderiza la gráfica. ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_stats_chart_data();
 CREATE OR REPLACE FUNCTION fn_stats_chart_data()
 RETURNS JSON
 AS $$
@@ -184,9 +186,11 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  Requiere explícitamente el p_user_id. Si el usuario      ║
 -- ║  intenta ver una factura ajena, el SELECT retorna vacío. ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_invoice_get_header(BIGINT, BIGINT);
+DROP FUNCTION IF EXISTS fn_invoice_get_header(INTEGER, INTEGER);
 CREATE OR REPLACE FUNCTION fn_invoice_get_header(
-    p_order_id BIGINT, -- Nodo de la transacción
-    p_user_id  BIGINT  -- Validador de propiedad (Anti-IDOR)
+    p_order_id INTEGER, -- Nodo de la transacción
+    p_user_id  INTEGER  -- Validador de propiedad (Anti-IDOR)
 )
 RETURNS JSON
 AS $$
@@ -235,8 +239,10 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  4. Cálculo de subtotales por línea (qty × precio).     ║
 -- ║  5. Retorna JSON array → PHP renderiza detalle factura.  ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_invoice_get_items(BIGINT);
+DROP FUNCTION IF EXISTS fn_invoice_get_items(INTEGER);
 CREATE OR REPLACE FUNCTION fn_invoice_get_items(
-    p_order_id BIGINT -- Puntero a la transacción madre
+    p_order_id INTEGER -- Puntero a la transacción madre
 )
 RETURNS JSON
 AS $$
@@ -284,8 +290,10 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  Retorna un stream BYTEA directamente. PHP debe usar     ║
 -- ║  PDO::fetchColumn() y inyectar Headers de archivo.       ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_receipt_get_binary(BIGINT);
+DROP FUNCTION IF EXISTS fn_receipt_get_binary(INTEGER);
 CREATE OR REPLACE FUNCTION fn_receipt_get_binary(
-    p_order_id BIGINT -- Referencia de acceso al archivo
+    p_order_id INTEGER -- Referencia de acceso al archivo
 )
 RETURNS TABLE(comprobante_archivo BYTEA, comprobante_extension VARCHAR)
 AS $$
@@ -323,6 +331,7 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  Actualmente retorna valores estáticos de producción.    ║
 -- ║  En fase 6 se migrarán a 'tab_Configuracion_Pagos'.     ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_config_get_bank();
 CREATE OR REPLACE FUNCTION fn_config_get_bank()
 RETURNS JSON
 AS $$
@@ -354,6 +363,7 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  3. Cálculo de años, reparaciones y satisfacción.       ║
 -- ║  4. Retorna JSON → JS anima contadores en la Home.      ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_stats_public();
 CREATE OR REPLACE FUNCTION fn_stats_public()
 RETURNS JSON
 AS $$

@@ -123,3 +123,7 @@ CREATE TRIGGER tri_audit_ciudades
 CREATE TRIGGER tri_audit_direcciones_envio 
     BEFORE INSERT OR UPDATE ON tab_Direcciones_Envio
     FOR EACH ROW EXECUTE FUNCTION fun_audit_rdwatch();
+
+CREATE TRIGGER tri_audit_rate_limits 
+    BEFORE INSERT OR UPDATE ON tab_Rate_Limits
+    FOR EACH ROW EXECUTE FUNCTION fun_audit_rdwatch();

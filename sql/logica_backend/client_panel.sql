@@ -72,8 +72,10 @@
 -- ║  Solo retorna campos de contacto y estado. NUNCA expone  ║
 -- ║  el hash de contraseña ni los tokens de sesión.         ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_user_get_profile(bigint);
+DROP FUNCTION IF EXISTS fn_user_get_profile(integer);
 CREATE OR REPLACE FUNCTION fn_user_get_profile(
-    p_user_id BIGINT  -- Identificador único del usuario
+    p_user_id INTEGER  -- Identificador único del usuario
 )
 RETURNS JSON
 AS $$
@@ -122,8 +124,10 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  La cláusula WHERE restringe los datos al propietario,   ║
 -- ║  evitando que un usuario vea órdenes de otros.          ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_user_get_orders(bigint);
+DROP FUNCTION IF EXISTS fn_user_get_orders(integer);
 CREATE OR REPLACE FUNCTION fn_user_get_orders(
-    p_user_id BIGINT -- ID del usuario autenticado
+    p_user_id INTEGER -- ID del usuario autenticado
 )
 RETURNS JSON
 AS $$
@@ -166,8 +170,10 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  Consolida 3 conteos cruzados en una sola transacción    ║
 -- ║  para minimizar la latencia de red entre PHP y DB.      ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_user_get_dashboard(bigint);
+DROP FUNCTION IF EXISTS fn_user_get_dashboard(integer);
 CREATE OR REPLACE FUNCTION fn_user_get_dashboard(
-    p_user_id BIGINT -- Ámbito del dashboard
+    p_user_id INTEGER -- Ámbito del dashboard
 )
 RETURNS JSON
 AS $$
@@ -223,8 +229,10 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  Verifica que el nuevo email no esté en uso por otra     ║
 -- ║  cuenta para prevenir robos de identidad o duplicados.   ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_user_update_profile(bigint, text, text, text);
+DROP FUNCTION IF EXISTS fn_user_update_profile(integer, text, text, text);
 CREATE OR REPLACE FUNCTION fn_user_update_profile(
-    p_user_id  BIGINT,  -- ID del usuario actual
+    p_user_id  INTEGER,  -- ID del usuario actual
     p_nombre   TEXT,    -- Nuevo nombre/alias
     p_email    TEXT,    -- Nuevo correo electrónico
     p_telefono TEXT     -- Nuevo número telefónico
@@ -275,8 +283,10 @@ $$ LANGUAGE plpgsql;
 -- ║  2. Busca o crea la entrada en 'tab_Direcciones_Envio'.  ║
 -- ║  3. Marca la dirección como predeterminada (TRUE).       ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_user_update_address(bigint, text, integer, text);
+DROP FUNCTION IF EXISTS fn_user_update_address(integer, text, integer, text);
 CREATE OR REPLACE FUNCTION fn_user_update_address(
-    p_user_id   BIGINT,  -- Propietario de la dirección
+    p_user_id   INTEGER,  -- Propietario de la dirección
     p_direccion TEXT,    -- Texto completo del domicilio
     p_ciudad_id INTEGER, -- Enlace al catálogo de ciudades
     p_postal    TEXT     -- Código postal
@@ -284,8 +294,8 @@ CREATE OR REPLACE FUNCTION fn_user_update_address(
 RETURNS JSON
 AS $$
 DECLARE
-    v_existing_id BIGINT; -- Puntero a dirección actual
-    v_new_id      BIGINT; -- Generador de ID para nueva dirección
+    v_existing_id INTEGER; -- Puntero a dirección actual
+    v_new_id      INTEGER; -- Generador de ID para nueva dirección
 BEGIN
     -- ANTI-FLOOD: Evita re-guardar la misma dirección múltiples veces.
     IF EXISTS (
@@ -403,8 +413,10 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  3. Si TRUE → PHP bloquea la publicación duplicada.     ║
 -- ║  4. Si FALSE → PHP procede con fn_reviews_create.       ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_reviews_check_dup(bigint, text);
+DROP FUNCTION IF EXISTS fn_reviews_check_dup(integer, text);
 CREATE OR REPLACE FUNCTION fn_reviews_check_dup(
-    p_user_id    BIGINT, -- El autor del comentario
+    p_user_id    INTEGER, -- El autor del comentario
     p_comentario TEXT    -- El cuerpo del mensaje
 )
 RETURNS BOOLEAN
@@ -438,8 +450,10 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  1. Rango Estelar: Solo se permiten de 1 a 5 estrellas.  ║
 -- ║  2. Doble Publicación: Bloqueo de comentarios idénticos.║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_reviews_create(bigint, smallint, text);
+DROP FUNCTION IF EXISTS fn_reviews_create(integer, smallint, text);
 CREATE OR REPLACE FUNCTION fn_reviews_create(
-    p_user_id     BIGINT,   -- Identidad del autor
+    p_user_id     INTEGER,   -- Identidad del autor
     p_calificacion SMALLINT, -- Escala numérica de satisfacción
     p_comentario   TEXT      -- Contenido narrativo
 )
@@ -636,8 +650,10 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  2. Ejecuta SELECT fn_admin_check_role(target_id).      ║
 -- ║  3. Retorna TEXT → PHP decide si autorizar la operación.║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_admin_check_role(bigint);
+DROP FUNCTION IF EXISTS fn_admin_check_role(integer);
 CREATE OR REPLACE FUNCTION fn_admin_check_role(
-    p_target_id BIGINT -- ID del usuario a consultar
+    p_target_id INTEGER -- ID del usuario a consultar
 )
 RETURNS TEXT 
 AS $$
@@ -674,8 +690,10 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  y BLOQUEA la acción para evitar auto-exclusiones o      ║
 -- ║  vulnerabilidades de escalación.                         ║
 -- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_admin_toggle_client(bigint, boolean);
+DROP FUNCTION IF EXISTS fn_admin_toggle_client(integer, boolean);
 CREATE OR REPLACE FUNCTION fn_admin_toggle_client(
-    p_target_id  BIGINT,    -- El usuario a intervenir
+    p_target_id  INTEGER,    -- El usuario a Intervention
     p_new_state  BOOLEAN    -- Estado bit (TRUE/FALSE)
 )
 RETURNS JSON

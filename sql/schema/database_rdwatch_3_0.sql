@@ -521,12 +521,13 @@ CREATE TABLE IF NOT EXISTS tab_Envios
 -- Almacena las calificaciones y reseñas de los usuarios sobre los productos.
 CREATE TABLE IF NOT EXISTS tab_Opiniones
 (
-    id_opinion              SERIAL PRIMARY KEY, -- Identificador único de la opinión (SERIAL para autoincremento)
+    id_opinion              INTEGER NOT NULL, -- Identificador único de la opinión
     id_usuario              SMALLINT NOT NULL, -- Identificador del usuario que realizó la opinión
-    id_producto             SMALLINT  NULL, -- Identificador del producto sobre el que se realizó la opinión
+    id_producto             SMALLINT NULL, -- Identificador del producto sobre el que se realizó la opinión
     calificacion            SMALLINT NOT NULL, -- Calificación del producto (1 a 5 estrellas)
     comentario              TEXT NOT NULL, -- Comentario adicional sobre el producto
     fecha_opinion           TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora en que se realizó la opinión
+    activo                  BOOLEAN DEFAULT TRUE, -- Estado de la reseña (Visible/Oculto)
 
     -- Columnas de auditoría
     usr_insert VARCHAR(100),
@@ -536,11 +537,15 @@ CREATE TABLE IF NOT EXISTS tab_Opiniones
     usr_delete VARCHAR(100),
     fec_delete TIMESTAMP,
 
-    --PRIMARY KEY (id_opinion), -- Ya definida en la línea 541
     FOREIGN KEY (id_usuario) REFERENCES tab_Usuarios (id_usuario),
     FOREIGN KEY (id_producto) REFERENCES tab_Productos (id_producto),
-    CHECK (calificacion BETWEEN 1 AND 5) -- Calificación del producto (1 a 5 estrellas)
+    CHECK (calificacion BETWEEN 1 AND 5) -- Calificación del producto
 );
+
+-- Índices para mejorar el rendimiento de reseñas
+CREATE INDEX IF NOT EXISTS idx_opiniones_usuario ON tab_Opiniones (id_usuario);
+CREATE INDEX IF NOT EXISTS idx_opiniones_fecha   ON tab_Opiniones (fecha_opinion DESC);
+CREATE INDEX IF NOT EXISTS idx_opiniones_activo  ON tab_Opiniones (activo);
 
 -- Tabla: tab_Pagos
 
@@ -602,6 +607,9 @@ CREATE TABLE IF NOT EXISTS tab_Reservas
     CHECK (estado_reserva IN ('pendiente', 'confirmada', 'cancelada', 'completada'))
 );
 
+-- (Mover PK de tab_Opiniones fuera si es necesario, pero aquí se ajusta la definición)
+ALTER TABLE tab_Opiniones ADD PRIMARY KEY (id_opinion);
+
 -- ==========================================
 -- Tabla: tab_Empleados
 -- Almacena la información de los empleados de la empresa.
@@ -658,14 +666,16 @@ CREATE TABLE IF NOT EXISTS tab_Eventos (
 -- =====================================================
 
 CREATE TABLE IF NOT EXISTS tab_Rate_Limits (
-    id_rate_limit   SERIAL PRIMARY KEY,
+    id_rate_limit   INTEGER NOT NULL,
     nom_accion      VARCHAR(50) NOT NULL,    -- Nombre de la acción (ej: 'login', 'signup')
     identificador   VARCHAR(100) NOT NULL,   -- Identificador único (IP o ID de usuario)
     fec_intento     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
     -- Auditoría (Siguiendo el estándar del proyecto)
     usr_insert      VARCHAR(100) DEFAULT CURRENT_USER,
-    fec_insert      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    fec_insert      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    PRIMARY KEY (id_rate_limit)
 );
 
 -- Índices para optimizar la consulta de intentos recientes
