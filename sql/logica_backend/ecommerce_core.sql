@@ -936,112 +936,78 @@ $$ LANGUAGE plpgsql;
 
 
 -- ╔══════════════════════════════════════════════════════════╗
--- ║  FUNCIÓN 14: fn_contacto_check_dup                      ║
+-- ║  FUNCIÓN 14: fn_contacto_public_create                  ║
 -- ╠══════════════════════════════════════════════════════════╣
--- ║  Propósito  : Implementar una barrera anti-flood para los ║
--- ║               mensajes de la Landing Page.               ║
--- ║  Llamada PHP: SELECT fn_contacto_check_dup(user, msg)   ║
--- ║  Retorna    : BOOLEAN (TRUE = Bloqueo detectado)         ║
+-- ║  Propósito  : Registrar de forma segura un mensaje de     ║
+-- ║               contacto público en tab_Contacto.         ║
+-- ║  Llamada PHP: SELECT fn_contacto_public_create(...)     ║
+-- ║  Retorna    : JSON {ok: true, msg: text}                ║
 -- ║                                                         ║
--- ║  FLUJO:                                                 ║
--- ║  1. Cliente envía formulario de contacto.               ║
--- ║  2. PHP ejecuta fn_contacto_check_dup(user, msg) ANTES. ║
--- ║  3. Si TRUE → PHP rechaza el envío como duplicado.      ║
--- ║  4. Si FALSE → PHP procede con fn_contacto_create.      ║
--- ║                                                         ║
--- ║  LOGICA ANTI-SPAM:                                      ║
--- ║  Busca coincidencias exactas del mensaje en una ventana ║
--- ║  temporal de 5 minutos para el mismo usuario.           ║
+-- ║  FLUJO ATÓMICO:                                         ║
+-- ║  1. Recibe datos limpios del frontend (nombre, correo,  ║
+-- ║     teléfono, asunto, mensaje).                         ║
+-- ║  2. Valida si hay spam (mismo correo + mismo mensaje    ║
+-- ║     en los últimos 5 minutos).                          ║
+-- ║  3. Genera ID secuencial seguro.                        ║
+-- ║  4. Inserta en tab_Contacto.                            ║
+-- ║  5. Retorna acuse de recibo.                            ║
 -- ╚══════════════════════════════════════════════════════════╝
-DROP FUNCTION IF EXISTS fn_contacto_check_dup(bigint, text);
-DROP FUNCTION IF EXISTS fn_contacto_check_dup(integer, text);
-CREATE OR REPLACE FUNCTION fn_contacto_check_dup(
-    p_user_id INTEGER,   -- ID del remitente
-    p_mensaje TEXT      -- Contenido del mensaje a auditar
-)
-RETURNS BOOLEAN
-AS $$
-BEGIN
-    -- Retorna TRUE si existe un rastro idéntico reciente.
-    RETURN EXISTS (
-        SELECT 1 FROM tab_Reservas
-        WHERE id_usuario = p_user_id
-          AND notas_cliente LIKE '%' || p_mensaje || '%' -- Búsqueda semántica
-          AND fec_insert > (NOW() - INTERVAL '5 minutes') -- Ventana de flood
-    );
-END;
-$$ LANGUAGE plpgsql STABLE; -- Función de validación pura (rápida)
-
-
--- ╔══════════════════════════════════════════════════════════╗
--- ║  FUNCIÓN 15: fn_contacto_create                         ║
--- ╠══════════════════════════════════════════════════════════╣
--- ║  Propósito  : Canalizar mensajes del formulario de        ║
--- ║               atención al cliente hacia la agenda.      ║
--- ║  Llamada PHP: SELECT fn_contacto_create(...)             ║
--- ║  Retorna    : JSON {ok: true, msg, id_reserva}          ║
--- ║                                                         ║
--- ║  FLUJO:                                                 ║
--- ║  1. Cliente envía formulario desde la Landing Page.     ║
--- ║  2. PHP (ya validó anti-dup) ejecuta fn_contacto_create.║
--- ║  3. Mapeo semántico: texto servicio → ID vía ILIKE.     ║
--- ║  4. INSERT en tab_Reservas como lead de contacto.       ║
--- ║  5. Retorna {ok, msg, id} → PHP confirma al cliente.    ║
--- ║                                                         ║
--- ║  INTELIGENCIA DE RUTA:                                   ║
--- ║  Mapea automáticamente el texto del selector hacia un    ║
--- ║  ID de servicio técnico real mediante ILIKE.             ║
--- ╚══════════════════════════════════════════════════════════╝
-DROP FUNCTION IF EXISTS fn_contacto_create(bigint, text, text);
-DROP FUNCTION IF EXISTS fn_contacto_create(integer, text, text);
-CREATE OR REPLACE FUNCTION fn_contacto_create(
-    p_user_id      INTEGER,   -- Remitente autenticado
-    p_servicio_txt TEXT,     -- Etiqueta del servicio (ej: 'Relojería')
-    p_notas        TEXT      -- Mensaje estructurado del cliente
+DROP FUNCTION IF EXISTS fn_contacto_public_create(text, text, bigint, text, text);
+CREATE OR REPLACE FUNCTION fn_contacto_public_create(
+    p_nombre_remitente TEXT,
+    p_correo_remitente TEXT,
+    p_telefono_remitente BIGINT,
+    p_asunto TEXT,
+    p_mensaje TEXT
 )
 RETURNS JSON
 AS $$
 DECLARE
-    v_service_id INTEGER;   -- ID de enlace obtenido
-    v_new_id     INTEGER;   -- PK para el nuevo registro de contacto
+    v_new_id INTEGER;
 BEGIN
-    -- Mapeo semántico: Busca la mejor coincidencia en el catálogo.
-    SELECT s.id_servicio INTO v_service_id
-    FROM tab_Servicios s
-    WHERE LOWER(s.nom_servicio) LIKE '%' || LOWER(p_servicio_txt) || '%'
-    LIMIT 1;
+    -- BARRERA ANTI-SPAM (NATIVA)
+    -- Evita que el mismo correo envíe el mismo texto en un lapso muy corto.
+    IF EXISTS (
+        SELECT 1 FROM tab_Contacto
+        WHERE correo_remitente = p_correo_remitente
+          AND mensaje = p_mensaje
+          AND fec_insert > (NOW() - INTERVAL '5 minutes')
+    ) THEN
+        RETURN json_build_object('ok', false,
+            'msg', 'Hemos recibido tu mensaje anterior. Por favor, espera unos minutos antes de enviar otro.');
+    END IF;
 
-    -- Garantía de integridad: Fallback al servicio general (1) si no hay match.
-    v_service_id := COALESCE(v_service_id, 1);
+    -- GENERACIÓN DE PK
+    SELECT COALESCE(MAX(id_contacto), 0) + 1 INTO v_new_id FROM tab_Contacto;
 
-    -- Generación de identidad secuencial.
-    SELECT COALESCE(MAX(r.id_reserva), 0) + 1 INTO v_new_id FROM tab_Reservas r;
-
-    -- Registro en el buffer de atención al cliente (tab_Reservas).
-    INSERT INTO tab_Reservas (
-        id_reserva, 
-        id_usuario, 
-        id_servicio, 
-        fecha_reserva, 
-        notas_cliente, 
-        estado_reserva, 
-        usr_insert, 
+    -- INSERCIÓN EN TAB_CONTACTO
+    INSERT INTO tab_Contacto (
+        id_contacto,
+        nombre_remitente,
+        correo_remitente,
+        telefono_remitente,
+        asunto,
+        mensaje,
+        estado,
+        fecha_envio,
+        usr_insert,
         fec_insert
     ) VALUES (
-        v_new_id, 
-        p_user_id, 
-        v_service_id, 
-        NOW(), 
-        p_notas, 
-        'pendiente', 
-        'lead_landing_form', -- Origen del registro
+        v_new_id,
+        p_nombre_remitente,
+        p_correo_remitente,
+        p_telefono_remitente,
+        COALESCE(p_asunto, 'Consulta General'),
+        p_mensaje,
+        'pendiente',
+        NOW(),
+        'system_public_form',
         NOW()
     );
 
     RETURN json_build_object(
         'ok', true,
-        'msg', 'Mensaje recibido. Un asesor de RD-Watch lo contactará en breve.',
-        'id_reserva', v_new_id
+        'msg', '¡Mensaje enviado con éxito! Un especialista de Relojería Durán te contactará pronto.'
     );
 END;
 $$ LANGUAGE plpgsql;

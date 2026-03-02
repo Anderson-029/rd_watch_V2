@@ -83,26 +83,18 @@ try {
     // ──────────────────────────────────────────────
     // INSERTAR EL MENSAJE EN TAB_CONTACTO
     // ──────────────────────────────────────────────
-    
-    // Generar nuevo identificador
-    $idStmt = $pdo->query("SELECT COALESCE(MAX(id_contacto), 0) + 1 FROM tab_Contacto");
-    $newId = $idStmt->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT fun_insert_contacto(?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$newId, $nombre, $email, $telefono, $asunto, $mensaje]);
-    
-    $result = $stmt->fetchColumn();
-    
-    if (strpos($result, 'SUCCESS') !== false) {
-        echo json_encode(['ok' => true, 'msg' => 'Tu mensaje ha sido enviado correctamente. Nos pondremos en contacto pronto!']);
-    } else {
-        error_log("Error BD contacto: " . $result);
-        echo json_encode(['ok' => false, 'msg' => 'Hubo un error interno al guardar el mensaje. Inténtelo más tarde.']);
-    }
+    $stmt = $pdo->prepare("SELECT fn_contacto_public_create(?, ?, ?::BIGINT, ?, ?)");
+    $stmt->execute([$nombre, $email, $telefono, $asunto, $mensaje]);
+
+    // Devolvemos el JSON exacto que PostgreSQL nos retorna de forma segura
+    echo json_encode(json_decode($stmt->fetchColumn(), true));
 
 }
 catch (PDOException $e) {
     http_response_code(500);
-    error_log("PDOException en contacto.php: " . $e->getMessage());
-    echo json_encode(['ok' => false, 'msg' => 'Error al procesar la solicitud en el servidor.']);
+    $err = "PDOException en contacto.php: " . $e->getMessage();
+    error_log($err);
+    file_put_contents('/tmp/rdwatch_contacto_error.log', $err . "\n", FILE_APPEND);
+    echo json_encode(['ok' => false, 'msg' => 'Error BD: ' . $e->getMessage()]);
 }

@@ -1709,13 +1709,14 @@ async function handleContactForm(e) {
     const nombre = document.getElementById('contact-name').value.trim();
     const email = document.getElementById('contact-email').value.trim();
     const telefono = document.getElementById('contact-phone').value.trim();
-    const asunto = document.getElementById('contact-subject').value.trim();
+    const serviceSelect = document.getElementById('contact-service');
+    const asunto = serviceSelect.options[serviceSelect.selectedIndex] ? serviceSelect.options[serviceSelect.selectedIndex].text : '';
     const mensaje = document.getElementById('contact-message').value.trim();
 
     // === VALIDACIONES ===
 
     // Validación básica de campos obligatorios
-    if (!nombre || !email || !asunto || !mensaje) {
+    if (!nombre || !email || !asunto || !mensaje || serviceSelect.value === "") {
         showNotification('❌ Por favor completa todos los campos obligatorios', true);
         return;
     }
@@ -1728,7 +1729,7 @@ async function handleContactForm(e) {
     }
 
     // Validar teléfono (si se proporciona)
-    if (telefono && !validatePhone(telefono)) {
+    if (telefono && !/^\d{10}$/.test(telefono)) {
         showNotification('❌ El teléfono debe tener 10 dígitos numéricos', true);
         document.getElementById('contact-phone').focus();
         return;
@@ -1780,6 +1781,38 @@ async function handleContactForm(e) {
 /**
  * Carga servicios dinámicamente en el select del formulario de contacto
  */
+async function loadContactServices() {
+    const serviceSelect = document.getElementById('contact-service');
+    if (!serviceSelect) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/servicios.php`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+
+        const data = await response.json();
+
+        if (data.ok && data.servicios) {
+            // Mantener la opción predeterminada
+            serviceSelect.innerHTML = '<option value="" disabled selected style="color: #999;">Selecciona un servicio</option>';
+
+            // Llenar con servicios activos
+            data.servicios.forEach(srv => {
+                if (srv.estado) { // Asegurar que está activo
+                    const option = document.createElement('option');
+                    option.value = srv.id_servicio;
+                    option.textContent = srv.nom_servicio;
+                    serviceSelect.appendChild(option);
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error cargando servicios para contacto:', error);
+        // Fallback en caso de error
+        serviceSelect.innerHTML = '<option value="1">Consulta General / Otros</option>';
+    }
+}
 
 /**
  * Validación en tiempo real del teléfono de contacto
@@ -1804,6 +1837,7 @@ function setupContactValidation() {
 // Inicialización final
 document.addEventListener('DOMContentLoaded', () => {
     loadStats();
+    loadContactServices(); // <-- Llamada añadida
 
     // Conectar formulario de contacto
     const contactForm = document.getElementById('contactForm');
