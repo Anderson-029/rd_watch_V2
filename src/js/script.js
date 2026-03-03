@@ -55,36 +55,6 @@ window.toggleCart = function (forceOpen = false) {
 };
 
 /**
- * Elimina producto del carrito
- */
-window.removeFromCart = async function (productId) {
-    if (!confirm('¿Eliminar producto?')) return;
-    try {
-        await secureFetch(`${API_BASE_SHOP}/carrito.php`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id_producto: productId })
-        });
-        loadCart();
-    } catch (e) { console.error(e); }
-};
-
-/**
- * Actualiza cantidad (+ / -)
- */
-window.updateCartQuantity = async function (productId, newQuantity) {
-    if (newQuantity < 1) return;
-    try {
-        const res = await secureFetch(`${API_BASE_SHOP}/carrito.php`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id_producto: productId, cantidad: newQuantity })
-        });
-        if (res.ok) loadCart();
-    } catch (e) { console.error(e); }
-};
-
-/**
  * Ir a la pantalla de Pago (Checkout)
  */
 window.procedeToCheckout = function () {
@@ -991,8 +961,7 @@ async function loadServices() {
                         <ul class="service-features">
                             <li><i class="fas fa-hourglass-half"></i> ${s.duracion_estimada}</li>
                             <li><i class="fas fa-tag"></i> ${formatPrice(s.precio_servicio)}</li>
-                        </ul>
-                        <a href="#contact-section" class="service-link btn-request-service" data-search="${s.nom_servicio}">
+                        <a href="#contact-section" class="btn btn-outline">
                             Agendar <i class="fas fa-chevron-down"></i>
                         </a>
                     </div>
@@ -1003,8 +972,6 @@ async function loadServices() {
             // 2. Inicializar lógica del Carrusel
             initServicesCarousel();
 
-            // Re-asignar eventos a los nuevos botones
-            initRequestButtons();
         } else {
             if (originalGrid) originalGrid.innerHTML = '<p style="width:100%;text-align:center">No hay servicios disponibles.</p>';
         }
@@ -1065,30 +1032,7 @@ function initServicesCarousel() {
     // Optional: Add resize listener to adjust if needed, though scrollLeft handles it naturally
 }
 
-// Función auxiliar para inicializar botones de solicitud (extraída para reuso)
-function initRequestButtons() {
-    const requestButtons = document.querySelectorAll('.btn-request-service');
-    if (requestButtons.length > 0) {
-        requestButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const subjectInput = document.getElementById('contact-subject');
-
-                // Esperamos un momento para el scroll
-                setTimeout(() => {
-                    if (subjectInput) {
-                        subjectInput.value = btn.getAttribute('data-search');
-                        subjectInput.style.borderColor = 'var(--primary-color)';
-                        subjectInput.style.boxShadow = '0 0 10px rgba(184, 134, 11, 0.3)';
-                        setTimeout(() => {
-                            subjectInput.style.borderColor = '';
-                            subjectInput.style.boxShadow = '';
-                        }, 1500);
-                    }
-                }, 100);
-            });
-        });
-    }
-}
+// Eliminada función obsoleta de redirección de servicios
 
 // Asegúrate de llamar a esta función cuando cargue la página
 document.addEventListener('DOMContentLoaded', () => {
@@ -1396,12 +1340,8 @@ document.addEventListener('DOMContentLoaded', () => {
             this.value = this.value.replace(/\D/g, '');
 
             const value = this.value;
-            if (value && !validatePhone(value)) {
-                if (value.length < 10) {
-                    signupPhoneError.textContent = 'El teléfono debe tener 10 dígitos';
-                } else {
-                    signupPhoneError.textContent = 'Solo se permiten números';
-                }
+            if (value && value.length < 10) {
+                signupPhoneError.textContent = 'El teléfono debe tener 10 dígitos';
                 signupPhoneError.style.display = 'block';
                 signupPhoneError.style.color = '#e74c3c';
                 this.style.borderColor = '#e74c3c';
@@ -1709,14 +1649,12 @@ async function handleContactForm(e) {
     const nombre = document.getElementById('contact-name').value.trim();
     const email = document.getElementById('contact-email').value.trim();
     const telefono = document.getElementById('contact-phone').value.trim();
-    const serviceSelect = document.getElementById('contact-service');
-    const asunto = serviceSelect.options[serviceSelect.selectedIndex] ? serviceSelect.options[serviceSelect.selectedIndex].text : '';
     const mensaje = document.getElementById('contact-message').value.trim();
 
     // === VALIDACIONES ===
 
     // Validación básica de campos obligatorios
-    if (!nombre || !email || !asunto || !mensaje || serviceSelect.value === "") {
+    if (!nombre || !email || !mensaje) {
         showNotification('❌ Por favor completa todos los campos obligatorios', true);
         return;
     }
@@ -1745,7 +1683,6 @@ async function handleContactForm(e) {
             nombre,
             email,
             telefono,
-            asunto,
             mensaje
         };
 
@@ -1775,44 +1712,8 @@ async function handleContactForm(e) {
 }
 
 // =========================================================
-// 12. CARGAR SERVICIOS EN FORMULARIO DE CONTACTO
+// 12. VALIDACIÓN DE TELÉFONO EN CONTACTO
 // =========================================================
-
-/**
- * Carga servicios dinámicamente en el select del formulario de contacto
- */
-async function loadContactServices() {
-    const serviceSelect = document.getElementById('contact-service');
-    if (!serviceSelect) return;
-
-    try {
-        const response = await fetch(`${API_BASE}/servicios.php`, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
-
-        const data = await response.json();
-
-        if (data.ok && data.servicios) {
-            // Mantener la opción predeterminada
-            serviceSelect.innerHTML = '<option value="" disabled selected style="color: #999;">Selecciona un servicio</option>';
-
-            // Llenar con servicios activos
-            data.servicios.forEach(srv => {
-                if (srv.estado) { // Asegurar que está activo
-                    const option = document.createElement('option');
-                    option.value = srv.id_servicio;
-                    option.textContent = srv.nom_servicio;
-                    serviceSelect.appendChild(option);
-                }
-            });
-        }
-    } catch (error) {
-        console.error('Error cargando servicios para contacto:', error);
-        // Fallback en caso de error
-        serviceSelect.innerHTML = '<option value="1">Consulta General / Otros</option>';
-    }
-}
 
 /**
  * Validación en tiempo real del teléfono de contacto
@@ -1837,7 +1738,6 @@ function setupContactValidation() {
 // Inicialización final
 document.addEventListener('DOMContentLoaded', () => {
     loadStats();
-    loadContactServices(); // <-- Llamada añadida
 
     // Conectar formulario de contacto
     const contactForm = document.getElementById('contactForm');

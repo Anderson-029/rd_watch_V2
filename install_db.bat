@@ -25,16 +25,32 @@ echo [2/4] Instalando Triggers y Auditoria...
 %PSQL_CMD% -f "sql\triggers\audit_trail.sql" || goto :error
 
 echo [3/4] Desplegando Logica de Backend (Funciones)...
-for %%f in (sql\logica_backend\*.sql) do (
-    echo    - cargando: %%~nxf
-    %PSQL_CMD% -f "%%f" || goto :error
-)
+echo    - cargando: auth_security.sql
+%PSQL_CMD% -f "sql\logica_backend\auth_security.sql" || goto :error
+echo    - cargando: catalog_master.sql
+%PSQL_CMD% -f "sql\logica_backend\catalog_master.sql" || goto :error
+echo    - cargando: client_panel.sql
+%PSQL_CMD% -f "sql\logica_backend\client_panel.sql" || goto :error
+echo    - cargando: ecommerce_core.sql
+%PSQL_CMD% -f "sql\logica_backend\ecommerce_core.sql" || goto :error
+echo    - cargando: admin_reports.sql
+%PSQL_CMD% -f "sql\logica_backend\admin_reports.sql" || goto :error
 
 echo [4/4] Poblando Semillas y Datos Maestros...
-for %%f in (sql\scripts\*.sql) do (
-    echo    - insertando: %%~nxf
-    %PSQL_CMD% -f "%%f" || goto :error
-)
+echo    - insertando: 00_geodata.sql
+%PSQL_CMD% -f "sql\scripts\00_geodata.sql" || goto :error
+echo    - insertando: 01_users_base.sql
+%PSQL_CMD% -f "sql\scripts\01_users_base.sql" || goto :error
+echo    - insertando: 02_users_extended.sql
+%PSQL_CMD% -f "sql\scripts\02_users_extended.sql" || goto :error
+echo    - insertando: 03_catalog.sql
+%PSQL_CMD% -f "sql\scripts\03_catalog.sql" || goto :error
+echo    - insertando: 04_activity.sql
+%PSQL_CMD% -f "sql\scripts\04_activity.sql" || goto :error
+echo    - insertando: 05_reviews.sql
+%PSQL_CMD% -f "sql\scripts\05_reviews.sql" || goto :error
+echo    - insertando: 06_configuracion_admin_pending.sql
+%PSQL_CMD% -f "sql\scripts\06_configuracion_admin_pending.sql" || goto :error
 
 echo.
 echo =====================================================

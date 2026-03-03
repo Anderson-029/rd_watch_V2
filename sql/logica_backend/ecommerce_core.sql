@@ -945,19 +945,18 @@ $$ LANGUAGE plpgsql;
 -- ║                                                         ║
 -- ║  FLUJO ATÓMICO:                                         ║
 -- ║  1. Recibe datos limpios del frontend (nombre, correo,  ║
--- ║     teléfono, asunto, mensaje).                         ║
+-- ║     teléfono, mensaje).                                 ║
 -- ║  2. Valida si hay spam (mismo correo + mismo mensaje    ║
 -- ║     en los últimos 5 minutos).                          ║
 -- ║  3. Genera ID secuencial seguro.                        ║
 -- ║  4. Inserta en tab_Contacto.                            ║
 -- ║  5. Retorna acuse de recibo.                            ║
 -- ╚══════════════════════════════════════════════════════════╝
-DROP FUNCTION IF EXISTS fn_contacto_public_create(text, text, bigint, text, text);
+DROP FUNCTION IF EXISTS fn_contacto_public_create(text, text, bigint, text);
 CREATE OR REPLACE FUNCTION fn_contacto_public_create(
     p_nombre_remitente TEXT,
     p_correo_remitente TEXT,
     p_telefono_remitente BIGINT,
-    p_asunto TEXT,
     p_mensaje TEXT
 )
 RETURNS JSON
@@ -986,7 +985,6 @@ BEGIN
         nombre_remitente,
         correo_remitente,
         telefono_remitente,
-        asunto,
         mensaje,
         estado,
         fecha_envio,
@@ -997,11 +995,10 @@ BEGIN
         p_nombre_remitente,
         p_correo_remitente,
         p_telefono_remitente,
-        COALESCE(p_asunto, 'Consulta General'),
         p_mensaje,
         'pendiente',
         NOW(),
-        'system_public_form',
+        'SYSTEM_PUBLIC_CONTACT',
         NOW()
     );
 

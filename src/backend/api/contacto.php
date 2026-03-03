@@ -62,17 +62,21 @@ try {
     Validation::validateOrReject($data, [
         'nombre' => 'name',
         'email' => 'email',
-        'telefono' => 'name',
-        'asunto' => 'name',
-        'mensaje' => 'name'
+        // 'telefono' se validará manualmente abajo
+        // 'mensaje' requiere más de 100 caracteres (la regla name lo limita)
     ]);
 
     $nombre = Validation::sanitizeString($data['nombre']);
     $email = Validation::sanitizeString($data['email']);
-    $telefonoRaw = Validation::sanitizeString($data['telefono']);
+    $telefonoRaw = Validation::sanitizeString($data['telefono'] ?? '');
     $telefono = preg_replace('/\D/', '', $telefonoRaw); // Solo dígitos
-    $asunto = Validation::sanitizeString($data['asunto']);
-    $mensaje = Validation::sanitizeString($data['mensaje']);
+    $mensaje = Validation::sanitizeString($data['mensaje'] ?? '');
+
+    if (empty($mensaje)) {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'msg' => 'El mensaje es obligatorio']);
+        exit;
+    }
 
     // Validar teléfono: exactamente 10 dígitos
     if (strlen($telefono) !== 10) {
@@ -84,8 +88,8 @@ try {
     // INSERTAR EL MENSAJE EN TAB_CONTACTO
     // ──────────────────────────────────────────────
 
-    $stmt = $pdo->prepare("SELECT fn_contacto_public_create(?, ?, ?::BIGINT, ?, ?)");
-    $stmt->execute([$nombre, $email, $telefono, $asunto, $mensaje]);
+    $stmt = $pdo->prepare("SELECT fn_contacto_public_create(?, ?, ?::BIGINT, ?)");
+    $stmt->execute([$nombre, $email, $telefono, $mensaje]);
 
     // Devolvemos el JSON exacto que PostgreSQL nos retorna de forma segura
     echo json_encode(json_decode($stmt->fetchColumn(), true));
@@ -95,6 +99,7 @@ catch (PDOException $e) {
     http_response_code(500);
     $err = "PDOException en contacto.php: " . $e->getMessage();
     error_log($err);
-    file_put_contents('/tmp/rdwatch_contacto_error.log', $err . "\n", FILE_APPEND);
+    // Cambiado: usar __DIR__ en lugar de /tmp/ para compatibilidad con Windows
+    file_put_contents(__DIR__ . '/contacto_error.log', $err . "\n", FILE_APPEND);
     echo json_encode(['ok' => false, 'msg' => 'Error BD: ' . $e->getMessage()]);
 }

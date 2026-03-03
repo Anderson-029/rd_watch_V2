@@ -24,19 +24,21 @@
   })
     .then(res => res.json())
     .then(data => {
-      // Si no hay sesión, redirigir al login usando la ruta correcta
+      // Si no hay sesión, redirigir al login usando replace() para eliminar del historial
       if (!data.ok || !data.user) {
+        sessionStorage.removeItem('user');
         showNotification('⚠️ Debes iniciar sesión para acceder al panel de administración');
         const appUrl = API_CONFIG.appUrl || '../..';
-        window.location.href = `${appUrl}/index.html`;
+        window.location.replace(`${appUrl}/index.html`);
         return;
       }
 
       // Verificación de rol
       if (data.user.rol !== 'admin') {
+        sessionStorage.removeItem('user');
         showNotification('⚠️ No tienes permisos de administrador');
         const appUrl = API_CONFIG.appUrl || '../..';
-        window.location.href = `${appUrl}/index.html`;
+        window.location.replace(`${appUrl}/index.html`);
         return;
       }
 
@@ -45,8 +47,9 @@
     .catch(err => {
       console.error('Error verificando sesión:', err);
       // En caso de error, sacar al usuario a la ruta correcta
+      sessionStorage.removeItem('user');
       const appUrl = API_CONFIG.appUrl || '../..';
-      window.location.href = `${appUrl}/index.html`;
+      window.location.replace(`${appUrl}/index.html`);
     });
 })();
 
@@ -63,22 +66,18 @@ function cerrarSesion() {
   })
     .then(res => res.json())
     .then(data => {
-      /* API_BASE es config.baseUrl (el del backend).
-       * Necesitamos la URL de la APP (frontend root).
-       * Como API_BASE termina en /src/backend/api, lo limpiamos o usamos la lógica inversa.
-       * O mejor, simplemente ../../index.html ya que estamos en src/admin/
-       * Pero lo más robusto es usar API_CONFIG.appUrl si estuviere disponible aquí.
-       * admin.js está incluido en admin.html, el cual usa config.js antes. 
-       * Así que API_CONFIG existe. */
-
+      sessionStorage.removeItem('user');
+      sessionStorage.removeItem('csrf_token');
+      // 🛡️ replace() elimina esta página del historial del navegador,
+      // impidiendo que el admin vuelva al panel con la flecha "atrás".
       const appUrl = API_CONFIG.appUrl || '../..';
-      window.location.href = `${appUrl}/index.html`;
+      window.location.replace(`${appUrl}/index.html`);
     })
     .catch(err => {
       console.error('Error al cerrar sesión:', err);
-      sessionStorage.removeItem('user');
+      sessionStorage.clear();
       const appUrl = API_CONFIG.appUrl || '../..';
-      window.location.href = `${appUrl}/index.html`;
+      window.location.replace(`${appUrl}/index.html`);
     });
 }
 

@@ -18,11 +18,30 @@ function getUser() {
 // 🔒 VERIFICACIÓN DE AUTENTICACIÓN Y CARGA INICIAL DE DATOS
 (async function checkAuth() {
     const user = getUser();
+    const appUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.appUrl) ? API_CONFIG.appUrl : '../../';
 
     if (!user) {
         showNotification('⚠️ Debes iniciar sesión para acceder a tu panel');
-        const appUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.appUrl) ? API_CONFIG.appUrl : '../../';
-        window.location.href = `${appUrl}/index.html`;
+        window.location.replace(`${appUrl}/index.html`);
+        return;
+    }
+
+    // 🛡️ VERIFICACIÓN DEL LADO DEL SERVIDOR
+    // Aunque sessionStorage tenga datos, verificamos que la sesión PHP siga activa.
+    // Esto previene el acceso por caché del navegador después de cerrar sesión.
+    try {
+        const sessionCheck = await secureFetch(`${API_BASE_URL}/me.php`, { method: 'GET' });
+        const sessionData = await sessionCheck.json();
+        if (!sessionData.ok || !sessionData.user) {
+            sessionStorage.removeItem('user');
+            showNotification('⚠️ Tu sesión ha expirado. Inicia sesión nuevamente.');
+            window.location.replace(`${appUrl}/index.html`);
+            return;
+        }
+    } catch (err) {
+        console.error('Error verificando sesión del servidor:', err);
+        sessionStorage.removeItem('user');
+        window.location.replace(`${appUrl}/index.html`);
         return;
     }
 
@@ -57,7 +76,7 @@ function getUser() {
     } catch (err) {
         console.error('Error al verificar usuario:', err);
         showNotification('❌ Sesión inválida');
-        window.location.href = '../index.html';
+        window.location.replace(`${appUrl}/index.html`);
     }
 })();
 
@@ -248,8 +267,15 @@ function cerrarSesion() {
         .then(res => res.json())
         .then(data => {
             sessionStorage.removeItem('user');
+            sessionStorage.removeItem('csrf_token');
             showNotification('Sesión cerrada correctamente');
-            window.location.href = `${API_CONFIG.appUrl}/index.html`;
+            // 🛡️ replace() elimina esta página del historial del navegador,
+            // impidiendo que el usuario vuelva al panel con la flecha "atrás".
+            window.location.replace(`${API_CONFIG.appUrl}/index.html`);
+        })
+        .catch(() => {
+            sessionStorage.clear();
+            window.location.replace(`${API_CONFIG.appUrl}/index.html`);
         });
 }
 

@@ -196,7 +196,6 @@ CREATE TABLE IF NOT EXISTS tab_Contacto
     nombre_remitente        VARCHAR(100) NOT NULL, -- Nombre de la persona que envía el mensaje
     correo_remitente        VARCHAR(100) NOT NULL, -- Correo electrónico de la persona que envía el mensaje
     telefono_remitente      BIGINT NOT NULL, -- Número de teléfono de la persona que envía el mensaje
-    asunto                  VARCHAR(200) NOT NULL, -- Asunto del mensaje
     mensaje                 TEXT NOT NULL, -- Contenido del mensaje
     fecha_envio             TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de envío del mensaje
     estado                  VARCHAR(10) NOT NULL DEFAULT 'pendiente', -- Estado del mensaje
