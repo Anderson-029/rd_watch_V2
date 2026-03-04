@@ -44,7 +44,7 @@
 -- tab_Facturas         → Facturación legal
 -- tab_Detalle_Factura  → Líneas de factura
 -- tab_Envios           → Logística de envío
--- tab_Pagos            → Comprobantes de pago (BYTEA)
+-- tab_Pagos            → Comprobantes de pago (ruta en disco)
 -- tab_Direcciones_Envio → Direcciones del cliente
 -- tab_Ciudades         → Catálogo de ciudades
 -- tab_Reservas         → Citas técnicas del taller
@@ -635,7 +635,7 @@ BEGIN
             o.estado_orden,          -- Situación logística
             o.total_orden,           -- Monto transaccional
             -- Verificación de existencia de comprobante (0/1) para el UI.
-            (CASE WHEN p.comprobante_archivo IS NOT NULL THEN 1 ELSE 0 END) AS tiene_comprobante,
+            (CASE WHEN p.comprobante_ruta IS NOT NULL THEN 1 ELSE 0 END) AS tiene_comprobante,
             p.estado_pago            -- Situación financiera
         FROM tab_Orden o
         JOIN tab_Usuarios u ON o.id_usuario = u.id_usuario -- Nexo con el cliente

@@ -151,13 +151,38 @@ async function cargarFactura() {
     }
 }
 
+// =====================================================
+// PROTECCIÓN NUCLEAR CONTRA BFCACHE (Back-Forward Cache)
+// Este listener de 'unload' vacío es la única forma
+// garantizada de deshabilitar el bfcache en Chrome/Firefox.
+// El navegador NO guardará esta página en el caché
+// de historial cuando el usuario salga de ella.
+// Referencia: https://web.dev/articles/bfcache
+// =====================================================
+window.addEventListener('unload', function () { /* prevent bfcache */ });
+
+// También proteción de pageshow como segunda capa
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+        // Si por alguna razón la página cargó desde caché, forzar reload
+        window.location.reload();
+    }
+});
+
+// Verificación inmediata de sesión antes de cualquier render
+(function checkSessionOnLoad() {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+        // Sin sesión -> redirigir al inicio inmediatamente
+        window.location.replace('../index.html');
+    }
+})();
+
 // Inicialización Robusta: Ejecutar si el DOM ya está listo o esperar a que lo esté
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('DOM cargado, iniciando carga de factura...');
         cargarFactura();
     });
 } else {
-    console.log('El DOM ya estaba listo, iniciando carga de factura inmediata...');
     cargarFactura();
 }

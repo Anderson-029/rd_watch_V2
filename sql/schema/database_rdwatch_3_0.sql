@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS tab_Categorias;
 DROP TABLE IF EXISTS tab_Usuarios;
 DROP TABLE IF EXISTS tab_Empleados;
 DROP TABLE IF EXISTS tab_Eventos;
+DROP TABLE IF EXISTS tab_Configuracion;
 
 
 -- =====================================================
@@ -558,8 +559,7 @@ CREATE TABLE IF NOT EXISTS tab_Pagos
     id_metodo_pago          SMALLINT NOT NULL, -- Clave foránea a tab_Metodos_Pago
     estado_pago             VARCHAR(50) NOT NULL, -- Estado actual del pago
     fecha_pago              TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora en que se realizó el pago
-    comprobante_archivo     BYTEA, -- Contenido binario del comprobante
-    comprobante_extension   VARCHAR(10), -- Extensión del archivo (jpg, png, pdf, etc.)
+    comprobante_ruta        VARCHAR(255), -- Ruta relativa del archivo en disco (ej: comprobantes/7_20260303_191500.jpg)
 
        -- Columnas de auditoría
     usr_insert VARCHAR(100),
@@ -572,9 +572,8 @@ CREATE TABLE IF NOT EXISTS tab_Pagos
     PRIMARY KEY (id_pago),
     FOREIGN KEY (id_orden) REFERENCES tab_Orden(id_orden),
     FOREIGN KEY (id_metodo_pago) REFERENCES tab_Metodos_Pago(id_metodo_pago),
-    CHECK (monto >= 0), -- Monto del pago
-    CHECK (monto >= 0), -- Monto del pago
-    CHECK (estado_pago IN ('pendiente', 'completado', 'fallido', 'reembolsado')) -- Estado actual del pago
+    CHECK (monto >= 0),
+    CHECK (estado_pago IN ('pendiente', 'completado', 'fallido', 'reembolsado'))
 );
 
 
@@ -692,3 +691,30 @@ COMMENT ON TABLE tab_Rate_Limits IS 'Registro de intentos de acciones sensibles 
 INSERT INTO tab_Metodos_Pago (id_metodo_pago, nombre_metodo, descripcion, usr_insert, fec_insert)
 VALUES (1, 'Consignación / Transferencia', 'Instrucciones de pago por Bancolombia, Nequi o Daviplata mostradas en el checkout.', 'system', NOW())
 ON CONFLICT (id_metodo_pago) DO NOTHING;
+
+
+-- =====================================================
+-- Tabla: tab_Configuracion
+-- Almacena los parámetros globales configurables de la tienda.
+-- =====================================================
+CREATE TABLE IF NOT EXISTS tab_Configuracion
+(
+    clave       VARCHAR(50)  NOT NULL, -- Nombre de la configuración (ej: 'nombre_tienda')
+    valor       VARCHAR(255) NOT NULL, -- Valor asociado
+
+    -- Columnas de auditoría
+    usr_insert  VARCHAR(100),
+    fec_insert  TIMESTAMP,
+    usr_update  VARCHAR(100),
+    fec_update  TIMESTAMP,
+
+    PRIMARY KEY (clave)
+);
+
+COMMENT ON TABLE tab_Configuracion IS 'Parámetros globales de la tienda, editables desde el panel admin.';
+
+-- Datos por defecto de la tienda
+INSERT INTO tab_Configuracion (clave, valor, usr_insert, fec_insert) VALUES
+    ('nombre_tienda', 'Relojería Durán',    'system', NOW()),
+    ('moneda',        'COP',                  'system', NOW())
+ON CONFLICT (clave) DO NOTHING;

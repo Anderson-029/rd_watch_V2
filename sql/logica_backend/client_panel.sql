@@ -750,21 +750,33 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION fn_admin_get_settings()
 RETURNS JSON
 AS $$
+DECLARE
+    v_nombre_tienda VARCHAR(255);
+    v_moneda        VARCHAR(10);
+    v_admin_nombre  VARCHAR(100);
 BEGIN
-    -- Retorno de objeto estático con firma de versión y entorno.
+    -- Leer de tab_Configuracion
+    SELECT valor INTO v_nombre_tienda FROM tab_Configuracion WHERE clave = 'nombre_tienda';
+    SELECT valor INTO v_moneda        FROM tab_Configuracion WHERE clave = 'moneda';
+
+    -- Obtener nombre del admin actual
+    SELECT nom_usuario INTO v_admin_nombre
+    FROM tab_Usuarios
+    WHERE rol = 'admin'
+    ORDER BY id_usuario
+    LIMIT 1;
+
     RETURN json_build_object(
         'store', json_build_object(
-            'nombre', 'Relojería RD-Watch',
-            'moneda', 'USD',
-            'version', '2.1.0-deep-doc' -- Firma de actualización documental
+            'nombre', COALESCE(v_nombre_tienda, 'RD-Watch'),
+            'moneda',  COALESCE(v_moneda, 'COP')
         ),
         'admin', json_build_object(
-            'usuario_central', 'admin_central',
-            'rol_jerarquico', 'SuperAdmin'
+            'usuario', COALESCE(v_admin_nombre, 'admin')
         )
     );
 END;
-$$ LANGUAGE plpgsql STABLE; -- Función estable (siempre retorna lo mismo)
+$$ LANGUAGE plpgsql STABLE;
 
 
 -- ╔══════════════════════════════════════════════════════════╗
@@ -827,13 +839,89 @@ $$ LANGUAGE plpgsql STABLE;
 -- ║  testeo de flujos en el frontend sin mutar la DB.       ║
 -- ╚══════════════════════════════════════════════════════════╝
 CREATE OR REPLACE FUNCTION fn_admin_update_settings(
-    p_data JSON  -- Bloque estructurado de configuración
+    p_data JSON
+)
+RETURNS JSON
+AS $$
+DECLARE
+    v_nombre VARCHAR(255);
+    v_moneda VARCHAR(50);
+BEGIN
+    v_nombre := trim(p_data->>'nombre');
+    v_moneda := trim(p_data->>'moneda');
+
+    -- Validaciones básicas
+    IF v_nombre IS NULL OR v_nombre = '' THEN
+        RETURN json_build_object('ok', false, 'msg', 'El nombre de la tienda no puede estar vacío');
+    END IF;
+
+    IF v_moneda IS NULL OR v_moneda = '' THEN
+        RETURN json_build_object('ok', false, 'msg', 'Debe seleccionar una moneda válida');
+    END IF;
+
+    -- UPSERT en tab_Configuracion
+    INSERT INTO tab_Configuracion (clave, valor, usr_insert, fec_insert)
+    VALUES ('nombre_tienda', v_nombre, 'admin', NOW())
+    ON CONFLICT (clave) DO UPDATE
+        SET valor = EXCLUDED.valor, usr_update = 'admin', fec_update = NOW();
+
+    INSERT INTO tab_Configuracion (clave, valor, usr_insert, fec_insert)
+    VALUES ('moneda', v_moneda, 'admin', NOW())
+    ON CONFLICT (clave) DO UPDATE
+        SET valor = EXCLUDED.valor, usr_update = 'admin', fec_update = NOW();
+
+    RETURN json_build_object('ok', true, 'msg', 'Configuración de tienda actualizada correctamente');
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- ╔══════════════════════════════════════════════════════════╗
+-- ║  FUNCIÓN 17: fn_admin_change_password                   ║
+-- ╠══════════════════════════════════════════════════════════╣
+-- ║  Propósito  : Obtener la contraseña hash del admin para   ║
+-- ║               que PHP la valide y actualice si es correcta. ║
+-- ║  Retorna    : JSON con ok, hash_actual para verificación   ║
+-- ║               y acción de update si es requerida.         ║
+-- ║                                                           ║
+-- ║  FLUJO:                                                   ║
+-- ║  1. PHP llama fn_admin_get_hash(id_usuario)              ║
+-- ║  2. PHP verifica con password_verify(current, hash)      ║
+-- ║  3. Si ok → PHP genera nuevo hash y llama                ║
+-- ║     fn_admin_set_password(id_usuario, nuevo_hash)        ║
+-- ╚══════════════════════════════════════════════════════════╝
+DROP FUNCTION IF EXISTS fn_admin_get_hash(INTEGER);
+CREATE OR REPLACE FUNCTION fn_admin_get_hash(
+    p_id_usuario INTEGER
+)
+RETURNS TEXT
+AS $$
+BEGIN
+    RETURN (
+        SELECT contra
+        FROM tab_Usuarios
+        WHERE id_usuario = p_id_usuario AND rol = 'admin'
+    );
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+DROP FUNCTION IF EXISTS fn_admin_set_password(INTEGER, TEXT);
+CREATE OR REPLACE FUNCTION fn_admin_set_password(
+    p_id_usuario INTEGER,
+    p_nuevo_hash TEXT
 )
 RETURNS JSON
 AS $$
 BEGIN
-    -- MOCK TRANSACCIONAL: Preparado para lógica de INSERT/UPDATE en tab_Configuracion.
-    RETURN json_build_object('ok', true,
-        'msg', 'Actualización simulada: La configuración ha sido validada y aceptada por el motor.');
+    UPDATE tab_Usuarios
+    SET contra = p_nuevo_hash,
+        usr_update = 'admin',
+        fec_update = NOW()
+    WHERE id_usuario = p_id_usuario AND rol = 'admin';
+
+    IF NOT FOUND THEN
+        RETURN json_build_object('ok', false, 'msg', 'No se encontró el administrador');
+    END IF;
+
+    RETURN json_build_object('ok', true, 'msg', 'Contraseña actualizada correctamente');
 END;
 $$ LANGUAGE plpgsql;

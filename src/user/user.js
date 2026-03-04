@@ -15,6 +15,19 @@ function getUser() {
     }
 }
 
+// 🛡️ PROTECCIÓN LOCAL DE CACHÉ BROWSER (bfcache)
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+        window.location.reload();
+    } else {
+        const user = sessionStorage.getItem('user');
+        const appUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.appUrl) ? API_CONFIG.appUrl : '../../';
+        if (!user) {
+            window.location.replace(`${appUrl}/index.html`);
+        }
+    }
+});
+
 // 🔒 VERIFICACIÓN DE AUTENTICACIÓN Y CARGA INICIAL DE DATOS
 (async function checkAuth() {
     const user = getUser();
@@ -261,20 +274,18 @@ async function cargarCiudadesPorDepto(idDepartamento) {
 // 🚪 CERRAR SESIÓN
 function cerrarSesion() {
     if (!confirm('¿Deseas cerrar sesión?')) return;
-    secureFetch(`${API_BASE_URL}/logout.php`, {
-        method: 'POST'
-    })
+
+    // 🛡️ Limpiar sesión local PRIMERO (antes de llamar al servidor)
+    // Esto garantiza que si el usuario presiona Atrás, no haya datos de sesión
+    sessionStorage.clear();
+    localStorage.removeItem('csrf_token');
+
+    // Luego invalidar la sesión en el servidor
+    secureFetch(`${API_BASE_URL}/logout.php`, { method: 'POST' })
         .then(res => res.json())
-        .then(data => {
-            sessionStorage.removeItem('user');
-            sessionStorage.removeItem('csrf_token');
-            showNotification('Sesión cerrada correctamente');
-            // 🛡️ replace() elimina esta página del historial del navegador,
-            // impidiendo que el usuario vuelva al panel con la flecha "atrás".
-            window.location.replace(`${API_CONFIG.appUrl}/index.html`);
-        })
-        .catch(() => {
-            sessionStorage.clear();
+        .catch(() => { })
+        .finally(() => {
+            // replace() elimina esta página del historial del navegador
             window.location.replace(`${API_CONFIG.appUrl}/index.html`);
         });
 }

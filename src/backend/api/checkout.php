@@ -124,10 +124,19 @@ if ($file['size'] > $maxSize) {
     exit;
 }
 
-// 3e: Leer contenido binario
-$binaryData = file_get_contents($file['tmp_name']);
-if (!$binaryData) {
-    echo json_encode(['ok' => false, 'msg' => 'Error al procesar el archivo del comprobante']);
+// 3e: Generar nombre único y mover archivo al disco
+$timestamp    = date('Ymd_His');                                         // Ej: 20260303_191500
+$fileName     = "{$userId}_{$timestamp}.{$fileExtension}";               // Ej: 7_20260303_191500.jpg
+$uploadDir    = dirname(__DIR__, 2) . '/comprobantes/';                   // Ruta absoluta en servidor
+$destPath     = $uploadDir . $fileName;
+$rutaRelativa = 'comprobantes/' . $fileName;                             // Lo que se guarda en BD
+
+if (!is_dir($uploadDir)) {
+    mkdir($uploadDir, 0755, true); // Crear directorio si no existe
+}
+
+if (!move_uploaded_file($file['tmp_name'], $destPath)) {
+    echo json_encode(['ok' => false, 'msg' => 'Error al guardar el comprobante en el servidor']);
     exit;
 }
 
@@ -157,17 +166,11 @@ try {
     }
 
     // ──────────────────────────────────────────────
-    // PASO 5: INSERTAR COMPROBANTE BINARIO
+    // PASO 5: GUARDAR RUTA DEL COMPROBANTE EN BD
     // ──────────────────────────────────────────────
-    // Este es el ÚNICO punto donde PHP toca una columna directamente.
-    // Razón técnica: los BYTEA (archivos binarios) no se pueden pasar
-    // como parámetro de una función PostgreSQL de forma práctica.
-    // Usamos el payment_id retornado por fn_checkout_process.
-    $stmtPago = $pdo->prepare("UPDATE tab_Pagos SET comprobante_archivo = ?, comprobante_extension = ? WHERE id_pago = ?");
-    $stmtPago->bindValue(1, $binaryData, PDO::PARAM_LOB);
-    $stmtPago->bindValue(2, $fileExtension);
-    $stmtPago->bindValue(3, $result['payment_id']);
-    $stmtPago->execute();
+    // El archivo ya está en disco. Solo guardamos la ruta relativa.
+    $stmtPago = $pdo->prepare("UPDATE tab_Pagos SET comprobante_ruta = ? WHERE id_pago = ?");
+    $stmtPago->execute([$rutaRelativa, $result['payment_id']]);
 
     // Respuesta exitosa
     echo json_encode([

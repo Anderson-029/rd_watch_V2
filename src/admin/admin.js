@@ -606,7 +606,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const matchSearch = !searchFilter ||
         c.nombre.toLowerCase().includes(searchFilter) ||
         c.email.toLowerCase().includes(searchFilter);
-      const matchStatus = !statusFilter || c.activo.toString() === statusFilter;
+      // activo viene como booleano de PostgreSQL (true/false).
+      // El select envía "1" (activo) o "0" (inactivo).
+      // Convertimos activo a número para que coincidan: true→1, false→0
+      const matchStatus = !statusFilter || Number(c.activo).toString() === statusFilter;
       return matchSearch && matchStatus;
     });
 

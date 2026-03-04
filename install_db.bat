@@ -1,10 +1,13 @@
 @echo off
-title RDWATCH - Instalador Maestro v2.1
+title RDWATCH - Instalador Maestro v3.1
 color 0B
 setlocal enabledelayedexpansion
 
 echo =====================================================
-echo    RDWATCH - INSTALADOR DE BASE DE DATOS (PSQL)
+echo    RDWATCH - INSTALADOR DE BASE DE DATOS v3.1
+echo    Cambios v3.1: Modulo Configuracion funcional
+echo    (tab_Configuracion, fn_admin_get/update_settings,
+echo     fn_admin_get_hash, fn_admin_set_password)
 echo =====================================================
 
 :: --- CONFIGURACIÓN ---
@@ -54,7 +57,7 @@ echo    - insertando: 06_configuracion_admin_pending.sql
 
 echo.
 echo =====================================================
-echo    INSTALACION COMPLETADA EXITOSAMENTE (V2.1)
+echo    INSTALACION COMPLETADA EXITOSAMENTE (V3.1)
 echo =====================================================
 pause
 exit /b 0

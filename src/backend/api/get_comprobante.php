@@ -1,30 +1,26 @@
 <?php
 /**
  * ============================================================
- * API: VISUALIZADOR DE COMPROBANTES BINARIOS (get_comprobante.php)
+ * API: VISUALIZADOR DE COMPROBANTES EN DISCO (get_comprobante.php)
  * ============================================================
  * ENDPOINT: GET /api/get_comprobante.php?id_orden=X
  *
  * PROPÓSITO:
- * Sirve imágenes de comprobantes de pago almacenadas como BYTEA
- * en PostgreSQL. Los admins lo usan para validar transferencias.
+ * Sirve imágenes de comprobantes de pago guardadas en disco
+ * (carpeta src/comprobantes/). Los admins lo usan para validar
+ * transferencias bancarias.
  *
  * ACCESO: SOLO ADMIN (requireRole('admin'))
  *
  * FUNCIÓN POSTGRESQL QUE USA:
- * - fn_receipt_get_binary(order_id) → TABLE(archivo BYTEA, extension VARCHAR)
- *
- * NOTA SOBRE BYTEA:
- * Esta es una de las excepciones justificadas al patrón opaco JSON.
- * Los datos binarios (imágenes) no se pueden retornar como JSON.
- * fn_receipt_get_binary retorna un RECORD con columnas, pero PHP
- * NO ve nombres de tablas, solo el resultado de la función.
+ * - fn_receipt_get_path(order_id) → TEXT (ruta relativa del archivo)
  *
  * FLUJO:
  * 1. Validar sesión admin
- * 2. Llamar fn_receipt_get_binary
- * 3. Determinar MIME type por extensión
- * 4. Limpiar buffer y servir binario
+ * 2. Llamar fn_receipt_get_path → obtener ruta del archivo
+ * 3. Construir ruta absoluta en servidor
+ * 4. Detectar MIME type por extensión
+ * 5. Servir el archivo con readfile()
  * ============================================================
  */
 
@@ -39,64 +35,57 @@ if (!isset($pdo)) {
 // 🛡️ BARRERA ADMINISTRATIVA
 requireRole('admin');
 
-$id_orden = $_GET['id_orden'] ?? null;
+$id_orden = (int)($_GET['id_orden'] ?? 0);
 if (!$id_orden) {
     http_response_code(400);
-    die('Solicitud Inválida: ID de orden ausente');
+    die('Solicitud Inválida: ID de orden ausente o inválido');
 }
 
 try {
     // ══════════════════════════════════════
-    // 🔍 OBTENER COMPROBANTE BINARIO
+    // 🔍 OBTENER RUTA DEL COMPROBANTE
     // ══════════════════════════════════════
-    // fn_receipt_get_binary retorna TABLE, no JSON
-    // Es la excepción justificada para datos BYTEA
-    $stmt = $pdo->prepare("SELECT * FROM fn_receipt_get_binary(?)");
+    $stmt = $pdo->prepare("SELECT fn_receipt_get_path(?)");
     $stmt->execute([$id_orden]);
-    $pago = $stmt->fetch(PDO::FETCH_ASSOC);
+    $rutaRelativa = $stmt->fetchColumn();
 
-    if ($pago && !empty($pago['comprobante_archivo'])) {
-
-        // Mapeo dinámico de extensión → MIME
-        $ext = strtolower($pago['comprobante_extension']);
-        $mimeMap = [
-            'jpg' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'png' => 'image/png',
-            'pdf' => 'application/pdf',
-            'gif' => 'image/gif',
-            'webp' => 'image/webp'
-        ];
-        $mimeType = $mimeMap[$ext] ?? 'application/octet-stream';
-
-        // Normalización BYTEA (stream o hex)
-        $contenido = $pago['comprobante_archivo'];
-        if (is_resource($contenido)) {
-            $contenido = stream_get_contents($contenido);
-        }
-        if (strpos($contenido, '\\x') === 0) {
-            $contenido = hex2bin(substr($contenido, 2));
-        }
-
-        // Despacho del archivo
-        header("Content-Type: $mimeType");
-        header("Content-Length: " . strlen($contenido));
-        header('Cache-Control: private, max-age=3600');
-
-        if (ob_get_length()) {
-            ob_clean();
-        }
-        flush();
-        echo $contenido;
-        exit;
-
-    }
-    else {
+    if (!$rutaRelativa) {
         http_response_code(404);
-        die('Recurso no encontrado: La orden no posee un comprobante de pago cargado');
+        die('Comprobante no encontrado: La orden no tiene un comprobante de pago registrado');
     }
-}
-catch (PDOException $e) {
+
+    // Construir ruta absoluta (desde api/ → subir 3 niveles → src/comprobantes/)
+    $rutaAbsoluta = dirname(__DIR__, 2) . '/' . $rutaRelativa;
+
+    if (!file_exists($rutaAbsoluta)) {
+        http_response_code(404);
+        die('Archivo no encontrado en el servidor: ' . basename($rutaRelativa));
+    }
+
+    // Detectar MIME type por extensión
+    $ext = strtolower(pathinfo($rutaAbsoluta, PATHINFO_EXTENSION));
+    $mimeMap = [
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png'  => 'image/png',
+        'svg'  => 'image/svg+xml',
+        'gif'  => 'image/gif',
+        'webp' => 'image/webp',
+    ];
+    $mimeType = $mimeMap[$ext] ?? 'application/octet-stream';
+
+    // Despacho del archivo desde disco
+    header("Content-Type: $mimeType");
+    header('Content-Disposition: inline; filename="' . basename($rutaAbsoluta) . '"');
+    header('Content-Length: ' . filesize($rutaAbsoluta));
+    header('Cache-Control: private, max-age=3600');
+
+    if (ob_get_length()) ob_clean();
+    flush();
+    readfile($rutaAbsoluta);
+    exit;
+
+} catch (PDOException $e) {
     http_response_code(500);
     die('Falla interna de base de datos: ' . $e->getMessage());
 }

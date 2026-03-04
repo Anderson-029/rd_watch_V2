@@ -266,44 +266,41 @@ END;
 $$ LANGUAGE plpgsql STABLE;
 
 
--- ██████████████████████████████████████████████████████████
--- ██  SECCIÓN 3: COMPROBANTES BINARIOS                    ██
--- ██████████████████████████████████████████████████████████
+-- ████████████████████████████████████████████████████████████
+-- ██  SECCIÓN 3: COMPROBANTES EN DISCO                   ██
+-- ████████████████████████████████████████████████████████████
 
 
 -- ╔══════════════════════════════════════════════════════════╗
--- ║  FUNCIÓN 5: fn_receipt_get_binary                       ║
+-- ║  FUNCIÓN 5: fn_receipt_get_path                        ║
 -- ╠══════════════════════════════════════════════════════════╣
--- ║  Propósito  : Extraer archivos adjuntos (JPG/PDF) de pago  ║
--- ║               para validación humana administrativa.     ║
--- ║  Llamada PHP: SELECT * FROM fn_receipt_get_binary(order) ║
--- ║  Retorna    : TABLE(comprobante_archivo BYTEA, ext)      ║
+-- ║  Propósito  : Obtener la ruta del comprobante guardado en  ║
+-- ║               disco para que PHP pueda servirlo directamente.║
+-- ║  Llamada PHP: SELECT fn_receipt_get_path(order_id)       ║
+-- ║  Retorna    : TEXT  (ej: 'comprobantes/7_20260303.jpg')  ║
 -- ║                                                         ║
 -- ║  FLUJO:                                                 ║
 -- ║  1. Admin pulsa "Ver Comprobante" en lista de pedidos.  ║
--- ║  2. PHP ejecuta SELECT * FROM fn_receipt_get_binary(id). ║
--- ║  3. fetchColumn() extrae el BYTEA y la extensión.       ║
--- ║  4. PHP inyecta Content-Type y descarga el archivo.     ║
--- ║                                                         ║
--- ║  ⚠️ EXCEPCIÓN DE DISEÑO:                                 ║
--- ║  Esta es la ÚNICA función que rompe el patrón JSON puro. ║
--- ║  Retorna un stream BYTEA directamente. PHP debe usar     ║
--- ║  PDO::fetchColumn() y inyectar Headers de archivo.       ║
+-- ║  2. PHP ejecuta SELECT fn_receipt_get_path(id).        ║
+-- ║  3. PHP construye la ruta absoluta y hace readfile().  ║
+-- ║  4. El navegador muestra la imagen directamente.       ║
 -- ╚══════════════════════════════════════════════════════════╝
 DROP FUNCTION IF EXISTS fn_receipt_get_binary(BIGINT);
 DROP FUNCTION IF EXISTS fn_receipt_get_binary(INTEGER);
-CREATE OR REPLACE FUNCTION fn_receipt_get_binary(
-    p_order_id INTEGER -- Referencia de acceso al archivo
+DROP FUNCTION IF EXISTS fn_receipt_get_path(BIGINT);
+DROP FUNCTION IF EXISTS fn_receipt_get_path(INTEGER);
+CREATE OR REPLACE FUNCTION fn_receipt_get_path(
+    p_order_id INTEGER
 )
-RETURNS TABLE(comprobante_archivo BYTEA, comprobante_extension VARCHAR)
+RETURNS TEXT
 AS $$
 BEGIN
-    -- Retorno de tupla binaria para manejo de buffers en PHP.
-    RETURN QUERY
-    SELECT pg.comprobante_archivo, pg.comprobante_extension
-    FROM tab_Pagos pg
-    WHERE pg.id_orden = p_order_id
-    LIMIT 1;
+    RETURN (
+        SELECT pg.comprobante_ruta
+        FROM tab_Pagos pg
+        WHERE pg.id_orden = p_order_id
+        LIMIT 1
+    );
 END;
 $$ LANGUAGE plpgsql STABLE;
 
