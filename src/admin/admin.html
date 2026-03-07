@@ -510,38 +510,26 @@
         <p class="section-subheading">Preferencias de tienda y cuenta</p>
       </div>
 
-      <div class="grid-2">
-        <div class="card">
-          <h3 class="card-title"><i class="fas fa-store"></i> Tienda</h3>
-          <form id="formConfigTienda" class="form-grid">
-            <label>Nombre<input id="tiendaNombre" value="RD-Watch"></label>
-            <label>Moneda
-              <select id="tiendaMoneda">
-                <option value="USD" selected>USD</option>
-                <option value="EUR">EUR</option>
-                <option value="COP">COP</option>
-              </select>
-            </label>
-            <div class="form-actions">
-              <button class="button button-primary" type="submit">Guardar</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="card">
-          <h3 class="card-title"><i class="fas fa-user-shield"></i> Cuenta admin</h3>
-          <form id="formConfigAdmin" class="form-grid">
-            <label>Usuario<input id="adminUsuario" value="admin" pattern="^[a-zA-Z0-9_]{4,20}$"
-                title="4-20 caracteres, letras, números y guion bajo"></label>
-            <label>Contraseña Actual (Requerido)<input type="password" id="adminCurrentPass"
-                placeholder="Para confirmar cambios" required></label>
-            <label>Nueva contraseña (Opcional)<input type="password" id="adminNewPass"
-                placeholder="Dejar en blanco para no cambiar"></label>
-            <div class="form-actions">
-              <button class="button button-primary" type="submit">Actualizar</button>
-            </div>
-          </form>
-        </div>
+      <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <h3 class="card-title"><i class="fas fa-sliders"></i> Configuración general</h3>
+        <form id="formConfig" class="form-grid">
+          <label>Usuario<input id="adminUsuario" value="admin" pattern="^[a-zA-Z0-9_]{4,20}$"
+              title="4-20 caracteres, letras, números y guion bajo"></label>
+          <label>Moneda
+            <select id="tiendaMoneda">
+              <option value="COP">COP — Peso colombiano</option>
+              <option value="USD">USD — Dólar estadounidense</option>
+              <option value="EUR">EUR — Euro</option>
+            </select>
+          </label>
+          <label>Contraseña Actual (Requerido)<input type="password" id="adminCurrentPass"
+              placeholder="Para confirmar cambios" required></label>
+          <label>Nueva contraseña (Opcional)<input type="password" id="adminNewPass"
+              placeholder="Dejar en blanco para no cambiar"></label>
+          <div class="form-actions" style="justify-content: center;">
+            <button class="button button-primary" type="submit">Actualizar</button>
+          </div>
+        </form>
       </div>
     </section>
   </main>

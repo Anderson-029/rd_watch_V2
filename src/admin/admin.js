@@ -982,56 +982,38 @@ document.addEventListener("DOMContentLoaded", () => {
   /* =======================
    * CONFIGURACIÓN
    * ======================= */
-  const formConfigTienda = document.getElementById('formConfigTienda');
-  const formConfigAdmin = document.getElementById('formConfigAdmin');
+  const formConfig = document.getElementById('formConfig');
 
   async function cargarConfiguracion() {
     try {
       const res = await secureFetch(`${API_BASE}/admin_settings.php`);
       const data = await res.json();
       if (data.ok) {
-        // Tienda
-        const store = data.store || { nombre: 'RD-Watch', moneda: 'USD' };
-        const elNombre = document.getElementById('tiendaNombre');
-        const elMoneda = document.getElementById('tiendaMoneda');
-        if (elNombre) elNombre.value = store.nombre;
-        if (elMoneda) elMoneda.value = store.moneda;
-
-        // Admin
+        const store = data.store || { moneda: 'COP', tasa_cambio: 1 };
         const admin = data.admin || { usuario: 'admin' };
+
+        const elMoneda = document.getElementById('tiendaMoneda');
         const elUser = document.getElementById('adminUsuario');
+        if (elMoneda) elMoneda.value = store.moneda;
         if (elUser) elUser.value = admin.usuario;
+
+        // Actualizar globals para que las tablas del admin usen la moneda correcta
+        window.MONEDA_ACTIVA = store.moneda || 'COP';
+        window.TASA_CAMBIO = Number(store.tasa_cambio) || 1;
       }
     } catch (e) {
       console.error('Error cargando configuración:', e);
     }
   }
 
-  if (formConfigTienda) {
-    formConfigTienda.addEventListener('submit', async (e) => {
+  if (formConfig) {
+    formConfig.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const nombre = document.getElementById('tiendaNombre').value;
+      const usuario = document.getElementById('adminUsuario').value.trim();
       const moneda = document.getElementById('tiendaMoneda').value;
-
-      try {
-        const res = await secureFetch(`${API_BASE}/admin_settings.php?action=update_store`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nombre, moneda })
-        });
-        const data = await res.json();
-        showNotification(data.msg || (data.ok ? 'Guardado' : 'Error'));
-      } catch (e) {
-        console.error(e);
-        showNotification('Error al guardar configuración de tienda');
-      }
-    });
-  }
-
-  if (formConfigAdmin) {
-    formConfigAdmin.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const usuario = document.getElementById('adminUsuario').value;
+      // Tasa automática según moneda (oculta al usuario)
+      const tasasPorMoneda = { COP: 1, USD: 0.00025, EUR: 0.00023 };
+      const tasaCambio = tasasPorMoneda[moneda] || 1;
       const currentPass = document.getElementById('adminCurrentPass').value;
       const newPass = document.getElementById('adminNewPass').value;
 
@@ -1041,27 +1023,22 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        const res = await secureFetch(`${API_BASE}/admin_settings.php?action=update_admin`, {
+        const res = await secureFetch(`${API_BASE}/admin_settings.php?action=update_config`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            usuario,
-            current_pass: currentPass,
-            new_pass: newPass
-          })
+          body: JSON.stringify({ usuario, moneda, tasa_cambio: tasaCambio, current_pass: currentPass, new_pass: newPass })
         });
         const data = await res.json();
         if (data.ok) {
-          showNotification('Cuenta actualizada correctamente.');
+          showNotification(data.msg || 'Configuración actualizada correctamente.');
           document.getElementById('adminCurrentPass').value = '';
           document.getElementById('adminNewPass').value = '';
-          // Opcional: recargar nombre de usuario mostrado en la UI si lo hubiera
         } else {
-          showNotification(data.msg || 'Error al actualizar cuenta');
+          showNotification(data.msg || 'Error al actualizar configuración');
         }
       } catch (e) {
         console.error(e);
-        showNotification('Error al actualizar cuenta de administrador');
+        showNotification('Error al guardar la configuración');
       }
     });
   }

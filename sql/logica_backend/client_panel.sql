@@ -753,13 +753,13 @@ AS $$
 DECLARE
     v_nombre_tienda VARCHAR(255);
     v_moneda        VARCHAR(10);
+    v_tasa          NUMERIC;
     v_admin_nombre  VARCHAR(100);
 BEGIN
-    -- Leer de tab_Configuracion
     SELECT valor INTO v_nombre_tienda FROM tab_Configuracion WHERE clave = 'nombre_tienda';
     SELECT valor INTO v_moneda        FROM tab_Configuracion WHERE clave = 'moneda';
+    SELECT CAST(valor AS NUMERIC) INTO v_tasa FROM tab_Configuracion WHERE clave = 'tasa_cambio';
 
-    -- Obtener nombre del admin actual
     SELECT nom_usuario INTO v_admin_nombre
     FROM tab_Usuarios
     WHERE rol = 'admin'
@@ -768,8 +768,9 @@ BEGIN
 
     RETURN json_build_object(
         'store', json_build_object(
-            'nombre', COALESCE(v_nombre_tienda, 'RD-Watch'),
-            'moneda',  COALESCE(v_moneda, 'COP')
+            'nombre',      COALESCE(v_nombre_tienda, 'RD-Watch'),
+            'moneda',      COALESCE(v_moneda, 'COP'),
+            'tasa_cambio', COALESCE(v_tasa, 1)
         ),
         'admin', json_build_object(
             'usuario', COALESCE(v_admin_nombre, 'admin')
@@ -844,33 +845,31 @@ CREATE OR REPLACE FUNCTION fn_admin_update_settings(
 RETURNS JSON
 AS $$
 DECLARE
-    v_nombre VARCHAR(255);
-    v_moneda VARCHAR(50);
+    v_moneda      VARCHAR(50);
+    v_tasa        NUMERIC;
 BEGIN
-    v_nombre := trim(p_data->>'nombre');
     v_moneda := trim(p_data->>'moneda');
-
-    -- Validaciones básicas
-    IF v_nombre IS NULL OR v_nombre = '' THEN
-        RETURN json_build_object('ok', false, 'msg', 'El nombre de la tienda no puede estar vacío');
-    END IF;
+    v_tasa   := CAST(NULLIF(trim(p_data->>'tasa_cambio'), '') AS NUMERIC);
 
     IF v_moneda IS NULL OR v_moneda = '' THEN
         RETURN json_build_object('ok', false, 'msg', 'Debe seleccionar una moneda válida');
     END IF;
 
-    -- UPSERT en tab_Configuracion
-    INSERT INTO tab_Configuracion (clave, valor, usr_insert, fec_insert)
-    VALUES ('nombre_tienda', v_nombre, 'admin', NOW())
-    ON CONFLICT (clave) DO UPDATE
-        SET valor = EXCLUDED.valor, usr_update = 'admin', fec_update = NOW();
-
+    -- Guardar moneda
     INSERT INTO tab_Configuracion (clave, valor, usr_insert, fec_insert)
     VALUES ('moneda', v_moneda, 'admin', NOW())
     ON CONFLICT (clave) DO UPDATE
         SET valor = EXCLUDED.valor, usr_update = 'admin', fec_update = NOW();
 
-    RETURN json_build_object('ok', true, 'msg', 'Configuración de tienda actualizada correctamente');
+    -- Guardar tasa de cambio si viene
+    IF v_tasa IS NOT NULL AND v_tasa > 0 THEN
+        INSERT INTO tab_Configuracion (clave, valor, usr_insert, fec_insert)
+        VALUES ('tasa_cambio', CAST(v_tasa AS TEXT), 'admin', NOW())
+        ON CONFLICT (clave) DO UPDATE
+            SET valor = EXCLUDED.valor, usr_update = 'admin', fec_update = NOW();
+    END IF;
+
+    RETURN json_build_object('ok', true, 'msg', 'Moneda actualizada correctamente');
 END;
 $$ LANGUAGE plpgsql;
 
@@ -923,5 +922,31 @@ BEGIN
     END IF;
 
     RETURN json_build_object('ok', true, 'msg', 'Contraseña actualizada correctamente');
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS fn_admin_update_nombre(INTEGER, TEXT);
+CREATE OR REPLACE FUNCTION fn_admin_update_nombre(
+    p_id_usuario INTEGER,
+    p_nuevo_nombre TEXT
+)
+RETURNS JSON
+AS $$
+BEGIN
+    IF trim(p_nuevo_nombre) = '' THEN
+        RETURN json_build_object('ok', false, 'msg', 'El nombre de usuario no puede estar vacío');
+    END IF;
+
+    UPDATE tab_Usuarios
+    SET nom_usuario = trim(p_nuevo_nombre),
+        usr_update = 'admin',
+        fec_update = NOW()
+    WHERE id_usuario = p_id_usuario AND rol = 'admin';
+
+    IF NOT FOUND THEN
+        RETURN json_build_object('ok', false, 'msg', 'Administrador no encontrado');
+    END IF;
+
+    RETURN json_build_object('ok', true, 'msg', 'Nombre de usuario actualizado correctamente');
 END;
 $$ LANGUAGE plpgsql;

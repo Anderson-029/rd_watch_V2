@@ -5,13 +5,35 @@
 // Usamos un nombre único para evitar conflictos con script.js (SyntaxError: redeclaration of const API_BASE)
 const API_BASE_FACTURA = API_CONFIG.baseUrl;
 
-// Función para formatear precio
+// Globales de moneda ─ se toman de window si ya fueron cargadas por script.js
+// o se cargan desde la API si factura.js corre en una página independiente
+if (typeof window.MONEDA_ACTIVA === 'undefined') {
+    window.MONEDA_ACTIVA = 'COP';
+    window.TASA_CAMBIO = 1;
+    (async function initMonedaFactura() {
+        try {
+            const r = await fetch(API_CONFIG.baseUrl + '/admin_settings.php', { credentials: 'include' });
+            if (r.ok) {
+                const d = await r.json();
+                if (d.ok && d.store) {
+                    window.MONEDA_ACTIVA = d.store.moneda || 'COP';
+                    window.TASA_CAMBIO = Number(d.store.tasa_cambio) || 1;
+                }
+            }
+        } catch (e) { /* usa COP por defecto */ }
+    })();
+}
+
 function formatPrice(amount) {
-    return Number(amount).toLocaleString('es-CO', {
+    const moneda = window.MONEDA_ACTIVA || 'COP';
+    const tasa = window.TASA_CAMBIO || 1;
+    const locale = moneda === 'COP' ? 'es-CO' : 'en-US';
+    const decimals = moneda === 'COP' ? 0 : 2;
+    return Number(amount * tasa).toLocaleString(locale, {
         style: 'currency',
-        currency: 'COP',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        currency: moneda,
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
     });
 }
 

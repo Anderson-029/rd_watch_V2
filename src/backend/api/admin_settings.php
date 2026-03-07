@@ -64,14 +64,16 @@ try {
             validateCsrfToken(null, true);
             $data = getJsonInput();
 
-            if ($action === 'update_admin') {
-                // ── Cambio de contraseña del admin ──
+            if ($action === 'update_config') {
+                // ── Formulario unificado: usuario + moneda + contraseña ──
                 $currentPass = trim($data['current_pass'] ?? '');
                 $newPass     = trim($data['new_pass'] ?? '');
                 $usuario     = trim($data['usuario'] ?? '');
+                $moneda      = trim($data['moneda'] ?? '');
+                $tasaCambio  = isset($data['tasa_cambio']) ? (float)$data['tasa_cambio'] : null;
 
                 if (!$currentPass) {
-                    echo json_encode(['ok' => false, 'msg' => 'Debes ingresar tu contraseña actual']);
+                    echo json_encode(['ok' => false, 'msg' => 'Debes ingresar tu contraseña actual para confirmar cambios']);
                     exit;
                 }
 
@@ -80,7 +82,6 @@ try {
                     exit;
                 }
 
-                // Obtener ID y hash actual del admin desde la sesión
                 $adminId = $_SESSION['user_id'] ?? null;
                 if (!$adminId) {
                     http_response_code(401);
@@ -98,20 +99,44 @@ try {
                     exit;
                 }
 
-                // Si hay nueva contraseña → actualizar
-                if ($newPass) {
-                    $nuevoHash = password_hash($newPass, PASSWORD_BCRYPT);
-                    $stmtUpdate = $pdo->prepare("SELECT fn_admin_set_password(?, ?)");
-                    $stmtUpdate->execute([$adminId, $nuevoHash]);
-                    $result = json_decode($stmtUpdate->fetchColumn(), true);
-                    echo json_encode($result);
-                } else {
-                    // Sin nueva contraseña, solo verificación (o cambio de usuario sin contraseña)
-                    echo json_encode(['ok' => true, 'msg' => 'Contraseña verificada. No se realizaron cambios.']);
+                $mensajes = [];
+
+                // Actualizar nombre de usuario
+                if ($usuario !== '') {
+                    $stmtNombre = $pdo->prepare("SELECT fn_admin_update_nombre(?, ?)");
+                    $stmtNombre->execute([$adminId, $usuario]);
+                    $resNombre = json_decode($stmtNombre->fetchColumn(), true);
+                    if (!$resNombre['ok']) { echo json_encode($resNombre); exit; }
+                    $mensajes[] = 'Usuario actualizado';
                 }
 
+                // Actualizar moneda y tasa de cambio en tab_Configuracion
+                if ($moneda !== '') {
+                    $stmtMoneda = $pdo->prepare("SELECT fn_admin_update_settings(?::json)");
+                    $stmtMoneda->execute([json_encode(['moneda' => $moneda, 'tasa_cambio' => $tasaCambio])]);
+                    $resMoneda = json_decode($stmtMoneda->fetchColumn(), true);
+                    if (!$resMoneda['ok']) { echo json_encode($resMoneda); exit; }
+                    $mensajes[] = 'Moneda y tasa de cambio actualizadas';
+                }
+
+                // Actualizar contraseña si fue enviada
+                if ($newPass) {
+                    $nuevoHash = password_hash($newPass, PASSWORD_BCRYPT);
+                    $stmtPass = $pdo->prepare("SELECT fn_admin_set_password(?, ?)");
+                    $stmtPass->execute([$adminId, $nuevoHash]);
+                    $resPass = json_decode($stmtPass->fetchColumn(), true);
+                    if (!$resPass['ok']) { echo json_encode($resPass); exit; }
+                    $mensajes[] = 'Contraseña actualizada';
+                }
+
+                $msg = count($mensajes) > 0
+                    ? implode(', ', $mensajes) . ' correctamente'
+                    : 'No se realizaron cambios';
+
+                echo json_encode(['ok' => true, 'msg' => $msg]);
+
             } else {
-                // ── Actualizar configuración de tienda ──
+                // Fallback: update_store legacy
                 $stmt = $pdo->prepare("SELECT fn_admin_update_settings(?::json)");
                 $stmt->execute([json_encode($data)]);
                 echo json_encode(json_decode($stmt->fetchColumn(), true));

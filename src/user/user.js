@@ -514,7 +514,7 @@ function seleccionarServicio(nombreServicio, idServicio, precio, duracion) {
         infoResumen.innerHTML = `
             <div style="background: rgba(184, 134, 11, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--primary-color);">
                 <p style="margin: 0; color: var(--secondary-color); font-weight: 600;">
-                    <i class="fas fa-tag"></i> Costo Base: <span style="color: var(--primary-dark);">$${parseFloat(precio).toLocaleString()}</span>
+                    <i class="fas fa-tag"></i> Costo Base: <span style="color: var(--primary-dark);">${typeof formatPrice === 'function' ? formatPrice(parseFloat(precio)) : '$' + parseFloat(precio).toLocaleString()}</span>
                 </p>
                 <p style="margin: 5px 0 0 0; color: var(--secondary-color); font-weight: 600;">
                     <i class="fas fa-clock"></i> Tiempo Estm.: <span style="color: var(--primary-dark);">${duracion}</span>
@@ -667,7 +667,7 @@ async function cargarServiciosPanel() {
                     <p class="service-description">${s.descripcion}</p>
                     <div class="service-meta">
                         <span><i class="fas fa-clock"></i> ${s.duracion_estimada}</span>
-                        <span><i class="fas fa-tag"></i> $${parseFloat(s.precio_servicio).toLocaleString()}</span>
+                        <span><i class="fas fa-tag"></i> ${typeof formatPrice === 'function' ? formatPrice(parseFloat(s.precio_servicio)) : '$' + parseFloat(s.precio_servicio).toLocaleString()}</span>
                     </div>
                     <button class="button button-primary btn-solicitar-servicio" 
                         data-nombre="${s.nom_servicio}" 

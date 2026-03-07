@@ -23,14 +23,38 @@ let currentPage = 1;
 // =========================================================
 
 
+// Globales de moneda (se cargan desde tab_Configuracion via API)
+window.MONEDA_ACTIVA = 'COP';
+window.TASA_CAMBIO = 1;
+
 function formatPrice(amount) {
-    return Number(amount).toLocaleString('es-CO', {
+    const moneda = window.MONEDA_ACTIVA || 'COP';
+    const tasa = window.TASA_CAMBIO || 1;
+    const locale = moneda === 'COP' ? 'es-CO' : 'en-US';
+    const decimals = moneda === 'COP' ? 0 : 2;
+    return Number(amount * tasa).toLocaleString(locale, {
         style: 'currency',
-        currency: 'COP',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        currency: moneda,
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
     });
 }
+
+// Cargar moneda activa desde la BD al arrancar
+(async function initMoneda() {
+    try {
+        const r = await fetch(API_CONFIG.baseUrl + '/admin_settings.php', { credentials: 'include' });
+        if (r.ok) {
+            const d = await r.json();
+            if (d.ok && d.store) {
+                window.MONEDA_ACTIVA = d.store.moneda || 'COP';
+                window.TASA_CAMBIO = Number(d.store.tasa_cambio) || 1;
+            }
+        }
+    } catch (e) {
+        console.warn('No se pudo cargar la configuración de moneda, usando COP por defecto.');
+    }
+})()
 
 // =========================================================
 // 3. FUNCIONES GLOBALES (ACCESIBLES DESDE HTML)

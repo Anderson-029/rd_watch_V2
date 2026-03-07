@@ -716,5 +716,6 @@ COMMENT ON TABLE tab_Configuracion IS 'Parámetros globales de la tienda, editab
 -- Datos por defecto de la tienda
 INSERT INTO tab_Configuracion (clave, valor, usr_insert, fec_insert) VALUES
     ('nombre_tienda', 'Relojería Durán',    'system', NOW()),
-    ('moneda',        'COP',                  'system', NOW())
+    ('moneda',        'COP',                'system', NOW()),
+    ('tasa_cambio',   '1',                  'system', NOW())
 ON CONFLICT (clave) DO NOTHING;
